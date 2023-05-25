@@ -1,32 +1,25 @@
 {
-  "author": "metaversecloud.com | topia.io",
-  "name": "sdk-boilerplate",
+  "name": "rnd-boilerplate",
   "private": true,
-  "dependencies": {
-    "@rtsdk/topia": "^0.3.1",
-    "axios": "^1.2.1",
-    "body-parser": "^1.20.1",
-    "concurrently": "^7.6.0",
-    "cors": "^2.8.5",
-    "dotenv": "^16.0.3",
-    "express": "^4.18.2",
-    "yalc": "^1.0.0-pre.53"
+  "author": "Automatipia-MC",
+  "version": "1.0.0",
+  "description": "This boilerplate is for the RND projects. It's provided to be as clean as possible",
+  "main": "index.js",
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "start:dev": "npm start --workspace=client & npm run dev --workspace=server"
   },
-  "description": "",
-  "engines": {
-    "node": "18.14"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Automatopia-MC/rnd-boilerplate.git"
   },
   "keywords": [],
   "license": "ISC",
-  "main": "index.js",
-  "scripts": {
-    "build": "cd client && npm install && npm run build",
-    "link-sdk": "yalc link @rtsdk/topia",
-    "unlink-sdk": "yalc remove @rtsdk/topia",
-    "server": "node server/index.js",
-    "client": "npm start --prefix client",
-    "start": "concurrently \"npm run server\" \"npm run client\""
+  "bugs": {
+    "url": "https://github.com/Automatopia-MC/rnd-boilerplate/issues"
   },
-  "type": "module",
-  "version": "1.0.0"
+  "homepage": "https://github.com/Automatopia-MC/rnd-boilerplate#readme"
 }

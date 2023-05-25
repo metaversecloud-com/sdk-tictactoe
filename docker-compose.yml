@@ -1,0 +1,22 @@
+version: "3.9"
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+      - "3001:3001"
+    volumes:
+      - ./:/usr/app
+      - ignore_server:/usr/app/server/node_modules
+      - ignore_client:/usr/app/client/node_modules
+    environment:
+      - PUBLIC_KEY=
+      - PRIVATE_KEY=
+      - NODE_ENV=development
+      - PORT=3000
+      - API_DOMAIN=
+volumes:
+  ignore_server:
+  ignore_client:

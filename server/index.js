@@ -8,13 +8,7 @@ import cors from "cors";
 dotenv.config();
 
 function checkEnvVariables() {
-  const requiredEnvVariables = [
-    "INSTANCE_DOMAIN",
-    "INSTANCE_PROTOCOL",
-    "INTERACTIVE_KEY",
-    "INTERACTIVE_SECRET",
-    "API_KEY",
-  ];
+  const requiredEnvVariables = ["INSTANCE_DOMAIN", "INSTANCE_PROTOCOL", "INTERACTIVE_KEY", "INTERACTIVE_SECRET"];
   const missingVariables = requiredEnvVariables.filter((variable) => !process.env[variable]);
 
   if (missingVariables.length > 0) {
@@ -25,7 +19,7 @@ function checkEnvVariables() {
 }
 checkEnvVariables();
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 const app = express();
 
 app.use(bodyParser.json());
