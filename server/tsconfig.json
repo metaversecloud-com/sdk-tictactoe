@@ -1,0 +1,16 @@
+{
+  "extends": "@tsconfig/node-lts/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./build",                          
+    "rootDir": "./",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "module": "ESNext",
+    // "moduleResolution": "node",
+  },
+  "exclude": ["node_modules", "build"],
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
+  }
+}

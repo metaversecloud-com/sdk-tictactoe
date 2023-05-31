@@ -1,53 +1,28 @@
 {
-  "name": "@sdk-boilerplate/sdk-client",
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+  "name": "@rnd-boilerplate/client",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview"
   },
   "dependencies": {
-    "@emotion/react": "^11.10.5",
-    "@emotion/styled": "^11.10.5",
-    "@mui/material": "^5.10.17",
-    "@rtsdk/topia": "^0.3.1",
-    "@testing-library/jest-dom": "^5.16.5",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^13.5.0",
-    "axios": "^1.2.1",
-    "babel-plugin-import": "^1.13.5",
-    "customize-cra": "^1.0.0",
     "react": "^18.2.0",
-    "react-app-rewired": "^2.2.1",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "^6.4.5",
-    "react-scripts": "4.0.3",
-    "web-vitals": "^2.1.4"
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "react-error-overlay": "6.0.9",
-    "yalc": "^1.0.0-pre.53"
-  },
-  "proxy": "http://localhost:3001/",
-  "private": true,
-  "resolutions": {
-    "//": "See https://github.com/facebook/create-react-app/issues/11773",
-    "react-error-overlay": "6.0.9"
-  },
-  "scripts": {
-    "start": "react-app-rewired --openssl-legacy-provider start",
-    "build": "react-app-rewired --openssl-legacy-provider build",
-    "test": "react-app-rewired test",
-    "eject": "react-app-rewired eject",
-    "lint": "eslint -c .eslintrc.js --ext .js,.jsx .",
-    "link-sdk": "yalc link @rtsdk/topia",
-    "unlink-sdk": "yalc remove @rtsdk/topia"
-  },
-  "version": "0.1.0"
+    "@types/react": "^18.0.37",
+    "@types/react-dom": "^18.0.11",
+    "@typescript-eslint/eslint-plugin": "^5.59.0",
+    "@typescript-eslint/parser": "^5.59.0",
+    "@vitejs/plugin-react": "^4.0.0",
+    "eslint": "^8.38.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.3.4",
+    "typescript": "^5.0.2",
+    "vite": "^4.3.9"
+  }
 }
