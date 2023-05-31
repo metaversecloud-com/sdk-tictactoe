@@ -62,7 +62,7 @@ oauth2.keys.json
 .env
 .vscode/
 !.vscode/extensions.json
-.idea/
+.idea
 .suo
 .ntvs*
 .njsproj
@@ -73,8 +73,7 @@ oauth2.keys.json
 build/
 
 # Vite specific
-dist/
-dist-ssr/
+dist
+dist-ssr
 .vite/
-
-.vscode
+*.local
