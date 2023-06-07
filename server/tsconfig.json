@@ -9,6 +9,7 @@
     // "moduleResolution": "node",
   },
   "exclude": ["node_modules", "build"],
+  "includes": ["./"],
   "ts-node": {
     "esm": true,
     "experimentalSpecifierResolution": "node"
