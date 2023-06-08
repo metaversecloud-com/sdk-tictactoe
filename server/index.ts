@@ -2,10 +2,10 @@ import path from "path";
 import { fileURLToPath } from "url";
 import express from "express";
 import bodyParser from "body-parser";
-import dotenv from "dotenv";
+import 'dotenv/config'
 import router from "./routes.js";
 import cors from "cors";
-dotenv.config();
+
 
 function checkEnvVariables() {
   const requiredEnvVariables = ["INSTANCE_DOMAIN", "INSTANCE_PROTOCOL", "INTERACTIVE_KEY", "INTERACTIVE_SECRET"];
