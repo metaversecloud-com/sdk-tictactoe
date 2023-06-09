@@ -6,6 +6,7 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "module": "ESNext",
+    "strict": false,
     // "moduleResolution": "node",
   },
   "exclude": ["node_modules", "build"],
