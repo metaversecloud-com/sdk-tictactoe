@@ -1,7 +1,7 @@
 {
   "extends": "@tsconfig/node-lts/tsconfig.json",
   "compilerOptions": {
-    "outDir": "./build",                          
+    "outDir": "./build",
     "rootDir": "./",
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -9,8 +9,13 @@
     "strict": false,
     // "moduleResolution": "node",
   },
-  "exclude": ["node_modules", "build"],
-  "includes": ["./"],
+  "exclude": [
+    "node_modules",
+    "build"
+  ],
+  "includes": [
+    "./"
+  ],
   "ts-node": {
     "esm": true,
     "experimentalSpecifierResolution": "node"
