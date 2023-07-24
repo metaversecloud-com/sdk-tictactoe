@@ -1,9 +1,9 @@
 {
-  "name": "rnd-boilerplate",
+  "name": "ttt",
   "private": true,
   "author": "Automatipia-MC",
-  "version": "1.0.0",
-  "description": "This boilerplate is for the RND projects. It's provided to be as clean as possible",
+  "version": "2.0.0",
+  "description": "An in-world TicTacToe game for Topia.",
   "main": "index.js",
   "workspaces": [
     "client",
@@ -15,12 +15,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Automatopia-MC/rnd-boilerplate.git"
+    "url": "git+https://github.com/Automatopia-MC/tictactoe.git"
   },
   "keywords": [],
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Automatopia-MC/rnd-boilerplate/issues"
+    "url": "https://github.com/Automatopia-MC/tictactoe/issues"
   },
-  "homepage": "https://github.com/Automatopia-MC/rnd-boilerplate#readme"
+  "homepage": "https://github.com/Automatopia-MC/tictactoe#readme"
 }
