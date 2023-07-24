@@ -1,10 +1,11 @@
 import ticTacToeController from "../controllers/ticTacToe.controller.js";
-import { RequestHandler, Router } from "express";
-import { noAuth } from "../middleware/auth.js";
+import { Router } from "express";
+import auth from "../middleware/auth.js";
 
-export default (router: Router, auth: RequestHandler = noAuth) => {
-  router.post("/ttt/leaderboard", auth, ticTacToeController.leaderboard);
-  router.post("/ttt/click/:cell", auth, ticTacToeController.gameMoves);
-  router.post("/ttt/:player/:action", auth, ticTacToeController.playerMovement);
-  return router;
-}
+const tttRouter = Router();
+
+tttRouter.post("/leaderboard", auth, ticTacToeController.leaderboard);
+tttRouter.post("/click/:cell", auth, ticTacToeController.gameMoves);
+tttRouter.post("/:player/:action", auth, ticTacToeController.playerMovement);
+
+export default tttRouter;

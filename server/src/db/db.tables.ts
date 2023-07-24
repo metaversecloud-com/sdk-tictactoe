@@ -1,6 +1,8 @@
 import { Optional } from "sequelize";
 import { Column, DataType, Model, Table } from "sequelize-typescript";
 
+// todo keep these attributes to user object
+
 export interface TttPlayerAttributes {
   id: number;
   username: string;

@@ -7,6 +7,8 @@ export const noAuth = async (req: Request, res: Response, next: NextFunction) =>
 export default async (req: Request, res: Response, next: NextFunction) => {
   console.log(`req.body`, req.body);
 
+  // todo make it test interactive credentials
+
   let t = req.header("authorization");
   if (!t && req.query.token)
     t = req.query.token as string;
