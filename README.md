@@ -41,9 +41,9 @@ Notes:
 
 ## Add your .env environmental variables
 
-For the server you need to setup environment variables. Copy the `.env-exmaple` file and rename it `.env`.
+For the server you need to set up environment variables. Copy the `.env-exmaple` file and rename it `.env`.
 
-```json
+```yaml
 API_URL=http://localhost:3001
 INSTANCE_DOMAIN=api.topia.io
 PUBLIC_KEY=yourkey

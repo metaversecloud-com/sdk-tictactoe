@@ -1,7 +1,7 @@
 import { InteractiveAsset, Position } from "../topia/topia.models.js";
 import axios from "axios";
 import { initDroppedAsset, initWorld, initWorldActivity } from "../topia/topia.factories.js";
-import { DroppedAsset, Visitor } from "../../types/index.js";
+import { DroppedAsset, DroppedAssetInterface, Visitor } from "@rtsdk/topia";
 
 const _axios = axios.create({
   baseURL: "https://api.topia.io/api",
@@ -85,13 +85,6 @@ const topiaAdapter = {
   //     return r.data
   // },
 
-  listTopiaScenes: async (email: string, apiKey: string) => {
-    const r = await _axios.get(`/scenes/topia-scenes?email=${email}`, {
-      headers: { Authorization: apiKey },
-    });
-    return r.data;
-  },
-
   /**
    *
    * @param email     {string}
@@ -170,24 +163,18 @@ const topiaAdapter = {
     return visitors;
   },
 
-  /**
-   *
-   * @param requestBody   {any|undefined}
-   * @param options   {{apiKey?: string, urlSlug?: string, nameSubstr: string}|undefined}
-   * @return {Promise<DroppedAsset[]>}
-   */
-  getDroppedAssets: async (requestBody: any, options?: { apiKey?: string, urlSlug?: string, nameSubstr: string }) => {
+  getDroppedAssets: async (requestBody: any, options?: { urlSlug?: string, nameSubstr: string }) => {
     try {
       const world = requestBody ?
         await initWorld().create(requestBody.urlSlug, { credentials: requestBody }) :
-        await initWorld(options?.apiKey).create(options?.urlSlug);
+        await initWorld().create(options?.urlSlug);
 
       await world.fetchDroppedAssets();
-      let droppedAssets: DroppedAsset[] = Object.values(world.droppedAssets);
+      let droppedAssets = Object.values(world.droppedAssets) as DroppedAssetInterface[];
 
       if (options?.nameSubstr)
-        droppedAssets = droppedAssets.filter(da => da.uniqueName)
-          .filter(da => da.uniqueName.indexOf(options.nameSubstr) > -1);
+        // @ts-ignore
+        droppedAssets = droppedAssets.filter(da => da.uniqueName).filter(da => da.uniqueName.indexOf(options.nameSubstr) > -1);
 
       console.log(`Found ${droppedAssets.length} dropped assets in world ${requestBody ? requestBody.urlSlug : options?.urlSlug}.`);
       return droppedAssets;

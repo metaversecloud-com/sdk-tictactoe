@@ -1,5 +1,21 @@
 import { initDroppedAsset } from "./topia/topia.factories.js";
-import { DroppedAsset } from "../types/index.js";
+import { DroppedAsset, DroppedAssetInterface, InteractiveCredentials } from "@rtsdk/topia";
+import { Request } from "express";
+
+const getCredentials = (reqObj: any): InteractiveCredentials => {
+  const requiredFields = ["interactiveNonce", "interactivePublicKey", "urlSlug", "visitorId", "assetId"];
+  const missingFields = requiredFields.filter((variable) => !reqObj[variable]);
+  if (missingFields.length > 0)
+    throw new Error(`Missing required body parameters: ${missingFields.join(", ")}`);
+
+  return {
+    interactiveNonce: reqObj.interactiveNonce as string,
+    interactivePublicKey: reqObj.interactivePublicKey as string,
+    urlSlug: reqObj.urlSlug as string,
+    visitorId: Number(reqObj.visitorId),
+    assetId: reqObj.assetId as string,
+  };
+};
 
 const utils = {
   generateRandomString: () => Math.random().toString(36).slice(2),
@@ -71,7 +87,6 @@ const utils = {
    * @param urlSlug {string}
    * @param config {{
    * id: number,
-   * apiKey: string,
    *     email: string,
    *     type: 'crosshairs'| 'absolute'| 'relative',
    *     assetSuffix: number,
@@ -85,7 +100,6 @@ const utils = {
    */
   calculatePosition: async (urlSlug: string, config: {
     id: number,
-    apiKey: string,
     email: string,
     type: "crosshairs" | "absolute" | "relative",
     assetSuffix: number,
@@ -93,7 +107,7 @@ const utils = {
     x: number,
     y: number,
     onlyDrop: boolean
-  }, uniqueNamePrefix: string, worldAssets: DroppedAsset[]) => {
+  }, uniqueNamePrefix: string, worldAssets: DroppedAssetInterface[]) => {
     console.log(`config: `, JSON.stringify(config));
     switch (config.type) {
       case "absolute":
@@ -101,8 +115,9 @@ const utils = {
 
       case "crosshairs":
         try {
-          const cs = worldAssets.filter(d => !!d.uniqueName)
-            .filter(d => d.uniqueName === `${uniqueNamePrefix}_${config.id}_crosshairs`);
+          // todo Ask SDK team to add uniqueName property to DroppedAssetInterface
+          // @ts-ignore
+          const cs = worldAssets.filter(d => !!d.uniqueName).filter(d => d.uniqueName === `${uniqueNamePrefix}_${config.id}_crosshairs`);
           if (cs.length)
             return cs[0].position;
 
@@ -117,7 +132,7 @@ const utils = {
 
       case "relative":
         try {
-          const referencedAsset = await initDroppedAsset(config.apiKey).get(config.targetAssetId, urlSlug);
+          const referencedAsset = await initDroppedAsset().get(config.targetAssetId, urlSlug) as DroppedAssetInterface;
           return { x: referencedAsset.position.x + config.x, y: referencedAsset.position.y + config.y };
         } catch (e) {
           console.error(`Could not find referenced asset`, e);
@@ -128,6 +143,16 @@ const utils = {
         }
     }
   },
+
+  credentialsFromRequest: (req: Request): InteractiveCredentials => {
+    try {
+      return getCredentials(req.query);
+    } catch (e) {
+      console.log("Could not get credentials from query. Trying body.");
+      return getCredentials(req.body);
+    }
+  },
+
 };
 
 export default utils;

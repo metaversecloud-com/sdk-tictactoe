@@ -1,8 +1,8 @@
 import express from "express";
-import assetRoutes from "./src/routes/asset.routes.js";
-import ticTacToeRoutes from "./src/routes/ticTacToe.routes.js";
-import webhookRoutes from "./src/routes/webhook.routes.js";
-import visitorRoutes from "./src/routes/visitor.routes.js";
+import assetRoutes from "./routes/asset.routes.js";
+import ticTacToeRoutes from "./routes/ticTacToe.routes.js";
+import webhookRoutes from "./routes/webhook.routes.js";
+import visitorRoutes from "./routes/visitor.routes.js";
 
 const router = express.Router();
 

@@ -8,6 +8,10 @@
     "module": "ESNext",
     "strict": false,
     // "moduleResolution": "node",
+    "typeRoots": [
+      "./src/types",
+      "./node_modules/@types"
+    ]
   },
   "exclude": [
     "node_modules",

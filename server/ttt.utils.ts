@@ -1,7 +1,7 @@
 import { Game } from "./topia/topia.models.js";
 import topiaAdapter from "./adapters/topia.adapter.js";
 import { initDroppedAsset, initWorld } from "./topia/topia.factories.js";
-import { DroppedAsset } from "../types/index.js";
+import { DroppedAssetInterface } from "@rtsdk/topia";
 
 export const WinningCombo = {
   H_TOP: [0, 1, 2],
@@ -68,9 +68,10 @@ export default {
   makeMove: async (options: { urlSlug: string, game: Game, cross: boolean, cell: string, requestBody: any }) => {
     const assetId = options.cross ? process.env.RED_X!! : process.env.BLUE_O!!;
     const daFactory = initDroppedAsset();
-    const cell = await daFactory.get(options.cell, options.urlSlug, { credentials: options.requestBody });
+    const cell = await daFactory.get(options.cell, options.urlSlug, { credentials: options.requestBody }) as DroppedAssetInterface;
     return topiaAdapter.dropAsset(options.urlSlug, {
-      assetId, position: cell.position,
+      assetId,
+      position: { x: cell.position.x || 0, y: cell.position.y || 0 },
       uniqueName: options.game.boardId + Date.now() + "_move",
     }, options.requestBody);
   },
@@ -162,7 +163,7 @@ export default {
 
   removeMessages: async (urlSlug: string, boardId: number, requestBody: any) => {
     const world = initWorld().create(urlSlug, { credentials: requestBody });
-    const messages: DroppedAsset[] = await world.fetchDroppedAssetsWithUniqueName({ uniqueName: boardId + "_message" });
+    const messages = await world.fetchDroppedAssetsWithUniqueName({ uniqueName: boardId + "_message" });
     console.log("messageAssets.length: ", messages.length);
     if (messages.length) {
       for (let m of messages)

@@ -1,5 +1,4 @@
-import { initDroppedAsset } from "./topia.factories.js";
-import jwt from "jsonwebtoken";
+import { initAsset, initDroppedAsset } from "./topia.factories.js";
 
 export const InteractiveAsset = async (options: {
   id: string, requestBody: any, position: Position,
@@ -7,17 +6,8 @@ export const InteractiveAsset = async (options: {
   urlSlug: string,
 }) => {
   try {
-    const { assetId, interactiveNonce, visitorId } = options.requestBody;
-    const payload = {
-      interactiveNonce,
-      visitorId,
-      assetId,
-    };
-
-    const droppedAsset = await initDroppedAsset().drop({
-      id: options.id, credentials: options.requestBody,
-      requestOptions: { headers: { InteractiveJWT: jwt.sign(payload, process.env.INTERACTIVE_SECRET!!) } },
-    }, options);
+    const asset = await initAsset().create(options.id, { credentials: options.requestBody });
+    const droppedAsset = await initDroppedAsset().drop(asset, options);
 
     // This adds your public developer key to the dropped asset so visitors can interact with it in-world.
     if (droppedAsset)
@@ -39,9 +29,14 @@ export interface Player {
   visitorId: number;
 }
 
-export interface Position {
+export class Position {
   x: number;
   y: number;
+
+  constructor(p: { x?: number, y?: number }) {
+    this.x = p.x || 0;
+    this.y = p.y || 0;
+  };
 }
 
 export class Game {

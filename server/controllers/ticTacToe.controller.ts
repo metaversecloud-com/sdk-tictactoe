@@ -1,30 +1,32 @@
 import tttUtils from "../ttt.utils.js";
 import { Request, Response } from "express";
-import { TttPlayer } from "../db/db.tables.js";
 import topiaAdapter from "../adapters/topia.adapter.js";
 import { Game, Player, Position } from "../topia/topia.models.js";
 import { initDroppedAsset } from "../topia/topia.factories.js";
+import { DroppedAssetInterface } from "@rtsdk/topia";
 
 const activeGames: { [urlSlug: string]: Game[] } = {};
 
 export default {
   leaderboard: async (req: Request, res: Response) => {
-    let { urlSlug, pageSize, page } = req.body;
-    pageSize = pageSize ? Number(pageSize) : 3;
-    if (isNaN(pageSize))
-      pageSize = 3;
-    page = page ? Number(page) : 0;
-    if (isNaN(page))
-      page = 0;
+    // let { urlSlug, pageSize, page } = req.body;
+    // pageSize = pageSize ? Number(pageSize) : 3;
+    // if (isNaN(pageSize))
+    //   pageSize = 3;
+    // page = page ? Number(page) : 0;
+    // if (isNaN(page))
+    //   page = 0;
 
-    const r = await TttPlayer.findAndCountAll({
-      where: { urlSlug },
-      order: ["won", "DESC"],
-      limit: pageSize,
-      offset: page * pageSize,
-    });
+    // todo list all visitors, and then get their data-object. No pagination.
 
-    res.status(200).send({ data: r.rows.map(l => l.toJSON()), pagination: { page, pageSize, count: r.count } });
+    // const r = await TttPlayer.findAndCountAll({
+    //   where: { urlSlug },
+    //   order: ["won", "DESC"],
+    //   limit: pageSize,
+    //   offset: page * pageSize,
+    // });
+
+    res.status(200).send([]);
   },
 
   playerMovement: async (req: Request, res: Response) => {
@@ -53,11 +55,11 @@ export default {
     console.log(`player: ${player}\naction: ${action}\nurlSlug: ${urlSlug}\nvisitorId: ${visitorId}\nassetId: ${assetId}\nboardId: ${boardId}\nusername: ${username}`);
 
     // todo calculate center position from the position of the p1 or p2 asset
-    const p1box = await initDroppedAsset().get(assetId, urlSlug, { credentials: req.body });
+    const p1box = await initDroppedAsset().get(assetId, urlSlug, { credentials: req.body }) as DroppedAssetInterface;
 
     // todo find scale of the P1 or P2 box, use this scaling to correct positions of center and top
     const scale: number = p1box.assetScale;
-    const center: Position = p1box.position;
+    const center = new Position(p1box.position);
 
     console.log(`scale: ${scale}\ncenter: `, center);
     const cellWidth = 90;
