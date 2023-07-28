@@ -14,14 +14,14 @@ import {
 dotenv.config();
 
 const config = {
-  apiDomain: process.env.INSTANCE_DOMAIN || "api-stage.topia.io",
+  apiDomain: process.env.INSTANCE_DOMAIN || "api.topia.io",
   apiProtocol: process.env.INSTANCE_PROTOCOL || "https",
   interactiveKey: process.env.INTERACTIVE_KEY,
   interactiveSecret: process.env.INTERACTIVE_SECRET,
 };
 
 // creating instances of Topia
-const topiaInstance = await new Topia(config);
+const topiaInstance = new Topia(config);
 
 let _worldFactory: WorldFactory | undefined = undefined;
 let _assetFactory: AssetFactory | undefined = undefined;
@@ -56,10 +56,6 @@ const initUser = () => {
   return _userFactory;
 };
 
-/**
- * Can be used to move a visitor in the world
- * @type {VisitorFactory}
- */
 const initVisitor = () => {
   if (!_visitorFactory)
     _visitorFactory = new VisitorFactory(topiaInstance);

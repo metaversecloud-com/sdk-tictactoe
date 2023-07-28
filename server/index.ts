@@ -8,7 +8,7 @@ import cors from "cors";
 
 
 function checkEnvVariables() {
-  const requiredEnvVariables = ["INSTANCE_DOMAIN", "INSTANCE_PROTOCOL", "INTERACTIVE_KEY", "INTERACTIVE_SECRET"];
+  const requiredEnvVariables = ["INSTANCE_DOMAIN", "INTERACTIVE_KEY", "INTERACTIVE_SECRET"];
   const missingVariables = requiredEnvVariables.filter((variable) => !process.env[variable]);
 
   if (missingVariables.length > 0) {

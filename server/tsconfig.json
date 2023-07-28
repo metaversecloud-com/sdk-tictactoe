@@ -9,7 +9,7 @@
     "strict": false,
     // "moduleResolution": "node",
     "typeRoots": [
-      "./src/types",
+      "./types",
       "./node_modules/@types"
     ]
   },
