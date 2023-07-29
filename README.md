@@ -31,13 +31,17 @@ Notes:
 
 1. Root package.json is for general/shared dependencies.
 2. Client and Server package.json files are for app specific dependencies. 
-3. We DO want to keep the ts-config files seperate, given that we might have different needs for client and server.
+3. We DO want to keep the ts-config files separate, given that we might have different needs for client and server.
 
 
 ### Run in Docker
 
-1. For local development run `docker-compose up`. This runs the client(3001) and server(3000) on seperate ports. You can access them seperately. They are also setup with auto-build on save.
+1. For local development run `docker-compose up`. This runs the client(3001) and server(3000) on separate ports. You can access them separately. They are also setup with auto-build on save.
 2. To build an image for delivery run `docker build . -t [add a name]:v[version_number]`. This will generate an image that you can push out to ECR for deployment.
+3. To locally run, use the following command.
+   ```bash
+   docker run -p 3000:3000 -p 3001:3001 -d --env INSTANCE_DOMAIN=api.topia.io --env INTERACTIVE_KEY=eDtTM1wKgP0B39pYidZc --env INTERACTIVE_SECRET=1314f7b5-4ec8-46ba-ac8d-8b0c06e11b3b --env CUSTOM_TEXT=rXLgzCs1wxpx96YLZAN5 --env START_BUTTON=Ko56CkYjFvL4IWm27ISX --env CROWN=cg59i7M6mabAobm1k6Hr --env BLUE_X=PjccgK9hiv5ZDB8vT2vK --env BLUE_O=Am6s8MRzIp4C137hg7Kf --env RED_X=nD7Pfmo2g1GgQF2iUmBm --env RED_O=ROP9HIdZJ8JRYAyn4oVi --env V_RED_LINE=pQ3jvnTgTisZyc7afkGn --env V_BLUE_LINE=JfwQRPt3P28XSgfMyf6I --env H_RED_LINE=UiVUWcClHSsblbTfYEMd --env H_BLUE_LINE=MhfEecToW83Nh3nVnX7F --env O_RED_LINE=L2Cid8H4cVC56Z629qC4 --env O_BLUE_LINE=ULzKociCJWXrISpisMxl --env P1_STAND=kDprIO2lDDTwkjuT7QxX --env P2_STAND=buwykWfqblLWeLpMqSLJ --env GAME_BOARD=Ck0Uoin05j5KBFajdJ9l <image_id>
+```
 
 ## Add your .env environmental variables
 
@@ -48,6 +52,23 @@ API_URL=http://localhost:3001
 INSTANCE_DOMAIN=api.topia.io
 PUBLIC_KEY=yourkey
 PRIVATE_KEY=enteryoursecret
+
+CUSTOM_TEXT=rXLgzCs1wxpx96YLZAN5
+START_BUTTON=Ko56CkYjFvL4IWm27ISX
+CROWN=cg59i7M6mabAobm1k6H
+BLUE_X=PjccgK9hiv5ZDB8vT2vK
+BLUE_O=Am6s8MRzIp4C137hg7Kf
+RED_X=nD7Pfmo2g1GgQF2iUmBm
+RED_O=ROP9HIdZJ8JRYAyn4oVi
+V_RED_LINE=pQ3jvnTgTisZyc7afkGn
+V_BLUE_LINE=JfwQRPt3P28XSgfMyf6I
+H_RED_LINE=UiVUWcClHSsblbTfYEMd
+H_BLUE_LINE=MhfEecToW83Nh3nVnX7F
+O_RED_LINE=L2Cid8H4cVC56Z629qC4
+O_BLUE_LINE=ULzKociCJWXrISpisMxl
+P1_STAND=kDprIO2lDDTwkjuT7QxX
+P2_STAND=buwykWfqblLWeLpMqSLJ
+GAME_BOARD=Ck0Uoin05j5KBFajdJ9l
 ```
 
 **Developer Note: DO NOT use API_KEY unless absolutely necessary. ASK IN SLACK BEFORE USING**

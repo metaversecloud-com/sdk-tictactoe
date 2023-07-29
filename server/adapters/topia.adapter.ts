@@ -1,11 +1,6 @@
 import { InteractiveAsset, Position } from "../topia/topia.models.js";
-import axios from "axios";
-import { initDroppedAsset, initWorld, initWorldActivity } from "../topia/topia.factories.js";
+import { initDroppedAsset, initUser, initWorld, initWorldActivity } from "../topia/topia.factories.js";
 import { DroppedAsset, DroppedAssetInterface, Visitor } from "@rtsdk/topia";
-
-const _axios = axios.create({
-  baseURL: "https://api.topia.io/api",
-});
 
 const topiaAdapter = {
   createText: async (options: {
@@ -17,6 +12,7 @@ const topiaAdapter = {
     textWidth: number,
     uniqueName: string,
     urlSlug: string,
+    interactivePublicKey: string
   }): Promise<DroppedAsset> => {
     try {
       const textAsset = await InteractiveAsset({
@@ -85,41 +81,21 @@ const topiaAdapter = {
   //     return r.data
   // },
 
-  /**
-   *
-   * @param email     {string}
-   * @param apiKey    {string}
-   * @return {Promise<{id: string, assetName: string, addedOn: string, specialType: string, isVideoPlayer: boolean, topLayerURL: string, bottomLayerURL: string}[]>}
-   */
-  listAssets: async (email: string, apiKey: string) => {
-    const assets: {
-      "id": string,
-      "assetName": string,
-      "addedOn": string,
-      "specialType": string,
-      "isVideoPlayer": boolean,
-      "topLayerURL": string,
-      "bottomLayerURL": string
-    }[] = [];
-    let r = await _axios.get(`/assets/topia-assets?email=${email}`, {
-      headers: { Authorization: apiKey },
-    });
-    assets.push(...(r.data));
-    r = await _axios.get(`/assets/my-assets?email=${email}`, {
-      headers: { Authorization: apiKey },
-    });
-    assets.push(...(r.data));
-    return assets;
+  listAssets: async (email: string, requestBody: any) => {
+    const user = initUser().create({ credentials: requestBody, urlSlug: requestBody.urlSlug, visitorId: Number(requestBody.visitorId) });
+    await user.fetchAssets();
+    return Object.values(user.assets);
   },
 
   dropAsset: async (urlSlug: string, options: {
     assetId: string,
     position: Position,
-    uniqueName?: string
+    uniqueName?: string, interactivePublicKey: string
   }, requestBody: any): Promise<DroppedAsset> =>
     InteractiveAsset({
       id: options.assetId, position: options.position,
       uniqueName: options.uniqueName || Date.now() + "", requestBody, urlSlug,
+      interactivePublicKey: options.interactivePublicKey,
     }),
 
   dropScene: async (urlSlug: string, config: {
@@ -129,11 +105,7 @@ const topiaAdapter = {
       y: number
     },
     assetSuffix: string
-  }, apiKey: string) => {
-    const r = await _axios.post(`/world/${urlSlug}/drop-scene`, config,
-      { headers: { Authorization: apiKey } });
-    return r.data;
-  },
+  }, requestBody: any) => initWorld().create(urlSlug, { credentials: requestBody }).dropScene(config),
 
   removeDroppedAsset: async (urlSlug: string, droppedAssetId: string, requestBody: any) => {
     const droppedAsset = initDroppedAsset().create(droppedAssetId, urlSlug, { credentials: requestBody });
@@ -143,12 +115,6 @@ const topiaAdapter = {
 
   removeDroppedAssets: async (urlSlug: string, assetIds: string[], requestBody: any) =>
     Promise.allSettled(assetIds.map(id => topiaAdapter.removeDroppedAsset(urlSlug, id, requestBody))),
-
-  getVisitor: async (urlSlug: string, visitorId: string, apiKey: string) => {
-    const r = await _axios.get<{ [p: string]: Visitor }>(`/world/${urlSlug}/visitors`,
-      { headers: { Authorization: apiKey } });
-    return r.data[visitorId];
-  },
 
   /**
    * Using interactive credentials
@@ -165,9 +131,8 @@ const topiaAdapter = {
 
   getDroppedAssets: async (requestBody: any, options?: { urlSlug?: string, nameSubstr: string }) => {
     try {
-      const world = requestBody ?
-        await initWorld().create(requestBody.urlSlug, { credentials: requestBody }) :
-        await initWorld().create(options?.urlSlug);
+      const world = requestBody ? initWorld().create(requestBody.urlSlug, { credentials: requestBody }) :
+        initWorld().create(options?.urlSlug);
 
       await world.fetchDroppedAssets();
       let droppedAssets = Object.values(world.droppedAssets) as DroppedAssetInterface[];

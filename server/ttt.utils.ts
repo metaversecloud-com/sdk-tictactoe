@@ -61,7 +61,7 @@ export default {
     // todo drop a start button at the given position, set a webhook to start the game as well
     return topiaAdapter.dropAsset(urlSlug, {
       assetId: process.env.START_BUTTON!!, position: game.center,
-      uniqueName: game.boardId + "_start_btn",
+      uniqueName: game.boardId + "_start_btn", interactivePublicKey: requestBody.interactivePublicKey,
     }, requestBody);
   },
 
@@ -72,7 +72,7 @@ export default {
     return topiaAdapter.dropAsset(options.urlSlug, {
       assetId,
       position: { x: cell.position.x || 0, y: cell.position.y || 0 },
-      uniqueName: options.game.boardId + Date.now() + "_move",
+      uniqueName: options.game.boardId + Date.now() + "_move", interactivePublicKey: options.requestBody.interactivePublicKey,
     }, options.requestBody);
   },
 
@@ -89,56 +89,56 @@ export default {
         return topiaAdapter.dropAsset(urlSlug, {
           assetId: H_LINE,
           position: { x: game.center.x, y: game.center.y - cellWidth },
-          uniqueName: game.boardId + "_finish_line",
+          uniqueName: game.boardId + "_finish_line", interactivePublicKey: requestBody.interactivePublicKey,
         }, requestBody);
 
       case WinningCombo.H_MID:
         return topiaAdapter.dropAsset(urlSlug, {
           assetId: H_LINE,
           position: game.center,
-          uniqueName: game.boardId + "_finish_line",
+          uniqueName: game.boardId + "_finish_line", interactivePublicKey: requestBody.interactivePublicKey,
         }, requestBody);
 
       case WinningCombo.H_BOT:
         return topiaAdapter.dropAsset(urlSlug, {
           assetId: H_LINE,
           position: { x: game.center.x, y: game.center.y + cellWidth },
-          uniqueName: game.boardId + "_finish_line",
+          uniqueName: game.boardId + "_finish_line", interactivePublicKey: requestBody.interactivePublicKey,
         }, requestBody);
 
       case WinningCombo.V_LEFT:
         return topiaAdapter.dropAsset(urlSlug, {
           assetId: V_LINE,
           position: { x: game.center.x - cellWidth, y: game.center.y },
-          uniqueName: game.boardId + "_finish_line",
+          uniqueName: game.boardId + "_finish_line", interactivePublicKey: requestBody.interactivePublicKey,
         }, requestBody);
 
       case WinningCombo.V_MID:
         return topiaAdapter.dropAsset(urlSlug, {
           assetId: V_LINE,
           position: game.center,
-          uniqueName: game.boardId + "_finish_line",
+          uniqueName: game.boardId + "_finish_line", interactivePublicKey: requestBody.interactivePublicKey,
         }, requestBody);
 
       case WinningCombo.V_RIGHT:
         return topiaAdapter.dropAsset(urlSlug, {
           assetId: V_LINE,
           position: { x: game.center.x + cellWidth, y: game.center.y },
-          uniqueName: game.boardId + "_finish_line",
+          uniqueName: game.boardId + "_finish_line", interactivePublicKey: requestBody.interactivePublicKey,
         }, requestBody);
 
       case WinningCombo.L_CROSS:
         return topiaAdapter.dropAsset(urlSlug, {
           assetId: O_LINE,
           position: { x: game.center.x - cellWidth, y: game.center.y + cellWidth },
-          uniqueName: game.boardId + "_finish_line",
+          uniqueName: game.boardId + "_finish_line", interactivePublicKey: requestBody.interactivePublicKey,
         }, requestBody);
 
       case WinningCombo.R_CROSS:
         return topiaAdapter.dropAsset(urlSlug, {
           assetId: O_LINE,
           position: { x: game.center.x - cellWidth, y: game.center.y - cellWidth },
-          uniqueName: game.boardId + "_finish_line",
+          uniqueName: game.boardId + "_finish_line", interactivePublicKey: requestBody.interactivePublicKey,
         }, requestBody);
     }
   },

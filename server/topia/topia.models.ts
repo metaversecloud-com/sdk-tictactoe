@@ -3,10 +3,10 @@ import { initAsset, initDroppedAsset } from "./topia.factories.js";
 export const InteractiveAsset = async (options: {
   id: string, requestBody: any, position: Position,
   uniqueName: string,
-  urlSlug: string,
+  urlSlug: string, interactivePublicKey?: string,
 }) => {
   try {
-    const asset = await initAsset().create(options.id, { credentials: options.requestBody });
+    const asset = initAsset().create(options.id, { credentials: options.requestBody });
     const droppedAsset = await initDroppedAsset().drop(asset, options);
 
     // This adds your public developer key to the dropped asset so visitors can interact with it in-world.

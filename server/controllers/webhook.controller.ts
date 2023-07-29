@@ -9,7 +9,7 @@ export default {
         // in-progress, no dialog will be shown.
         console.log("A visitor has entered into the start area.");
         console.log(`request.body`, req.body);
-        const world = await initWorld().create(req.body.urlSlug, { credentials: req.body });
+        const world = initWorld().create(req.body.urlSlug, { credentials: req.body });
 
         break;
       case "exited":

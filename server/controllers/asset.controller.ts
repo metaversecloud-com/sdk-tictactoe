@@ -6,7 +6,7 @@ export default {
     res.status(200).send(await topiaAdapter.getDroppedAssets(req.body)),
 
   list: async (req: Request, res: Response) =>
-    res.status(200).send(await topiaAdapter.listAssets(req.body.email, req.body.apiKey)),
+    res.status(200).send(await topiaAdapter.listAssets(req.body.email, req.body)),
 
   align: async (req: Request, res: Response) => {
     const assets: string[] = req.body.assets;

@@ -98,9 +98,10 @@ export default {
           text: "Find a second player!",
           textColor: "#333333",
           textSize: 20,
-          urlSlug: req.body.urlSlug,
+          urlSlug,
           textWidth: 50,
           uniqueName: boardId + "_message",
+          interactivePublicKey: req.body.interactivePublicKey
         })).id;
       }
     }
@@ -168,6 +169,7 @@ export default {
       position: { x: game.center.x, y: game.center.y - 60 },
       requestBody: req.body, text: "👑 " + mover?.username, textColor: "#ffffff", textSize: 24,
       urlSlug: req.body.urlSlug, textWidth: 14, uniqueName: boardId + "_win_msg",
+      interactivePublicKey: req.body.interactivePublicKey
     })).id;
     res.status(200).send({ message: "Move completed." });
   },
