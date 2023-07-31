@@ -32,7 +32,7 @@ export default {
   playerMovement: async (req: Request, res: Response) => {
     const player = Number(req.params.player);
     const action = req.params.action; // : "entered"  | "exited"
-    const { urlSlug, visitorId, assetId } = req.body;
+    const { urlSlug, visitorId, assetId, interactiveNonce } = req.body;
     const boardId = tttUtils.extractBoardId(req.body);
     if (!boardId)
       return res.status(400).send({ message: "boardId must be supplied in dataObject." });
@@ -54,10 +54,10 @@ export default {
 
     console.log(`player: ${player}\naction: ${action}\nurlSlug: ${urlSlug}\nvisitorId: ${visitorId}\nassetId: ${assetId}\nboardId: ${boardId}\nusername: ${username}`);
 
-    // todo calculate center position from the position of the p1 or p2 asset
+    // Calculating center position from the position of the p1 or p2 asset
     const p1box = await initDroppedAsset().get(assetId, urlSlug, { credentials: req.body }) as DroppedAssetInterface;
 
-    // todo find scale of the P1 or P2 box, use this scaling to correct positions of center and top
+    // Finding scale of the P1 or P2 box, use this scaling to correct positions of center and top
     const scale: number = p1box.assetScale;
     const center = new Position(p1box.position);
 
@@ -83,9 +83,9 @@ export default {
       }
 
       if (player === 1 && !activeGame.player1)
-        activeGame.player1 = { visitorId, username };
+        activeGame.player1 = { visitorId, username, interactiveNonce };
       else if (player === 2 && !activeGame.player2)
-        activeGame.player2 = { visitorId, username };
+        activeGame.player2 = { visitorId, username, interactiveNonce };
 
       if (activeGame.player1 && activeGame.player2) {
         await tttUtils.removeMessages(urlSlug, boardId, req.body);

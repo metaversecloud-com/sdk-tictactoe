@@ -1,4 +1,4 @@
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import assetRoutes from "./routes/asset.routes.js";
 import ticTacToeRoutes from "./routes/ticTacToe.routes.js";
 import webhookRoutes from "./routes/webhook.routes.js";
@@ -14,5 +14,13 @@ router.use(ticTacToeRoutes);
 router.use("/wh", webhookRoutes);
 router.use("/visitors", visitorRoutes);
 router.use("/assets", assetRoutes);
+
+// Error handling
+router.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  if (res.headersSent)
+    return next(err);
+
+  res.status(500).send({ success: false, message: err.message });
+});
 
 export default router;

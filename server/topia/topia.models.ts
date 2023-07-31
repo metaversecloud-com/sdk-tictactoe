@@ -27,6 +27,7 @@ export const InteractiveAsset = async (options: {
 export interface Player {
   username: string;
   visitorId: number;
+  interactiveNonce: string;
 }
 
 export class Position {
