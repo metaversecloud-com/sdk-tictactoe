@@ -102,7 +102,7 @@ export default {
           textWidth: 50,
           uniqueName: boardId + "_message",
           interactivePublicKey: req.body.interactivePublicKey
-        })).id;
+        }))?.id;
       }
     }
 
@@ -170,7 +170,7 @@ export default {
       requestBody: req.body, text: "👑 " + mover?.username, textColor: "#ffffff", textSize: 24,
       urlSlug: req.body.urlSlug, textWidth: 14, uniqueName: boardId + "_win_msg",
       interactivePublicKey: req.body.interactivePublicKey
-    })).id;
+    }))?.id;
     res.status(200).send({ message: "Move completed." });
   },
 
