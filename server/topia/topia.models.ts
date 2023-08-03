@@ -1,10 +1,11 @@
 import { initAsset, initDroppedAsset } from "./topia.factories.js";
+import { DroppedAsset } from "@rtsdk/topia";
 
 export const InteractiveAsset = async (options: {
   id: string, requestBody: any, position: Position,
   uniqueName: string,
   urlSlug: string, interactivePublicKey?: string,
-}) => {
+}): Promise<DroppedAsset | null> => {
   try {
     const asset = initAsset().create(options.id, { credentials: options.requestBody });
     const droppedAsset = await initDroppedAsset().drop(asset, options);
@@ -20,7 +21,8 @@ export const InteractiveAsset = async (options: {
     const m = "Error creating interactive asset";
     console.log(m, e);
     console.log(JSON.stringify(e.data));
-    return Promise.reject(m);
+    // return Promise.reject(m);
+    return null;
   }
 };
 

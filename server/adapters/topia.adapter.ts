@@ -21,7 +21,7 @@ const topiaAdapter = {
         }, ...options,
       });
 
-      await textAsset.updateCustomTextAsset({
+      await textAsset?.updateCustomTextAsset({
           ...{
             textFontFamily: "Arial",
             textWeight: "normal",
@@ -92,7 +92,7 @@ const topiaAdapter = {
     assetId: string,
     position: Position,
     uniqueName?: string, interactivePublicKey: string
-  }, requestBody: any): Promise<DroppedAsset> =>
+  }, requestBody: any): Promise<DroppedAsset | null> =>
     InteractiveAsset({
       id: options.assetId, position: options.position,
       uniqueName: options.uniqueName || Date.now() + "", requestBody, urlSlug,
