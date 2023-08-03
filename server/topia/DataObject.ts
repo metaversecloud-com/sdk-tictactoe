@@ -1,4 +1,4 @@
-import { DroppedAssetInterface, Visitor, VisitorInterface } from "@rtsdk/topia";
+import { DroppedAsset, DroppedAssetInterface, Visitor, VisitorInterface } from "@rtsdk/topia";
 import { TttStats } from "../models.js";
 
 /**
@@ -44,3 +44,4 @@ class DataObject<D extends VisitorInterface | DroppedAssetInterface, T> {
  * App-specific data for a visitor.
  */
 export const TttStatsData = new DataObject<Visitor, TttStats>("tttStats");
+export const BoardIdData = new DataObject<DroppedAsset, number>("boardId");

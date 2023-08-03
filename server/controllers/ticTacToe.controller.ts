@@ -89,7 +89,7 @@ export default {
 
       if (activeGame.player1 && activeGame.player2) {
         await tttUtils.removeMessages(urlSlug, boardId, req.body);
-        activeGame.startBtnId = (await tttUtils.dropStartButton(urlSlug, activeGame, req.body)).id;
+        activeGame.startBtnId = (await tttUtils.dropStartButton(urlSlug, activeGame, req.body))?.id;
       } else {
         // todo Find position from the values of scale and center
         activeGame.messageTextId = (await topiaAdapter.createText({

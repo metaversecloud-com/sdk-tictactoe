@@ -92,12 +92,11 @@ const topiaAdapter = {
     assetId: string,
     position: Position,
     uniqueName?: string, interactivePublicKey: string
-  }, requestBody: any): Promise<DroppedAsset | null> =>
-    InteractiveAsset({
-      id: options.assetId, position: options.position,
-      uniqueName: options.uniqueName || Date.now() + "", requestBody, urlSlug,
-      interactivePublicKey: options.interactivePublicKey,
-    }),
+  }, requestBody: any): Promise<DroppedAsset | null> => InteractiveAsset({
+    id: options.assetId, position: options.position,
+    uniqueName: options.uniqueName || Date.now() + "", requestBody, urlSlug,
+    interactivePublicKey: options.interactivePublicKey,
+  }),
 
   dropScene: async (urlSlug: string, config: {
     sceneId: string,

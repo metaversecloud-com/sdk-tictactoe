@@ -59,10 +59,16 @@ export default {
 
   dropStartButton: async (urlSlug: string, game: Game, requestBody: any) => {
     // todo drop a start button at the given position, set a webhook to start the game as well
-    return topiaAdapter.dropAsset(urlSlug, {
+    const startBtn = await topiaAdapter.dropAsset(urlSlug, {
       assetId: process.env.START_BUTTON!!, position: game.center,
       uniqueName: game.boardId + "_start_btn", interactivePublicKey: requestBody.interactivePublicKey,
     }, requestBody);
+
+    // await startBtn.updateWebhookZone(true)
+    // await BoardIdData.write(startBtn, game.boardId)
+    // const world = initWorld().create(urlSlug, { credentials: requestBody });
+
+    return startBtn;
   },
 
   makeMove: async (options: { urlSlug: string, game: Game, cross: boolean, cell: string, requestBody: any }) => {
