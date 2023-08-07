@@ -24,7 +24,8 @@ export default async (req: Request, res: Response, next: NextFunction) => {
     const world = initWorld().create(credentials.urlSlug!!, { credentials });
     await world.fetchDroppedAssets();
     Object.values(world.droppedAssets).map(da => da as DroppedAssetInterface)
-      .forEach(da => console.log(`da.id: `, da.id, "\nda.assetId: ", da.assetId, "\nda.layer0: ", da.layer0, "\nda.layer1: ", da.layer1));
+      .forEach(da => console.log(`da.id: `, da.id, "\nda.assetId: ", da.assetId, "\nda.layer0: ",
+        da.layer0, "\nda.layer1: ", da.layer1, "\nda.assetScale: ", da.assetScale));
 
     return next();
   } catch (e: any) {
