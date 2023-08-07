@@ -40,7 +40,7 @@ Notes:
 2. To build an image for delivery run `docker build . -t [add a name]:v[version_number]`. This will generate an image that you can push out to ECR for deployment.
 3. To locally run, use the following command.
    ```bash
-   docker run -p 3000:3000 -p 3001:3001 -d --env INSTANCE_DOMAIN=api.topia.io --env INTERACTIVE_KEY=eDtTM1wKgP0B39pYidZc --env INTERACTIVE_SECRET=1314f7b5-4ec8-46ba-ac8d-8b0c06e11b3b --env CUSTOM_TEXT=rXLgzCs1wxpx96YLZAN5 --env WEB_IMAGE= --env API_URL=https://ttt.topia-randd.io <image_id>
+   docker run -p 3000:3000 -p 3001:3001 -d --env INSTANCE_DOMAIN=api.topia.io --env INTERACTIVE_KEY=eDtTM1wKgP0B39pYidZc --env INTERACTIVE_SECRET=1314f7b5-4ec8-46ba-ac8d-8b0c06e11b3b --env CUSTOM_TEXT=rXLgzCs1wxpx96YLZAN5 --env WEB_IMAGE=webImageAsset --env API_URL=https://ttt.topia-randd.io <image_id>
 ```
 
 ## Add your .env environmental variables
@@ -54,7 +54,7 @@ PUBLIC_KEY=yourkey
 PRIVATE_KEY=enteryoursecret
 
 CUSTOM_TEXT=rXLgzCs1wxpx96YLZAN5
-WEB_IMAGE=
+WEB_IMAGE=webImageAsset
 ```
 
 **Developer Note: DO NOT use API_KEY unless absolutely necessary. ASK IN SLACK BEFORE USING**

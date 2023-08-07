@@ -2,6 +2,7 @@ import { Game } from "./topia/topia.models.js";
 import topiaAdapter from "./adapters/topia.adapter.js";
 import { initDroppedAsset, initWorld } from "./topia/topia.factories.js";
 import { DroppedAssetInterface } from "@rtsdk/topia";
+import { BoardIdData } from "./topia/DataObject.js";
 
 export const WinningCombo = {
   H_TOP: [0, 1, 2],
@@ -65,90 +66,108 @@ export default {
       requestBody,
     });
 
-    // todo Updating webhooks will be available in the next version of the RTSDK. For now, it's available through public API.
+    await BoardIdData.write(startBtn, game.boardId);
 
-    // await startBtn.updateWebhookZone(true)
-    // await BoardIdData.write(startBtn, game.boardId)
-    // const world = initWorld().create(urlSlug, { credentials: requestBody });
+    await startBtn.addWebhook({
+      dataObject: { boardId: game.boardId },
+      isUniqueOnly: false,
+      type: "assetClicked",
+      url: `${process.env.API_URL}/backend/start`,
+      title: "Start Game",
+      description: "Starts the game",
+    });
 
+    game.startBtnId = startBtn.id;
     return startBtn;
   },
 
   makeMove: async (options: { urlSlug: string, game: Game, cross: boolean, cell: string, requestBody: any }) => {
-    const assetId = options.cross ? process.env.RED_X!! : process.env.BLUE_O!!;
-    const daFactory = initDroppedAsset();
-    const cell = await daFactory.get(options.cell, options.urlSlug, { credentials: options.requestBody }) as DroppedAssetInterface;
-    return topiaAdapter.dropAsset(options.urlSlug, {
-      assetId,
+    const cell = await initDroppedAsset().get(options.cell, options.urlSlug, { credentials: options.requestBody }) as DroppedAssetInterface;
+    return topiaAdapter.createWebImage({
+      urlSlug: options.urlSlug,
+      imageUrl: `${process.env.API_URL}/${options.cross ? `blue_x` : "pink_o"}.png`,
       position: { x: cell.position.x || 0, y: cell.position.y || 0 },
-      uniqueName: options.game.boardId + Date.now() + "_move", interactivePublicKey: options.requestBody.interactivePublicKey,
-    }, options.requestBody);
+      uniqueName: options.game.boardId + Date.now() + "_move",
+      interactivePublicKey: options.requestBody.interactivePublicKey,
+      requestBody: options.requestBody,
+    });
   },
 
   dropFinishLine: async (urlSlug: string, game: Game, combo: readonly [number, number, number], requestBody: any) => {
-    // todo get asset IDs for vertical line, horizontal line, and oblique line
-    const H_LINE = process.env.H_RED_LINE!!;
-    const V_LINE = process.env.V_RED_LINE!!;
-    const O_LINE = process.env.O_RED_LINE!!;
-
     const cellWidth = 90;
 
     switch (combo) {
       case WinningCombo.H_TOP:
-        return topiaAdapter.dropAsset(urlSlug, {
-          assetId: H_LINE,
+        return topiaAdapter.createWebImage({
+          urlSlug,
+          imageUrl: `${process.env.API_URL}/blue_horizontal.png`,
           position: { x: game.center.x, y: game.center.y - cellWidth },
           uniqueName: game.boardId + "_finish_line", interactivePublicKey: requestBody.interactivePublicKey,
-        }, requestBody);
+          requestBody,
+        });
 
       case WinningCombo.H_MID:
-        return topiaAdapter.dropAsset(urlSlug, {
-          assetId: H_LINE,
+        return topiaAdapter.createWebImage({
+          urlSlug,
+          imageUrl: `${process.env.API_URL}/blue_horizontal.png`,
           position: game.center,
           uniqueName: game.boardId + "_finish_line", interactivePublicKey: requestBody.interactivePublicKey,
-        }, requestBody);
+          requestBody,
+        });
 
       case WinningCombo.H_BOT:
-        return topiaAdapter.dropAsset(urlSlug, {
-          assetId: H_LINE,
+        return topiaAdapter.createWebImage({
+          urlSlug,
+          imageUrl: `${process.env.API_URL}/blue_horizontal.png`,
           position: { x: game.center.x, y: game.center.y + cellWidth },
           uniqueName: game.boardId + "_finish_line", interactivePublicKey: requestBody.interactivePublicKey,
-        }, requestBody);
+          requestBody,
+        });
 
       case WinningCombo.V_LEFT:
-        return topiaAdapter.dropAsset(urlSlug, {
-          assetId: V_LINE,
+        return topiaAdapter.createWebImage({
+          urlSlug,
+          imageUrl: `${process.env.API_URL}/blue_vertical.png`,
           position: { x: game.center.x - cellWidth, y: game.center.y },
           uniqueName: game.boardId + "_finish_line", interactivePublicKey: requestBody.interactivePublicKey,
-        }, requestBody);
+          requestBody,
+        });
 
       case WinningCombo.V_MID:
-        return topiaAdapter.dropAsset(urlSlug, {
-          assetId: V_LINE,
+        return topiaAdapter.createWebImage({
+          urlSlug,
+          imageUrl: `${process.env.API_URL}/blue_vertical.png`,
           position: game.center,
           uniqueName: game.boardId + "_finish_line", interactivePublicKey: requestBody.interactivePublicKey,
-        }, requestBody);
+          requestBody,
+        });
 
       case WinningCombo.V_RIGHT:
-        return topiaAdapter.dropAsset(urlSlug, {
-          assetId: V_LINE,
+        return topiaAdapter.createWebImage({
+          urlSlug,
+          imageUrl: `${process.env.API_URL}/blue_vertical.png`,
           position: { x: game.center.x + cellWidth, y: game.center.y },
           uniqueName: game.boardId + "_finish_line", interactivePublicKey: requestBody.interactivePublicKey,
-        }, requestBody);
+          requestBody,
+        });
 
       case WinningCombo.L_CROSS:
-        return topiaAdapter.dropAsset(urlSlug, {
-          assetId: O_LINE,
+        return topiaAdapter.createWebImage({
+          urlSlug,
+          imageUrl: `${process.env.API_URL}/blue_oblique.png`,
           position: { x: game.center.x - cellWidth, y: game.center.y + cellWidth },
           uniqueName: game.boardId + "_finish_line", interactivePublicKey: requestBody.interactivePublicKey,
-        }, requestBody);
+          requestBody,
+        });
 
       case WinningCombo.R_CROSS:
-        return topiaAdapter.dropAsset(urlSlug, {
-          assetId: O_LINE,
+        return topiaAdapter.createWebImage({
+          urlSlug,
+          imageUrl: `${process.env.API_URL}/blue_oblique.png`,
           position: { x: game.center.x - cellWidth, y: game.center.y - cellWidth },
           uniqueName: game.boardId + "_finish_line", interactivePublicKey: requestBody.interactivePublicKey,
-        }, requestBody);
+          requestBody,
+        });
     }
   },
 

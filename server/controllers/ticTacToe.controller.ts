@@ -2,7 +2,7 @@ import tttUtils from "../ttt.utils.js";
 import { Request, Response } from "express";
 import topiaAdapter from "../adapters/topia.adapter.js";
 import { Game, Player, Position } from "../topia/topia.models.js";
-import { initDroppedAsset } from "../topia/topia.factories.js";
+import { initDroppedAsset, initWorld } from "../topia/topia.factories.js";
 import { DroppedAssetInterface } from "@rtsdk/topia";
 
 const activeGames: { [urlSlug: string]: Game[] } = {};
@@ -27,6 +27,19 @@ export default {
     // });
 
     res.status(200).send([]);
+  },
+
+  removeStartBtn: async (req: Request, res: Response) => {
+    const { urlSlug, visitorId, assetId, interactiveNonce } = req.body;
+    const boardId = tttUtils.extractBoardId(req.body);
+    let activeGame = activeGames[urlSlug]?.find(g => g.boardId === boardId);
+    if (!activeGame)
+      return res.status(400).send({ message: "Game not found." });
+
+    const world = initWorld().create(urlSlug, { credentials: req.body });
+    const startBtn = initDroppedAsset().create(activeGame.startBtnId, urlSlug, { credentials: req.body });
+    await startBtn.deleteDroppedAsset();
+    return res.status(200).send({ message: "Start button removed." });
   },
 
   playerMovement: async (req: Request, res: Response) => {
@@ -101,7 +114,7 @@ export default {
           urlSlug,
           textWidth: 50,
           uniqueName: boardId + "_message",
-          interactivePublicKey: req.body.interactivePublicKey
+          interactivePublicKey: req.body.interactivePublicKey,
         }))?.id;
       }
     }
@@ -169,7 +182,7 @@ export default {
       position: { x: game.center.x, y: game.center.y - 60 },
       requestBody: req.body, text: "👑 " + mover?.username, textColor: "#ffffff", textSize: 24,
       urlSlug: req.body.urlSlug, textWidth: 14, uniqueName: boardId + "_win_msg",
-      interactivePublicKey: req.body.interactivePublicKey
+      interactivePublicKey: req.body.interactivePublicKey,
     }))?.id;
     res.status(200).send({ message: "Move completed." });
   },

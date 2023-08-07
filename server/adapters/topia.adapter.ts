@@ -49,7 +49,7 @@ const topiaAdapter = {
     try {
       const webImageAsset = await InteractiveAsset({
         ...{
-          id: process.env.WEB_IMAGE || "rXLgzCs1wxpx96YLZAN5",
+          id: process.env.WEB_IMAGE || "webImageAsset",
         }, ...options,
       });
       await webImageAsset.updateWebImageLayers("", options.imageUrl);
