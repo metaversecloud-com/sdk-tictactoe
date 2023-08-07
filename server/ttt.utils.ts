@@ -59,10 +59,13 @@ export default {
 
   dropStartButton: async (urlSlug: string, game: Game, requestBody: any) => {
     // todo drop a start button at the given position, set a webhook to start the game as well
-    const startBtn = await topiaAdapter.dropAsset(urlSlug, {
-      assetId: process.env.START_BUTTON!!, position: game.center,
+    const startBtn = await topiaAdapter.createWebImage({
+      urlSlug, imageUrl: `${process.env.API_URL}/start_button.png`, position: game.center,
       uniqueName: game.boardId + "_start_btn", interactivePublicKey: requestBody.interactivePublicKey,
-    }, requestBody);
+      requestBody,
+    });
+
+    // todo Updating webhooks will be available in the next version of the RTSDK. For now, it's available through public API.
 
     // await startBtn.updateWebhookZone(true)
     // await BoardIdData.write(startBtn, game.boardId)

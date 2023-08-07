@@ -1,6 +1,6 @@
 {
   "name": "@ttt/server",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "",
   "type": "module",
   "scripts": {
@@ -15,11 +15,11 @@
   "devDependencies": {
     "@tsconfig/node-lts": "^18.12.3",
     "@types/express": "^4.17.17",
-    "@types/node": "^20.4.5",
+    "@types/node": "^20.4.8",
     "nodemon": "^3.0.1",
     "ts-node": "^10.9.1",
     "typescript": "^5.1.6",
-    "eslint-config-next": "13.4.12",
+    "eslint-config-next": "13.4.13",
     "@types/node-cron": "^3.0.8",
     "@types/jsonwebtoken": "^9.0.2",
     "@types/cors": "^2.8.13",
@@ -38,8 +38,6 @@
     "express-timeout-handler": "^2.2.2",
     "jsonwebtoken": "^9.0.1",
     "nodemon": "^3.0.1",
-    "node-cron": "^3.0.2",
-    "mysql2": "^3.5.2",
-    "sequelize": "^6.32.1"
+    "node-cron": "^3.0.2"
   }
 }

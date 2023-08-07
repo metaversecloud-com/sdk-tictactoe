@@ -17,7 +17,7 @@ const topiaAdapter = {
     try {
       const textAsset = await InteractiveAsset({
         ...{
-          id: process.env.CUSTOM_TEXT!!,
+          id: process.env.CUSTOM_TEXT || "rXLgzCs1wxpx96YLZAN5",
         }, ...options,
       });
 
@@ -35,6 +35,29 @@ const topiaAdapter = {
       console.log(r, e);
       // return Promise.reject(r);
       return null;
+    }
+  },
+
+  createWebImage: async (options: {
+    position: Position,
+    requestBody: any,
+    imageUrl: string,
+    uniqueName: string,
+    urlSlug: string,
+    interactivePublicKey: string
+  }) => {
+    try {
+      const webImageAsset = await InteractiveAsset({
+        ...{
+          id: process.env.WEB_IMAGE || "rXLgzCs1wxpx96YLZAN5",
+        }, ...options,
+      });
+      await webImageAsset.updateWebImageLayers("", options.imageUrl);
+      return webImageAsset;
+    } catch (e) {
+      const r = "Error creating web image";
+      console.log(r, e);
+      return Promise.reject(r);
     }
   },
 
@@ -83,7 +106,11 @@ const topiaAdapter = {
   // },
 
   listAssets: async (email: string, requestBody: any) => {
-    const user = initUser().create({ credentials: requestBody, urlSlug: requestBody.urlSlug, visitorId: Number(requestBody.visitorId) });
+    const user = initUser().create({
+      credentials: requestBody,
+      urlSlug: requestBody.urlSlug,
+      visitorId: Number(requestBody.visitorId),
+    });
     await user.fetchAssets();
     return Object.values(user.assets);
   },
