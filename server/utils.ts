@@ -3,7 +3,7 @@ import { DroppedAsset, DroppedAssetInterface, InteractiveCredentials } from "@rt
 import { Request } from "express";
 
 const getCredentials = (reqObj: any): InteractiveCredentials => {
-  const requiredFields = ["interactiveNonce", "interactivePublicKey", "urlSlug", "visitorId", "assetId"];
+  const requiredFields = ["interactiveNonce", "interactivePublicKey", "urlSlug", "visitorId"];
   const missingFields = requiredFields.filter((variable) => !reqObj[variable]);
   if (missingFields.length > 0)
     throw new Error(`Missing required body parameters: ${missingFields.join(", ")}`);
@@ -13,7 +13,7 @@ const getCredentials = (reqObj: any): InteractiveCredentials => {
     interactivePublicKey: reqObj.interactivePublicKey as string,
     urlSlug: reqObj.urlSlug as string,
     visitorId: Number(reqObj.visitorId),
-    assetId: reqObj.assetId as string,
+    assetId: reqObj.assetId as string | undefined,
   };
 };
 

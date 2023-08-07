@@ -3,6 +3,7 @@ import { DroppedAsset } from "@rtsdk/topia";
 
 export const InteractiveAsset = async (options: {
   id: string, requestBody: any, position: Position,
+  bottom?: string, top?: string,
   uniqueName: string,
   urlSlug: string, interactivePublicKey?: string,
 }): Promise<DroppedAsset | null> => {
