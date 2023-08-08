@@ -8,7 +8,10 @@ export const InteractiveAsset = async (options: {
   urlSlug: string, interactivePublicKey?: string,
 }): Promise<DroppedAsset | null> => {
   try {
-    const asset = initAsset().create(options.id, { credentials: options.requestBody });
+    const asset = initAsset().create(options.id, {
+      credentials: options.requestBody,
+      attributes: { requestOptions: { top: options.top, bottom: options.bottom } },
+    });
     const droppedAsset = await initDroppedAsset().drop(asset, options);
 
     // This adds your public developer key to the dropped asset so visitors can interact with it in-world.

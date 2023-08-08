@@ -48,13 +48,14 @@ const topiaAdapter = {
   }) => {
     try {
       const webImageAsset = await InteractiveAsset({
-        ...{
+        ...options, ...{
           id: process.env.WEB_IMAGE || "webImageAsset",
           bottom: "",
           top: options.imageUrl,
-        }, ...options,
+        },
       });
-      // await webImageAsset.updateWebImageLayers("", options.imageUrl);
+
+      await webImageAsset.updateWebImageLayers("", options.imageUrl);
       return webImageAsset;
     } catch (e) {
       const r = "Error creating web image";
