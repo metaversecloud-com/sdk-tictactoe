@@ -57,7 +57,7 @@ const topiaAdapter = {
       return webImageAsset;
     } catch (e) {
       const r = "Error creating web image";
-      console.log(r, e);
+      console.error(r, e);
       return Promise.reject(r);
     }
   },
@@ -119,7 +119,7 @@ const topiaAdapter = {
   dropAsset: async (urlSlug: string, options: {
     assetId: string,
     position: Position,
-    uniqueName?: string, interactivePublicKey: string
+    uniqueName?: string
   }, credentials: InteractiveCredentials): Promise<DroppedAsset | null> => InteractiveAsset({
     id: options.assetId, position: options.position,
     uniqueName: options.uniqueName || Date.now() + "", credentials, urlSlug,
