@@ -185,8 +185,8 @@ export default {
     return boardId;
   },
 
-  removeMessages: async (urlSlug: string, boardId: number, requestBody: any) => {
-    const world = initWorld().create(urlSlug, { credentials: requestBody });
+  removeMessages: async (urlSlug: string, boardId: number, credentials: InteractiveCredentials) => {
+    const world = initWorld().create(urlSlug, { credentials });
     const messages = await world.fetchDroppedAssetsWithUniqueName({ uniqueName: boardId + "_message" });
     console.log("messageAssets.length: ", messages.length);
     if (messages.length) {

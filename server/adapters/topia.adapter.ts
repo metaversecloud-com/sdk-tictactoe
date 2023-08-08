@@ -106,11 +106,11 @@ const topiaAdapter = {
   //     return r.data
   // },
 
-  listAssets: async (email: string, requestBody: any) => {
+  listAssets: async (email: string, visitor: Visitor) => {
     const user = initUser().create({
-      credentials: requestBody,
-      urlSlug: requestBody.urlSlug,
-      visitorId: Number(requestBody.visitorId),
+      credentials: visitor.credentials,
+      urlSlug: visitor.urlSlug,
+      visitorId: visitor.id,
     });
     await user.fetchAssets();
     return Object.values(user.assets);
@@ -132,34 +132,31 @@ const topiaAdapter = {
       y: number
     },
     assetSuffix: string
-  }, requestBody: any) => initWorld().create(urlSlug, { credentials: requestBody }).dropScene(config),
+  }, credentials: InteractiveCredentials) => initWorld().create(urlSlug, { credentials }).dropScene(config),
 
-  removeDroppedAsset: async (urlSlug: string, droppedAssetId: string, requestBody: any) => {
-    const droppedAsset = initDroppedAsset().create(droppedAssetId, urlSlug, { credentials: requestBody });
+  removeDroppedAsset: async (urlSlug: string, droppedAssetId: string, credentials: InteractiveCredentials) => {
+    const droppedAsset = initDroppedAsset().create(droppedAssetId, urlSlug, { credentials });
     await droppedAsset.deleteDroppedAsset();
     console.log(`Removed ${droppedAssetId} from ${urlSlug}.`);
   },
 
-  removeDroppedAssets: async (urlSlug: string, assetIds: string[], requestBody: any) =>
-    Promise.allSettled(assetIds.map(id => topiaAdapter.removeDroppedAsset(urlSlug, id, requestBody))),
+  removeDroppedAssets: async (urlSlug: string, assetIds: string[], credentials: InteractiveCredentials) =>
+    Promise.allSettled(assetIds.map(id => topiaAdapter.removeDroppedAsset(urlSlug, id, credentials))),
 
   /**
    * Using interactive credentials
    *
-   * @param requestBody
-   * @return {Promise<Visitor[]>}
    */
-  getCurrentVisitors: async (requestBody: any) => {
-    const worldActivity = await initWorldActivity().create(requestBody.urlSlug, { credentials: requestBody });
+  getCurrentVisitors: async (credentials: InteractiveCredentials) => {
+    const worldActivity = initWorldActivity().create(credentials.urlSlug, { credentials });
     const visitors = Object.values(await worldActivity.currentVisitors());
-    console.log(`Found ${visitors.length} visitors in world ${requestBody.urlSlug}.`);
+    console.log(`Found ${visitors.length} visitors in world ${credentials.urlSlug}.`);
     return visitors;
   },
 
-  getDroppedAssets: async (requestBody: any, options?: { urlSlug?: string, nameSubstr: string }) => {
+  getDroppedAssets: async (credentials: InteractiveCredentials, options?: { urlSlug?: string, nameSubstr: string }) => {
     try {
-      const world = requestBody ? initWorld().create(requestBody.urlSlug, { credentials: requestBody }) :
-        initWorld().create(options?.urlSlug);
+      const world = initWorld().create(credentials.urlSlug, { credentials });
 
       await world.fetchDroppedAssets();
       let droppedAssets = Object.values(world.droppedAssets) as DroppedAssetInterface[];
@@ -168,7 +165,7 @@ const topiaAdapter = {
         // @ts-ignore
         droppedAssets = droppedAssets.filter(da => da.uniqueName).filter(da => da.uniqueName.indexOf(options.nameSubstr) > -1);
 
-      console.log(`Found ${droppedAssets.length} dropped assets in world ${requestBody ? requestBody.urlSlug : options?.urlSlug}.`);
+      console.log(`Found ${droppedAssets.length} dropped assets in world ${credentials.urlSlug}.`);
       return droppedAssets;
     } catch (e) {
       console.error(`Error occurred in fetching dropped assets`, e);

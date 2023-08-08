@@ -61,7 +61,7 @@ export default {
         activeGame.player2 = undefined;
 
       if (!activeGame.player1 && !activeGame.player2)
-        await tttUtils.removeMessages(urlSlug, boardId, req.body);
+        await tttUtils.removeMessages(urlSlug, boardId, req.visitor.credentials);
       return res.status(200).send({ message: "Player moved." });
     }
 
@@ -101,8 +101,8 @@ export default {
         activeGame.player2 = { visitorId, username, interactiveNonce };
 
       if (activeGame.player1 && activeGame.player2) {
-        await tttUtils.removeMessages(urlSlug, boardId, req.body);
-        activeGame.startBtnId = (await tttUtils.dropStartButton(urlSlug, activeGame, req.body))?.id;
+        await tttUtils.removeMessages(urlSlug, boardId, req.visitor.credentials);
+        activeGame.startBtnId = (await tttUtils.dropStartButton(urlSlug, activeGame, req.visitor.credentials))?.id;
       } else {
         // todo Find position from the values of scale and center
         activeGame.messageTextId = (await topiaAdapter.createText({
@@ -197,24 +197,24 @@ export default {
 
     if (game.player1 && game.player2) {
       if (game.startBtnId) {
-        await topiaAdapter.removeDroppedAsset(urlSlug, game.startBtnId, req.body);
+        await topiaAdapter.removeDroppedAsset(urlSlug, game.startBtnId, req.visitor.credentials);
         game.startBtnId = undefined;
       }
 
       if (game.finishLineId) {
-        await topiaAdapter.removeDroppedAsset(urlSlug, game.finishLineId, req.body);
+        await topiaAdapter.removeDroppedAsset(urlSlug, game.finishLineId, req.visitor.credentials);
         game.finishLineId = undefined;
       }
 
       if (game.messageTextId) {
-        await topiaAdapter.removeDroppedAsset(urlSlug, game.messageTextId, req.body);
+        await topiaAdapter.removeDroppedAsset(urlSlug, game.messageTextId, req.visitor.credentials);
         game.messageTextId = undefined;
       }
 
       for (let m of game.moves) {
         if (!m)
           continue;
-        await topiaAdapter.removeDroppedAsset(urlSlug, m, req.body);
+        await topiaAdapter.removeDroppedAsset(urlSlug, m, req.visitor.credentials);
       }
       game.moves = [];
 
