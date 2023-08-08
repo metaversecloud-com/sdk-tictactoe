@@ -1,18 +1,17 @@
 import { InteractiveAsset, Position } from "../topia/topia.models.js";
 import { initDroppedAsset, initUser, initWorld, initWorldActivity } from "../topia/topia.factories.js";
-import { DroppedAsset, DroppedAssetInterface, Visitor } from "@rtsdk/topia";
+import { DroppedAsset, DroppedAssetInterface, InteractiveCredentials, Visitor } from "@rtsdk/topia";
 
 const topiaAdapter = {
   createText: async (options: {
     position: Position,
-    requestBody: any,
+    credentials: InteractiveCredentials,
     text: string,
     textColor: string,
     textSize: number,
     textWidth: number,
     uniqueName: string,
     urlSlug: string,
-    interactivePublicKey: string
   }): Promise<DroppedAsset | null> => {
     try {
       const textAsset = await InteractiveAsset({
@@ -40,11 +39,10 @@ const topiaAdapter = {
 
   createWebImage: async (options: {
     position: Position,
-    requestBody: any,
+    credentials: InteractiveCredentials,
     imageUrl: string,
     uniqueName: string,
     urlSlug: string,
-    interactivePublicKey: string
   }) => {
     try {
       const webImageAsset = await InteractiveAsset({
@@ -122,10 +120,9 @@ const topiaAdapter = {
     assetId: string,
     position: Position,
     uniqueName?: string, interactivePublicKey: string
-  }, requestBody: any): Promise<DroppedAsset | null> => InteractiveAsset({
+  }, credentials: InteractiveCredentials): Promise<DroppedAsset | null> => InteractiveAsset({
     id: options.assetId, position: options.position,
-    uniqueName: options.uniqueName || Date.now() + "", requestBody, urlSlug,
-    interactivePublicKey: options.interactivePublicKey,
+    uniqueName: options.uniqueName || Date.now() + "", credentials, urlSlug,
   }),
 
   dropScene: async (urlSlug: string, config: {

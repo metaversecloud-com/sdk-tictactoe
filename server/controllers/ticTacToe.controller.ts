@@ -107,14 +107,13 @@ export default {
         // todo Find position from the values of scale and center
         activeGame.messageTextId = (await topiaAdapter.createText({
           position: { x: center.x, y: center.y - 200 * scale },
-          requestBody: req.body,
+          credentials: req.visitor.credentials,
           text: "Find a second player!",
           textColor: "#333333",
           textSize: 20,
           urlSlug,
           textWidth: 50,
           uniqueName: boardId + "_message",
-          interactivePublicKey: req.body.interactivePublicKey,
         }))?.id;
       }
     }
@@ -162,7 +161,7 @@ export default {
 
     // todo drop a ❌ or a ⭕
     const move = await tttUtils.makeMove({
-      urlSlug, game, cell: assetId, requestBody: req.body,
+      urlSlug, game, cell: assetId, credentials: req.visitor.credentials,
       cross: pVisitorId === game.player1!!.visitorId,
     });
     game.moves[cell] = move.id;
@@ -180,9 +179,8 @@ export default {
     // todo drop 👑 and player's name
     game.messageTextId = (await topiaAdapter.createText({
       position: { x: game.center.x, y: game.center.y - 60 },
-      requestBody: req.body, text: "👑 " + mover?.username, textColor: "#ffffff", textSize: 24,
+      credentials: req.visitor.credentials, text: "👑 " + mover?.username, textColor: "#ffffff", textSize: 24,
       urlSlug: req.body.urlSlug, textWidth: 14, uniqueName: boardId + "_win_msg",
-      interactivePublicKey: req.body.interactivePublicKey,
     }))?.id;
     res.status(200).send({ message: "Move completed." });
   },

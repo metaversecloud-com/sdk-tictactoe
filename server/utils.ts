@@ -148,7 +148,7 @@ const utils = {
     try {
       return getCredentials(req.query);
     } catch (e) {
-      console.log("Could not get credentials from query. Trying body.");
+      console.warn("Could not get credentials from query. Trying body.");
       return getCredentials(req.body);
     }
   },

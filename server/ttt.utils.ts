@@ -1,7 +1,7 @@
 import { Game } from "./topia/topia.models.js";
 import topiaAdapter from "./adapters/topia.adapter.js";
 import { initDroppedAsset, initWorld } from "./topia/topia.factories.js";
-import { DroppedAssetInterface } from "@rtsdk/topia";
+import { DroppedAssetInterface, InteractiveCredentials } from "@rtsdk/topia";
 import { BoardIdData } from "./topia/DataObject.js";
 
 export const WinningCombo = {
@@ -58,12 +58,11 @@ export default {
     return { player: status[combo[0]], combo };
   },
 
-  dropStartButton: async (urlSlug: string, game: Game, requestBody: any) => {
+  dropStartButton: async (urlSlug: string, game: Game, credentials: InteractiveCredentials) => {
     // todo drop a start button at the given position, set a webhook to start the game as well
     const startBtn = await topiaAdapter.createWebImage({
       urlSlug, imageUrl: `${process.env.API_URL}/start_button.png`, position: game.center,
-      uniqueName: game.boardId + "_start_btn", interactivePublicKey: requestBody.interactivePublicKey,
-      requestBody,
+      uniqueName: game.boardId + "_start_btn", credentials,
     });
 
     await BoardIdData.write(startBtn, game.boardId);
@@ -81,19 +80,24 @@ export default {
     return startBtn;
   },
 
-  makeMove: async (options: { urlSlug: string, game: Game, cross: boolean, cell: string, requestBody: any }) => {
-    const cell = await initDroppedAsset().get(options.cell, options.urlSlug, { credentials: options.requestBody }) as DroppedAssetInterface;
+  makeMove: async (options: {
+    urlSlug: string,
+    game: Game,
+    cross: boolean,
+    cell: string,
+    credentials: InteractiveCredentials
+  }) => {
+    const cell = await initDroppedAsset().get(options.cell, options.urlSlug, { credentials: options.credentials }) as DroppedAssetInterface;
     return topiaAdapter.createWebImage({
       urlSlug: options.urlSlug,
       imageUrl: `${process.env.API_URL}/${options.cross ? `blue_x` : "pink_o"}.png`,
       position: { x: cell.position.x || 0, y: cell.position.y || 0 },
       uniqueName: options.game.boardId + Date.now() + "_move",
-      interactivePublicKey: options.requestBody.interactivePublicKey,
-      requestBody: options.requestBody,
+      credentials: options.credentials,
     });
   },
 
-  dropFinishLine: async (urlSlug: string, game: Game, combo: readonly [number, number, number], requestBody: any) => {
+  dropFinishLine: async (urlSlug: string, game: Game, combo: readonly [number, number, number], credentials: InteractiveCredentials) => {
     const cellWidth = 90;
 
     switch (combo) {
@@ -102,8 +106,7 @@ export default {
           urlSlug,
           imageUrl: `${process.env.API_URL}/blue_horizontal.png`,
           position: { x: game.center.x, y: game.center.y - cellWidth },
-          uniqueName: game.boardId + "_finish_line", interactivePublicKey: requestBody.interactivePublicKey,
-          requestBody,
+          uniqueName: game.boardId + "_finish_line", credentials,
         });
 
       case WinningCombo.H_MID:
@@ -111,8 +114,7 @@ export default {
           urlSlug,
           imageUrl: `${process.env.API_URL}/blue_horizontal.png`,
           position: game.center,
-          uniqueName: game.boardId + "_finish_line", interactivePublicKey: requestBody.interactivePublicKey,
-          requestBody,
+          uniqueName: game.boardId + "_finish_line", credentials,
         });
 
       case WinningCombo.H_BOT:
@@ -120,8 +122,7 @@ export default {
           urlSlug,
           imageUrl: `${process.env.API_URL}/blue_horizontal.png`,
           position: { x: game.center.x, y: game.center.y + cellWidth },
-          uniqueName: game.boardId + "_finish_line", interactivePublicKey: requestBody.interactivePublicKey,
-          requestBody,
+          uniqueName: game.boardId + "_finish_line", credentials,
         });
 
       case WinningCombo.V_LEFT:
@@ -129,8 +130,7 @@ export default {
           urlSlug,
           imageUrl: `${process.env.API_URL}/blue_vertical.png`,
           position: { x: game.center.x - cellWidth, y: game.center.y },
-          uniqueName: game.boardId + "_finish_line", interactivePublicKey: requestBody.interactivePublicKey,
-          requestBody,
+          uniqueName: game.boardId + "_finish_line", credentials,
         });
 
       case WinningCombo.V_MID:
@@ -138,8 +138,7 @@ export default {
           urlSlug,
           imageUrl: `${process.env.API_URL}/blue_vertical.png`,
           position: game.center,
-          uniqueName: game.boardId + "_finish_line", interactivePublicKey: requestBody.interactivePublicKey,
-          requestBody,
+          uniqueName: game.boardId + "_finish_line", credentials,
         });
 
       case WinningCombo.V_RIGHT:
@@ -147,8 +146,7 @@ export default {
           urlSlug,
           imageUrl: `${process.env.API_URL}/blue_vertical.png`,
           position: { x: game.center.x + cellWidth, y: game.center.y },
-          uniqueName: game.boardId + "_finish_line", interactivePublicKey: requestBody.interactivePublicKey,
-          requestBody,
+          uniqueName: game.boardId + "_finish_line", credentials,
         });
 
       case WinningCombo.L_CROSS:
@@ -156,8 +154,7 @@ export default {
           urlSlug,
           imageUrl: `${process.env.API_URL}/blue_oblique.png`,
           position: { x: game.center.x - cellWidth, y: game.center.y + cellWidth },
-          uniqueName: game.boardId + "_finish_line", interactivePublicKey: requestBody.interactivePublicKey,
-          requestBody,
+          uniqueName: game.boardId + "_finish_line", credentials,
         });
 
       case WinningCombo.R_CROSS:
@@ -165,8 +162,7 @@ export default {
           urlSlug,
           imageUrl: `${process.env.API_URL}/blue_oblique.png`,
           position: { x: game.center.x - cellWidth, y: game.center.y - cellWidth },
-          uniqueName: game.boardId + "_finish_line", interactivePublicKey: requestBody.interactivePublicKey,
-          requestBody,
+          uniqueName: game.boardId + "_finish_line", credentials,
         });
     }
   },

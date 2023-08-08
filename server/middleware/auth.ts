@@ -8,6 +8,7 @@ export default async (req: Request, res: Response, next: NextFunction) => {
 
   try {
     const credentials = utils.credentialsFromRequest(req);
+    console.log(`Extracted credentials: `, credentials);
     const visitor = await initVisitor().get(credentials.visitorId!!, credentials.urlSlug!!,
       { credentials });
     req.visitor = visitor;

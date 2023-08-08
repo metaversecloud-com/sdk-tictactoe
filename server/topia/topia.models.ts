@@ -1,15 +1,15 @@
 import { initAsset, initDroppedAsset } from "./topia.factories.js";
-import { DroppedAsset } from "@rtsdk/topia";
+import { DroppedAsset, InteractiveCredentials } from "@rtsdk/topia";
 
 export const InteractiveAsset = async (options: {
-  id: string, requestBody: any, position: Position,
+  id: string, credentials: InteractiveCredentials, position: Position,
   bottom?: string, top?: string,
   uniqueName: string,
-  urlSlug: string, interactivePublicKey?: string,
+  urlSlug: string
 }): Promise<DroppedAsset | null> => {
   try {
     const asset = initAsset().create(options.id, {
-      credentials: options.requestBody,
+      credentials: options.credentials,
       attributes: { requestOptions: { top: options.top, bottom: options.bottom } },
     });
     const droppedAsset = await initDroppedAsset().drop(asset, options);
@@ -18,7 +18,7 @@ export const InteractiveAsset = async (options: {
     if (droppedAsset)
       await droppedAsset.setInteractiveSettings({
         isInteractive: true,
-        interactivePublicKey: process.env.INTERACTIVE_KEY,
+        interactivePublicKey: options.credentials.interactivePublicKey,
       });
     return droppedAsset;
   } catch (e: any) {
