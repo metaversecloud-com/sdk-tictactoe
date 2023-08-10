@@ -49,6 +49,7 @@ export class Game {
   boardId: number;
   center: Position;
   // startBtnId?: string;
+  inControl: 0 | 1 = 0;
   finishLineId?: string;
   messageTextId?: string;
   moves: [string?, string?, string?, string?, string?, string?, string?, string?, string?];
@@ -59,6 +60,7 @@ export class Game {
     this.center = center;
     this.status = [0, 0, 0, 0, 0, 0, 0, 0, 0];
     this.moves = [];
+    this.inControl = 0;
   }
 }
 

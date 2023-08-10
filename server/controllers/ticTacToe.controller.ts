@@ -161,10 +161,16 @@ export default {
 
     // Figure out the player who clicked on this cell
     let mover: Player | undefined = undefined;
-    if (game.player1?.username === username && game.player1?.visitorId)
+    if (game.player1?.username === username && game.player1?.visitorId && game.inControl === 0)
       mover = game.player1;
-    if (game.player2?.username === username && game.player2?.visitorId)
+    if (game.player2?.username === username && game.player2?.visitorId && game.inControl === 1)
       mover = game.player2;
+
+    if (!mover)
+      return res.status(400).send({ message: "It's not your turn." });
+
+    game.inControl = (game.inControl + 1) % 2 as 0 | 1;
+
     game.status[cell] = pVisitorId;
     console.log("urlSlug: ", urlSlug, "\nassetId: ", assetId, "\npVisitorId: ", pVisitorId, "\ngame.status: ", game.status);
 
@@ -190,6 +196,6 @@ export default {
       urlSlug: req.body.urlSlug, textWidth: 14, uniqueName: boardId + "_win_msg",
     }))?.id;
     res.status(200).send({ message: "Move completed." });
-  }
+  },
 };
 
