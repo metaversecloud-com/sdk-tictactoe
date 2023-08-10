@@ -88,7 +88,7 @@ export default {
     const cell = await initDroppedAsset().get(options.cell, options.urlSlug, { credentials: options.credentials }) as DroppedAssetInterface;
     return topiaAdapter.createWebImage({
       urlSlug: options.urlSlug,
-      imageUrl: `${process.env.API_URL}/${options.cross ? `blue_cross` : "pink_o"}.png`,
+      imageUrl: `${process.env.API_URL}/${options.cross ? `pink_cross` : "blue_o"}.png`,
       position: { x: cell.position.x || 0, y: cell.position.y || 0 },
       uniqueName: options.game.boardId + Date.now() + "_move",
       credentials: options.credentials,
@@ -98,11 +98,13 @@ export default {
   dropFinishLine: async (urlSlug: string, game: Game, combo: readonly [number, number, number], credentials: InteractiveCredentials) => {
     const cellWidth = 90;
 
+    const color = game.player1.visitorId === credentials.visitorId ? "pink" : "blue";
+
     switch (combo) {
       case WinningCombo.H_TOP:
         return topiaAdapter.createWebImage({
           urlSlug,
-          imageUrl: `${process.env.API_URL}/blue_horizontal.png`,
+          imageUrl: `${process.env.API_URL}/${color}_horizontal.png`,
           position: { x: game.center.x, y: game.center.y - cellWidth },
           uniqueName: game.boardId + "_finish_line", credentials,
         });
@@ -110,7 +112,7 @@ export default {
       case WinningCombo.H_MID:
         return topiaAdapter.createWebImage({
           urlSlug,
-          imageUrl: `${process.env.API_URL}/blue_horizontal.png`,
+          imageUrl: `${process.env.API_URL}/${color}_horizontal.png`,
           position: game.center,
           uniqueName: game.boardId + "_finish_line", credentials,
         });
@@ -118,7 +120,7 @@ export default {
       case WinningCombo.H_BOT:
         return topiaAdapter.createWebImage({
           urlSlug,
-          imageUrl: `${process.env.API_URL}/blue_horizontal.png`,
+          imageUrl: `${process.env.API_URL}/${color}_horizontal.png`,
           position: { x: game.center.x, y: game.center.y + cellWidth },
           uniqueName: game.boardId + "_finish_line", credentials,
         });
@@ -126,7 +128,7 @@ export default {
       case WinningCombo.V_LEFT:
         return topiaAdapter.createWebImage({
           urlSlug,
-          imageUrl: `${process.env.API_URL}/blue_vertical.png`,
+          imageUrl: `${process.env.API_URL}/${color}_vertical.png`,
           position: { x: game.center.x - cellWidth, y: game.center.y },
           uniqueName: game.boardId + "_finish_line", credentials,
         });
@@ -134,7 +136,7 @@ export default {
       case WinningCombo.V_MID:
         return topiaAdapter.createWebImage({
           urlSlug,
-          imageUrl: `${process.env.API_URL}/blue_vertical.png`,
+          imageUrl: `${process.env.API_URL}/${color}_vertical.png`,
           position: game.center,
           uniqueName: game.boardId + "_finish_line", credentials,
         });
@@ -142,7 +144,7 @@ export default {
       case WinningCombo.V_RIGHT:
         return topiaAdapter.createWebImage({
           urlSlug,
-          imageUrl: `${process.env.API_URL}/blue_vertical.png`,
+          imageUrl: `${process.env.API_URL}/${color}_vertical.png`,
           position: { x: game.center.x + cellWidth, y: game.center.y },
           uniqueName: game.boardId + "_finish_line", credentials,
         });
@@ -150,7 +152,7 @@ export default {
       case WinningCombo.L_CROSS:
         return topiaAdapter.createWebImage({
           urlSlug,
-          imageUrl: `${process.env.API_URL}/blue_oblique.png`,
+          imageUrl: `${process.env.API_URL}/${color}_oblique.png`,
           position: { x: game.center.x - cellWidth, y: game.center.y + cellWidth },
           uniqueName: game.boardId + "_finish_line", credentials,
         });
@@ -158,7 +160,7 @@ export default {
       case WinningCombo.R_CROSS:
         return topiaAdapter.createWebImage({
           urlSlug,
-          imageUrl: `${process.env.API_URL}/blue_oblique.png`,
+          imageUrl: `${process.env.API_URL}/${color}_oblique.png`,
           position: { x: game.center.x - cellWidth, y: game.center.y - cellWidth },
           uniqueName: game.boardId + "_finish_line", credentials,
         });

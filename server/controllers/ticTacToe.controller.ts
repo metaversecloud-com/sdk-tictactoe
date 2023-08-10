@@ -172,6 +172,8 @@ export default {
     if (game.status[cell] !== 0)
       return res.status(400).send({ message: "Cannot place your move here." });
 
+    const scale = ((await initDroppedAsset().get(assetId, urlSlug, { credentials: req.visitor.credentials })) as DroppedAssetInterface).assetScale;
+
     game.status[cell] = pVisitorId;
     game.inControl = (game.inControl + 1) % 2 as 0 | 1;
     console.log("urlSlug: ", urlSlug, "\nassetId: ", assetId, "\npVisitorId: ", pVisitorId, "\ngame.status: ", game.status);
@@ -188,12 +190,13 @@ export default {
     if (!r)
       return res.status(200).send("Move made.");
 
-    // todo drop a finishing line
+    // Dropping a finishing line
     game.finishLineId = (await tttUtils.dropFinishLine(urlSlug, game, r.combo, req.visitor.credentials)).id;
 
-    // todo drop 👑 and player's name
+    // Dropping 👑 and player's name
     game.messageTextId = (await topiaAdapter.createText({
-      position: { x: game.center.x, y: game.center.y - 60 },
+      // position: { x: game.center.x, y: game.center.y - 60 },
+      position: { x: game.center.x, y: game.center.y - 200 * scale },
       credentials: req.visitor.credentials, text: "👑 " + mover?.username, textColor: "#ffffff", textSize: 24,
       urlSlug: req.body.urlSlug, textWidth: 14, uniqueName: boardId + "_win_msg",
     }))?.id;
