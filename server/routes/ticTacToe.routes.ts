@@ -8,5 +8,6 @@ tttRouter.get("/leaderboard", auth, ticTacToeController.leaderboard);
 tttRouter.post("/click/:cell", auth, ticTacToeController.gameMoves);
 tttRouter.post("/:player/:action", auth, ticTacToeController.playerMovement);
 tttRouter.post("/start", auth, ticTacToeController.removeStartBtn);
+tttRouter.post("/reset", auth, ticTacToeController.resetBoard);
 
 export default tttRouter;

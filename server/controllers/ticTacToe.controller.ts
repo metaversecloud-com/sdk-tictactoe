@@ -29,6 +29,23 @@ export default {
     res.status(200).send([]);
   },
 
+  resetBoard: async (req: Request, res: Response) => {
+    const urlSlug: string = req.body.urlSlug;
+    const boardId = tttUtils.extractBoardId(req.body);
+    let activeGame = activeGames[urlSlug]?.find(g => g.boardId === boardId);
+    if (!activeGame)
+      return res.status(400).send({ message: "Game not found." });
+
+    const finishLine = initDroppedAsset().create(activeGame.finishLineId, urlSlug, { credentials: req.visitor.credentials });
+    const message = initDroppedAsset().create(activeGame.messageTextId, urlSlug, { credentials: req.visitor.credentials });
+    const moves = activeGame.moves.map(m => initDroppedAsset().create(m, urlSlug, { credentials: req.visitor.credentials }));
+    activeGame.moves = [];
+    activeGame.status = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+    await Promise.allSettled([finishLine.deleteDroppedAsset(), message.deleteDroppedAsset(), ...moves.map(m => m.deleteDroppedAsset())]);
+    return res.status(200).send({ message: "Start button removed." });
+  },
+
   removeStartBtn: async (req: Request, res: Response) => {
     const { urlSlug, visitorId, assetId, interactiveNonce } = req.body;
     const boardId = tttUtils.extractBoardId(req.body);
@@ -128,27 +145,19 @@ export default {
     if (isNaN(cell))
       return res.status(400).send({ message: "cell is missing." });
 
-    console.log(1);
     const pVisitorId = visitorId ? Number(visitorId) : NaN;
     if (isNaN(pVisitorId))
       return res.status(400).send({ message: "visitorId must be a number." });
 
-    console.log(2);
     const boardId = tttUtils.extractBoardId(req.body);
     if (!boardId)
       return res.status(400).send({ message: "boardId is missing." });
 
-    console.log(3);
-    // if (!activeGames.hasOwnProperty(urlSlug))
-    //     return res.status(400).send({message: 'No active game found.'})
-    //
-    // console.log(4)
     console.log(`active games found in worlds: `, Object.keys(activeGames));
     console.log(`activeGames: `, activeGames);
     const game = activeGames[urlSlug]?.find(ag => ag.boardId === boardId);
     if (!game)
       return res.status(404).send({ message: "No active game found." });
-    console.log(5);
 
     // Figure out the player who clicked on this cell
     let mover: Player | undefined = undefined;
@@ -170,11 +179,9 @@ export default {
     const r = tttUtils.findWinningCombo(game.status);
     if (!r)
       return res.status(200).send("Move made.");
-    console.log(8);
 
     // todo drop a finishing line
     game.finishLineId = (await tttUtils.dropFinishLine(urlSlug, game, r.combo, req.body)).id;
-    console.log(9);
 
     // todo drop 👑 and player's name
     game.messageTextId = (await topiaAdapter.createText({

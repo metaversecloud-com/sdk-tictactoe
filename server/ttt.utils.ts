@@ -14,28 +14,28 @@ export const WinningCombo = {
   L_CROSS: [2, 4, 6],
   R_CROSS: [0, 4, 8],
   identify: (status: readonly [number, number, number, number, number, number, number, number, number]): null | readonly [number, number, number] => {
-    if (status[0] === status[1] && status[1] === status[2])
+    if (status[0] && status[1] && status[2] && status[0] === status[1] && status[1] === status[2])
       return WinningCombo.H_TOP;
 
-    if (status[3] === status[4] && status[4] === status[5])
+    if (status[3] && status[4] && status[5] && status[3] === status[4] && status[4] === status[5])
       return WinningCombo.H_MID;
 
-    if (status[6] === status[7] && status[7] === status[8])
+    if (status[6] && status[7] && status[8] && status[6] === status[7] && status[7] === status[8])
       return WinningCombo.H_BOT;
 
-    if (status[0] === status[3] && status[3] === status[6])
+    if (status[0] && status[3] && status[6] && status[0] === status[3] && status[3] === status[6])
       return WinningCombo.V_LEFT;
 
-    if (status[1] === status[4] && status[4] === status[7])
+    if (status[1] && status[4] && status[7] && status[1] === status[4] && status[4] === status[7])
       return WinningCombo.V_MID;
 
-    if (status[2] === status[5] && status[5] === status[8])
+    if (status[2] && status[5] && status[8] && status[2] === status[5] && status[5] === status[8])
       return WinningCombo.V_RIGHT;
 
-    if (status[0] === status[4] && status[4] === status[8])
+    if (status[0] && status[4] && status[8] && status[0] === status[4] && status[4] === status[8])
       return WinningCombo.R_CROSS;
 
-    if (status[2] === status[4] && status[4] === status[6])
+    if (status[2] && status[4] && status[6] && status[2] === status[4] && status[4] === status[6])
       return WinningCombo.L_CROSS;
 
     return null;
