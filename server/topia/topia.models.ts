@@ -48,7 +48,7 @@ export class Game {
   player2?: Player;
   boardId: number;
   center: Position;
-  startBtnId?: string;
+  // startBtnId?: string;
   finishLineId?: string;
   messageTextId?: string;
   moves: [string?, string?, string?, string?, string?, string?, string?, string?, string?];

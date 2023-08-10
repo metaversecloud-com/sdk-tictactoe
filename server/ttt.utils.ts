@@ -76,7 +76,7 @@ export default {
       description: "Starts the game",
     });
 
-    game.startBtnId = startBtn.id;
+    // game.startBtnId = startBtn.id;
     return startBtn;
   },
 

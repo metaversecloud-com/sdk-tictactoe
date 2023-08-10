@@ -37,8 +37,8 @@ export default {
       return res.status(400).send({ message: "Game not found." });
 
     const world = initWorld().create(urlSlug, { credentials: req.body });
-    const startBtn = initDroppedAsset().create(activeGame.startBtnId, urlSlug, { credentials: req.body });
-    await startBtn.deleteDroppedAsset();
+    // const startBtn = initDroppedAsset().create(activeGame.startBtnId, urlSlug, { credentials: req.body });
+    // await startBtn.deleteDroppedAsset();
     return res.status(200).send({ message: "Start button removed." });
   },
 
@@ -102,7 +102,7 @@ export default {
 
       if (activeGame.player1 && activeGame.player2) {
         await tttUtils.removeMessages(urlSlug, boardId, req.visitor.credentials);
-        activeGame.startBtnId = (await tttUtils.dropStartButton(urlSlug, activeGame, req.visitor.credentials))?.id;
+        // activeGame.startBtnId = (await tttUtils.dropStartButton(urlSlug, activeGame, req.visitor.credentials))?.id;
       } else {
         // todo Find position from the values of scale and center
         activeGame.messageTextId = (await topiaAdapter.createText({
@@ -196,10 +196,10 @@ export default {
       return res.status(404).send({ message: "Could not find this game." });
 
     if (game.player1 && game.player2) {
-      if (game.startBtnId) {
-        await topiaAdapter.removeDroppedAsset(urlSlug, game.startBtnId, req.visitor.credentials);
-        game.startBtnId = undefined;
-      }
+      // if (game.startBtnId) {
+      //   await topiaAdapter.removeDroppedAsset(urlSlug, game.startBtnId, req.visitor.credentials);
+      //   game.startBtnId = undefined;
+      // }
 
       if (game.finishLineId) {
         await topiaAdapter.removeDroppedAsset(urlSlug, game.finishLineId, req.visitor.credentials);
