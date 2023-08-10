@@ -169,9 +169,11 @@ export default {
     if (!mover)
       return res.status(400).send({ message: "It's not your turn." });
 
-    game.inControl = (game.inControl + 1) % 2 as 0 | 1;
+    if (game.status[cell] !== 0)
+      return res.status(400).send({ message: "Cannot place your move here." });
 
     game.status[cell] = pVisitorId;
+    game.inControl = (game.inControl + 1) % 2 as 0 | 1;
     console.log("urlSlug: ", urlSlug, "\nassetId: ", assetId, "\npVisitorId: ", pVisitorId, "\ngame.status: ", game.status);
 
     // todo drop a ❌ or a ⭕
