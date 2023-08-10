@@ -65,16 +65,14 @@ export default {
       uniqueName: game.boardId + "_start_btn", credentials,
     });
 
-    await BoardIdData.write(startBtn, game.boardId);
-
-    await startBtn.addWebhook({
+    await Promise.allSettled([BoardIdData.write(startBtn, game.boardId), startBtn.addWebhook({
       dataObject: { boardId: game.boardId },
       isUniqueOnly: false,
       type: "assetClicked",
       url: `${process.env.API_URL}/backend/start`,
       title: "Start Game",
       description: "Starts the game",
-    });
+    })]);
 
     // game.startBtnId = startBtn.id;
     return startBtn;
@@ -90,7 +88,7 @@ export default {
     const cell = await initDroppedAsset().get(options.cell, options.urlSlug, { credentials: options.credentials }) as DroppedAssetInterface;
     return topiaAdapter.createWebImage({
       urlSlug: options.urlSlug,
-      imageUrl: `${process.env.API_URL}/${options.cross ? `blue_x` : "pink_o"}.png`,
+      imageUrl: `${process.env.API_URL}/${options.cross ? `blue_cross` : "pink_o"}.png`,
       position: { x: cell.position.x || 0, y: cell.position.y || 0 },
       uniqueName: options.game.boardId + Date.now() + "_move",
       credentials: options.credentials,
@@ -190,8 +188,7 @@ export default {
     const messages = await world.fetchDroppedAssetsWithUniqueName({ uniqueName: boardId + "_message" });
     console.log("messageAssets.length: ", messages.length);
     if (messages.length) {
-      for (let m of messages)
-        await m.deleteDroppedAsset();
+      await Promise.allSettled(messages.map(m => m.deleteDroppedAsset()));
     }
   },
 };

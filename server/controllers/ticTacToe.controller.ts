@@ -43,7 +43,7 @@ export default {
     activeGame.status = [0, 0, 0, 0, 0, 0, 0, 0, 0];
 
     await Promise.allSettled([finishLine.deleteDroppedAsset(), message.deleteDroppedAsset(), ...moves.map(m => m.deleteDroppedAsset())]);
-    return res.status(200).send({ message: "Start button removed." });
+    return res.status(200).send({ message: "Game reset" });
   },
 
   removeStartBtn: async (req: Request, res: Response) => {
@@ -53,8 +53,8 @@ export default {
     if (!activeGame)
       return res.status(400).send({ message: "Game not found." });
 
-    const world = initWorld().create(urlSlug, { credentials: req.body });
-    // const startBtn = initDroppedAsset().create(activeGame.startBtnId, urlSlug, { credentials: req.body });
+    const world = initWorld().create(urlSlug, { credentials: req.visitor.credentials });
+    // const startBtn = initDroppedAsset().create(activeGame.startBtnId, urlSlug, { credentials: req.visitor.credentials });
     // await startBtn.deleteDroppedAsset();
     return res.status(200).send({ message: "Start button removed." });
   },
@@ -85,7 +85,7 @@ export default {
     console.log(`player: ${player}\naction: ${action}\nurlSlug: ${urlSlug}\nvisitorId: ${visitorId}\nassetId: ${assetId}\nboardId: ${boardId}\nusername: ${username}`);
 
     // Calculating center position from the position of the p1 or p2 asset
-    const p1box = await initDroppedAsset().get(assetId, urlSlug, { credentials: req.body }) as DroppedAssetInterface;
+    const p1box = await initDroppedAsset().get(assetId, urlSlug, { credentials: req.visitor.credentials }) as DroppedAssetInterface;
 
     // Finding scale of the P1 or P2 box, use this scaling to correct positions of center and top
     const scale: number = p1box.assetScale;
@@ -181,7 +181,7 @@ export default {
       return res.status(200).send("Move made.");
 
     // todo drop a finishing line
-    game.finishLineId = (await tttUtils.dropFinishLine(urlSlug, game, r.combo, req.body)).id;
+    game.finishLineId = (await tttUtils.dropFinishLine(urlSlug, game, r.combo, req.visitor.credentials)).id;
 
     // todo drop 👑 and player's name
     game.messageTextId = (await topiaAdapter.createText({
@@ -190,45 +190,6 @@ export default {
       urlSlug: req.body.urlSlug, textWidth: 14, uniqueName: boardId + "_win_msg",
     }))?.id;
     res.status(200).send({ message: "Move completed." });
-  },
-
-  newGame: async (req: Request, res: Response) => {
-    // todo Handles click on the start button
-    const urlSlug: string = req.body.urlSlug;
-    const boardId = tttUtils.extractBoardId(req.body);
-    if (!boardId)
-      return res.status(400).send({ message: "dataObject must contain boardId." });
-    const game = activeGames[req.body.urlSlug]?.find(g => g.boardId === boardId);
-    if (!game)
-      return res.status(404).send({ message: "Could not find this game." });
-
-    if (game.player1 && game.player2) {
-      // if (game.startBtnId) {
-      //   await topiaAdapter.removeDroppedAsset(urlSlug, game.startBtnId, req.visitor.credentials);
-      //   game.startBtnId = undefined;
-      // }
-
-      if (game.finishLineId) {
-        await topiaAdapter.removeDroppedAsset(urlSlug, game.finishLineId, req.visitor.credentials);
-        game.finishLineId = undefined;
-      }
-
-      if (game.messageTextId) {
-        await topiaAdapter.removeDroppedAsset(urlSlug, game.messageTextId, req.visitor.credentials);
-        game.messageTextId = undefined;
-      }
-
-      for (let m of game.moves) {
-        if (!m)
-          continue;
-        await topiaAdapter.removeDroppedAsset(urlSlug, m, req.visitor.credentials);
-      }
-      game.moves = [];
-
-      return res.status(200).send({ message: "Game started." });
-    }
-
-    res.status(409).send({ message: "Both players must be present to start the game." });
-  },
+  }
 };
 
