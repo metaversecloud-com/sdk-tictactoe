@@ -46,7 +46,7 @@ export class Position {
 export class Game {
   player1?: Player;
   player2?: Player;
-  boardId: number;
+  suffix: string;
   center: Position;
   // startBtnId?: string;
   inControl: 0 | 1 = 0;
@@ -55,8 +55,8 @@ export class Game {
   moves: [string?, string?, string?, string?, string?, string?, string?, string?, string?];
   status: [number, number, number, number, number, number, number, number, number];
 
-  constructor(boardId: number, center: Position) {
-    this.boardId = boardId;
+  constructor(suffix: string, center: Position) {
+    this.suffix = suffix;
     this.center = center;
     this.status = [0, 0, 0, 0, 0, 0, 0, 0, 0];
     this.moves = [];

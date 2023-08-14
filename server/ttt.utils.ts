@@ -2,7 +2,7 @@ import { Game } from "./topia/topia.models.js";
 import topiaAdapter from "./adapters/topia.adapter.js";
 import { initDroppedAsset, initWorld } from "./topia/topia.factories.js";
 import { DroppedAssetInterface, InteractiveCredentials } from "@rtsdk/topia";
-import { BoardIdData } from "./topia/DataObject.js";
+import { Request } from "express";
 
 export const WinningCombo = {
   H_TOP: [0, 1, 2],
@@ -62,17 +62,17 @@ export default {
     // todo drop a start button at the given position, set a webhook to start the game as well
     const startBtn = await topiaAdapter.createWebImage({
       urlSlug, imageUrl: `${process.env.API_URL}/start_button.png`, position: game.center,
-      uniqueName: game.boardId + "_start_btn", credentials,
+      uniqueName: `start_btn${game.suffix}`, credentials,
     });
 
-    await Promise.allSettled([BoardIdData.write(startBtn, game.boardId), startBtn.addWebhook({
-      dataObject: { boardId: game.boardId },
+    await startBtn.addWebhook({
+      dataObject: {},
       isUniqueOnly: false,
       type: "assetClicked",
       url: `${process.env.API_URL}/backend/start`,
       title: "Start Game",
       description: "Starts the game",
-    })]);
+    });
 
     // game.startBtnId = startBtn.id;
     return startBtn;
@@ -90,11 +90,14 @@ export default {
       urlSlug: options.urlSlug,
       imageUrl: `${process.env.API_URL}/${options.cross ? `pink_cross` : "blue_o"}.png`,
       position: { x: cell.position.x || 0, y: cell.position.y || 0 },
-      uniqueName: options.game.boardId + Date.now() + "_move",
+      uniqueName: options.game.suffix + Date.now() + "_move",
       credentials: options.credentials,
     });
   },
 
+  /**
+   * Drops a finish line in the world
+   */
   dropFinishLine: async (urlSlug: string, game: Game, combo: readonly [number, number, number], credentials: InteractiveCredentials) => {
     const cellWidth = 90;
 
@@ -106,7 +109,7 @@ export default {
           urlSlug,
           imageUrl: `${process.env.API_URL}/${color}_horizontal.png`,
           position: { x: game.center.x, y: game.center.y - cellWidth },
-          uniqueName: game.boardId + "_finish_line", credentials,
+          uniqueName: `finish_line${game.suffix}`, credentials,
         });
 
       case WinningCombo.H_MID:
@@ -114,7 +117,7 @@ export default {
           urlSlug,
           imageUrl: `${process.env.API_URL}/${color}_horizontal.png`,
           position: game.center,
-          uniqueName: game.boardId + "_finish_line", credentials,
+          uniqueName: `finish_line${game.suffix}`, credentials,
         });
 
       case WinningCombo.H_BOT:
@@ -122,7 +125,7 @@ export default {
           urlSlug,
           imageUrl: `${process.env.API_URL}/${color}_horizontal.png`,
           position: { x: game.center.x, y: game.center.y + cellWidth },
-          uniqueName: game.boardId + "_finish_line", credentials,
+          uniqueName: `finish_line${game.suffix}`, credentials,
         });
 
       case WinningCombo.V_LEFT:
@@ -130,7 +133,7 @@ export default {
           urlSlug,
           imageUrl: `${process.env.API_URL}/${color}_vertical.png`,
           position: { x: game.center.x - cellWidth, y: game.center.y },
-          uniqueName: game.boardId + "_finish_line", credentials,
+          uniqueName: `finish_line${game.suffix}`, credentials,
         });
 
       case WinningCombo.V_MID:
@@ -138,7 +141,7 @@ export default {
           urlSlug,
           imageUrl: `${process.env.API_URL}/${color}_vertical.png`,
           position: game.center,
-          uniqueName: game.boardId + "_finish_line", credentials,
+          uniqueName: `finish_line${game.suffix}`, credentials,
         });
 
       case WinningCombo.V_RIGHT:
@@ -146,15 +149,15 @@ export default {
           urlSlug,
           imageUrl: `${process.env.API_URL}/${color}_vertical.png`,
           position: { x: game.center.x + cellWidth, y: game.center.y },
-          uniqueName: game.boardId + "_finish_line", credentials,
+          uniqueName: `finish_line${game.suffix}`, credentials,
         });
 
       case WinningCombo.L_CROSS:
         return topiaAdapter.createWebImage({
           urlSlug,
-          imageUrl: `${process.env.API_URL}/${color}_oblique.png`,
+          imageUrl: `${process.env.API_URL}/${color}_oblique_1.png`,
           position: { x: game.center.x - cellWidth, y: game.center.y + cellWidth },
-          uniqueName: game.boardId + "_finish_line", credentials,
+          uniqueName: `finish_line${game.suffix}`, credentials,
         });
 
       case WinningCombo.R_CROSS:
@@ -162,32 +165,23 @@ export default {
           urlSlug,
           imageUrl: `${process.env.API_URL}/${color}_oblique.png`,
           position: { x: game.center.x - cellWidth, y: game.center.y - cellWidth },
-          uniqueName: game.boardId + "_finish_line", credentials,
+          uniqueName: `finish_line${game.suffix}`, credentials,
         });
     }
   },
 
-  extractBoardId: (requestBody: any): number | undefined => {
-    const dataObject: { boardId?: number, target?: any } | undefined = requestBody.dataObject;
-    if (!dataObject)
+  extractSuffix: async (request: Request): Promise<string | undefined> => {
+    const asset = await initDroppedAsset().get(request.body.assetId, request.body.urlSlug, { credentials: request.visitor.credentials }) as DroppedAssetInterface | undefined;
+    if (!asset)
       return undefined;
-    let bId: any | undefined = dataObject.boardId;
-
-    if (!bId && dataObject.target && dataObject.target.value && dataObject.target.value.boardId)
-      bId = dataObject.target.value.boardId;
-
-    if (!bId)
-      return undefined;
-
-    const boardId = Number(bId);
-    if (isNaN(boardId))
-      return undefined;
-    return boardId;
+    const suffix = asset.assetName;
+    console.log("Suffix: ", suffix);
+    return suffix;
   },
 
-  removeMessages: async (urlSlug: string, boardId: number, credentials: InteractiveCredentials) => {
+  removeMessages: async (urlSlug: string, suffix: string, credentials: InteractiveCredentials) => {
     const world = initWorld().create(urlSlug, { credentials });
-    const messages = await world.fetchDroppedAssetsWithUniqueName({ uniqueName: boardId + "_message" });
+    const messages = await world.fetchDroppedAssetsWithUniqueName({ uniqueName: `message${suffix}` });
     console.log("messageAssets.length: ", messages.length);
     if (messages.length) {
       await Promise.allSettled(messages.map(m => m.deleteDroppedAsset()));

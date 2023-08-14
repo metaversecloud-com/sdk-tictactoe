@@ -31,8 +31,10 @@ export default {
 
   resetBoard: async (req: Request, res: Response) => {
     const urlSlug: string = req.body.urlSlug;
-    const boardId = tttUtils.extractBoardId(req.body);
-    let activeGame = activeGames[urlSlug]?.find(g => g.boardId === boardId);
+    const suffix = await tttUtils.extractSuffix(req);
+    if (!suffix) return res.status(400).send({ message: "Cannot find suffix" });
+
+    let activeGame = activeGames[urlSlug]?.find(g => g.suffix === suffix);
     if (!activeGame)
       return res.status(400).send({ message: "Game not found." });
 
@@ -48,8 +50,10 @@ export default {
 
   removeStartBtn: async (req: Request, res: Response) => {
     const { urlSlug, visitorId, assetId, interactiveNonce } = req.body;
-    const boardId = tttUtils.extractBoardId(req.body);
-    let activeGame = activeGames[urlSlug]?.find(g => g.boardId === boardId);
+    const suffix = await tttUtils.extractSuffix(req);
+    if (!suffix) return res.status(400).send({ message: "Cannot find suffix" });
+
+    let activeGame = activeGames[urlSlug]?.find(g => g.suffix === suffix);
     if (!activeGame)
       return res.status(400).send({ message: "Game not found." });
 
@@ -63,13 +67,12 @@ export default {
     const player = Number(req.params.player);
     const action = req.params.action; // : "entered"  | "exited"
     const { urlSlug, visitorId, assetId, interactiveNonce } = req.body;
-    const boardId = tttUtils.extractBoardId(req.body);
-    if (!boardId)
-      return res.status(400).send({ message: "boardId must be supplied in dataObject." });
+    const suffix = await tttUtils.extractSuffix(req);
+    if (!suffix) return res.status(400).send({ message: "Cannot find suffix" });
 
     const username = req.body.eventText.split("\"")[1];
 
-    let activeGame = activeGames[urlSlug]?.find(g => g.boardId === boardId);
+    let activeGame = activeGames[urlSlug]?.find(g => g.suffix === suffix);
 
     if (activeGame && action === "exited") {
       if (player === 1)
@@ -78,11 +81,11 @@ export default {
         activeGame.player2 = undefined;
 
       if (!activeGame.player1 && !activeGame.player2)
-        await tttUtils.removeMessages(urlSlug, boardId, req.visitor.credentials);
+        await tttUtils.removeMessages(urlSlug, suffix, req.visitor.credentials);
       return res.status(200).send({ message: "Player moved." });
     }
 
-    console.log(`player: ${player}\naction: ${action}\nurlSlug: ${urlSlug}\nvisitorId: ${visitorId}\nassetId: ${assetId}\nboardId: ${boardId}\nusername: ${username}`);
+    console.log(`player: ${player}\naction: ${action}\nurlSlug: ${urlSlug}\nvisitorId: ${visitorId}\nassetId: ${assetId}\nsuffix: ${suffix}\nusername: ${username}`);
 
     // Calculating center position from the position of the p1 or p2 asset
     const p1box = await initDroppedAsset().get(assetId, urlSlug, { credentials: req.visitor.credentials }) as DroppedAssetInterface;
@@ -95,17 +98,17 @@ export default {
     const cellWidth = 90;
 
     if (player === 1)
-      center.x += cellWidth * scale;
+      center.y -= cellWidth * scale;
     else
-      center.x -= cellWidth * scale;
-    center.y -= 2 * cellWidth * scale;
+      center.y += cellWidth * scale;
+    center.x += Math.floor(cellWidth * scale * 2.5);
 
     console.log(`center: `, center);
 
     if (action === "entered") {
       if (!activeGame) {
         // Get position of assetID -NPNcpKdPhRyhnL0VWf_ for center, and the first player box is
-        activeGame = new Game(boardId, center);
+        activeGame = new Game(suffix, center);
         if (activeGames[urlSlug]?.length)
           activeGames[urlSlug].push(activeGame);
         else
@@ -118,7 +121,7 @@ export default {
         activeGame.player2 = { visitorId, username, interactiveNonce };
 
       if (activeGame.player1 && activeGame.player2) {
-        await tttUtils.removeMessages(urlSlug, boardId, req.visitor.credentials);
+        await tttUtils.removeMessages(urlSlug, suffix, req.visitor.credentials);
         // activeGame.startBtnId = (await tttUtils.dropStartButton(urlSlug, activeGame, req.visitor.credentials))?.id;
       } else {
         // todo Find position from the values of scale and center
@@ -130,7 +133,7 @@ export default {
           textSize: 20,
           urlSlug,
           textWidth: 50,
-          uniqueName: boardId + "_message",
+          uniqueName: suffix + "_message",
         }))?.id;
       }
     }
@@ -149,13 +152,15 @@ export default {
     if (isNaN(pVisitorId))
       return res.status(400).send({ message: "visitorId must be a number." });
 
-    const boardId = tttUtils.extractBoardId(req.body);
+    const boardId = tttUtils.extractSuffix(assetId);
     if (!boardId)
       return res.status(400).send({ message: "boardId is missing." });
 
     console.log(`active games found in worlds: `, Object.keys(activeGames));
     console.log(`activeGames: `, activeGames);
-    const game = activeGames[urlSlug]?.find(ag => ag.boardId === boardId);
+    const suffix = await tttUtils.extractSuffix(req);
+    if (!suffix) return res.status(400).send({ message: "Cannot find suffix" });
+    const game = activeGames[urlSlug]?.find(ag => ag.suffix === suffix);
     if (!game)
       return res.status(404).send({ message: "No active game found." });
 
