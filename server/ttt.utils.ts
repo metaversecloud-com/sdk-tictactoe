@@ -174,7 +174,8 @@ export default {
     const asset = await initDroppedAsset().get(request.body.assetId, request.body.urlSlug, { credentials: request.visitor.credentials }) as DroppedAssetInterface | undefined;
     if (!asset)
       return undefined;
-    const suffix = asset.assetName;
+    // @ts-ignore
+    const suffix = asset.uniqueName;
     console.log("Suffix: ", suffix);
     return suffix;
   },

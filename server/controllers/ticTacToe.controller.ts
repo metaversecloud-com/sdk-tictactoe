@@ -65,7 +65,7 @@ export default {
 
   playerMovement: async (req: Request, res: Response) => {
     const player = Number(req.params.player);
-    const action = req.params.action; // : "entered"  | "exited"
+    const action = req.params.action as "entered" | "exited";
     const { urlSlug, visitorId, assetId, interactiveNonce } = req.body;
     const suffix = await tttUtils.extractSuffix(req);
     if (!suffix) return res.status(400).send({ message: "Cannot find suffix" });
@@ -126,14 +126,14 @@ export default {
       } else {
         // todo Find position from the values of scale and center
         activeGame.messageTextId = (await topiaAdapter.createText({
-          position: { x: center.x, y: center.y - 200 * scale },
+          position: { x: center.x - 90, y: center.y + 200 * scale },
           credentials: req.visitor.credentials,
           text: "Find a second player!",
           textColor: "#333333",
           textSize: 20,
           urlSlug,
-          textWidth: 50,
-          uniqueName: suffix + "_message",
+          textWidth: 150,
+          uniqueName: `message${suffix}`,
         }))?.id;
       }
     }
@@ -152,14 +152,12 @@ export default {
     if (isNaN(pVisitorId))
       return res.status(400).send({ message: "visitorId must be a number." });
 
-    const boardId = tttUtils.extractSuffix(assetId);
-    if (!boardId)
-      return res.status(400).send({ message: "boardId is missing." });
+    const suffix = await tttUtils.extractSuffix(req);
+    if (!suffix) return res.status(400).send({ message: "Cannot find suffix" });
 
     console.log(`active games found in worlds: `, Object.keys(activeGames));
     console.log(`activeGames: `, activeGames);
-    const suffix = await tttUtils.extractSuffix(req);
-    if (!suffix) return res.status(400).send({ message: "Cannot find suffix" });
+
     const game = activeGames[urlSlug]?.find(ag => ag.suffix === suffix);
     if (!game)
       return res.status(404).send({ message: "No active game found." });
@@ -201,9 +199,9 @@ export default {
     // Dropping 👑 and player's name
     game.messageTextId = (await topiaAdapter.createText({
       // position: { x: game.center.x, y: game.center.y - 60 },
-      position: { x: game.center.x, y: game.center.y - 200 * scale },
+      position: { x: game.center.x - 90, y: game.center.y + 200 * scale },
       credentials: req.visitor.credentials, text: "👑 " + mover?.username, textColor: "#ffffff", textSize: 24,
-      urlSlug: req.body.urlSlug, textWidth: 14, uniqueName: boardId + "_win_msg",
+      urlSlug: req.body.urlSlug, textWidth: 150, uniqueName: `win_msg${suffix}`,
     }))?.id;
     res.status(200).send({ message: "Move completed." });
   },
