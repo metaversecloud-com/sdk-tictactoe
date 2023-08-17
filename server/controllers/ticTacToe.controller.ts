@@ -160,7 +160,7 @@ export default {
 
     const game = activeGames[urlSlug]?.find(ag => ag.suffix === suffix);
     if (!game)
-      return res.status(404).send({ message: "No active game found." });
+      return res.status(404).send({ message: "No active games found." });
 
     // Figure out the player who clicked on this cell
     let mover: Player | undefined = undefined;
@@ -175,7 +175,7 @@ export default {
     if (game.status[cell] !== 0)
       return res.status(400).send({ message: "Cannot place your move here." });
 
-    const scale = ((await initDroppedAsset().get(assetId, urlSlug, { credentials: req.visitor.credentials })) as DroppedAssetInterface).assetScale;
+    const cellAsset = (await initDroppedAsset().get(assetId, urlSlug, { credentials: req.visitor.credentials })) as DroppedAssetInterface;
 
     game.status[cell] = pVisitorId;
     game.inControl = (game.inControl + 1) % 2 as 0 | 1;
@@ -183,7 +183,7 @@ export default {
 
     // todo drop a ❌ or a ⭕
     const move = await tttUtils.makeMove({
-      urlSlug, game, cell: assetId, credentials: req.visitor.credentials,
+      urlSlug, game, position: new Position(cellAsset.position), credentials: req.visitor.credentials,
       cross: pVisitorId === game.player1!!.visitorId,
     });
     game.moves[cell] = move.id;
@@ -199,8 +199,8 @@ export default {
     // Dropping 👑 and player's name
     game.messageTextId = (await topiaAdapter.createText({
       // position: { x: game.center.x, y: game.center.y - 60 },
-      position: { x: game.center.x - 90, y: game.center.y + 200 * scale },
-      credentials: req.visitor.credentials, text: "👑 " + mover?.username, textColor: "#ffffff", textSize: 24,
+      position: { x: game.center.x - 90, y: game.center.y + 200 * cellAsset.assetScale },
+      credentials: req.visitor.credentials, text: `👑 ${mover?.username}`, textColor: "#ffffff", textSize: 24,
       urlSlug: req.body.urlSlug, textWidth: 150, uniqueName: `win_msg${suffix}`,
     }))?.id;
     res.status(200).send({ message: "Move completed." });

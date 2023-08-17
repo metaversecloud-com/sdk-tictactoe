@@ -1,6 +1,6 @@
 {
   "name": "@ttt/server",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "Handles all the webhooks from Topia world",
   "type": "module",
   "scripts": {
@@ -19,14 +19,14 @@
     "nodemon": "^3.0.1",
     "ts-node": "^10.9.1",
     "typescript": "^5.1.6",
-    "eslint-config-next": "13.4.13",
+    "eslint-config-next": "13.4.17",
     "@types/node-cron": "^3.0.8",
     "@types/jsonwebtoken": "^9.0.2",
     "@types/cors": "^2.8.13",
     "sequelize-typescript": "^2.1.5"
   },
   "dependencies": {
-    "@rtsdk/topia": "^0.3.7",
+    "@rtsdk/topia": "^0.3.8",
     "@types/cors": "^2.8.13",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",

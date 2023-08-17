@@ -1,4 +1,4 @@
-import { Game } from "./topia/topia.models.js";
+import { Game, Position } from "./topia/topia.models.js";
 import topiaAdapter from "./adapters/topia.adapter.js";
 import { initDroppedAsset, initWorld } from "./topia/topia.factories.js";
 import { DroppedAssetInterface, InteractiveCredentials } from "@rtsdk/topia";
@@ -82,18 +82,15 @@ export default {
     urlSlug: string,
     game: Game,
     cross: boolean,
-    cell: string,
+    position: Position,
     credentials: InteractiveCredentials
-  }) => {
-    const cell = await initDroppedAsset().get(options.cell, options.urlSlug, { credentials: options.credentials }) as DroppedAssetInterface;
-    return topiaAdapter.createWebImage({
-      urlSlug: options.urlSlug,
-      imageUrl: `${process.env.API_URL}/${options.cross ? `pink_cross` : "blue_o"}.png`,
-      position: { x: cell.position.x || 0, y: cell.position.y || 0 },
-      uniqueName: options.game.suffix + Date.now() + "_move",
-      credentials: options.credentials,
-    });
-  },
+  }) => topiaAdapter.createWebImage({
+    urlSlug: options.urlSlug,
+    imageUrl: `${process.env.API_URL}/${options.cross ? "pink_cross" : "blue_o"}.png`,
+    position: options.position,
+    uniqueName: `${Date.now()}_move${options.game.suffix}`,
+    credentials: options.credentials,
+  }),
 
   /**
    * Drops a finish line in the world
@@ -102,72 +99,49 @@ export default {
     const cellWidth = 90;
 
     const color = game.player1.visitorId === credentials.visitorId ? "pink" : "blue";
+    const options = {
+      urlSlug,
+      imageUrl: `${process.env.API_URL}/${color}_horizontal.png`,
+      position: { x: game.center.x, y: game.center.y - cellWidth },
+      uniqueName: `finish_line${game.suffix}`, credentials,
+    };
 
     switch (combo) {
-      case WinningCombo.H_TOP:
-        return topiaAdapter.createWebImage({
-          urlSlug,
-          imageUrl: `${process.env.API_URL}/${color}_horizontal.png`,
-          position: { x: game.center.x, y: game.center.y - cellWidth },
-          uniqueName: `finish_line${game.suffix}`, credentials,
-        });
-
       case WinningCombo.H_MID:
-        return topiaAdapter.createWebImage({
-          urlSlug,
-          imageUrl: `${process.env.API_URL}/${color}_horizontal.png`,
-          position: game.center,
-          uniqueName: `finish_line${game.suffix}`, credentials,
-        });
+        options.position = game.center;
+        break;
 
       case WinningCombo.H_BOT:
-        return topiaAdapter.createWebImage({
-          urlSlug,
-          imageUrl: `${process.env.API_URL}/${color}_horizontal.png`,
-          position: { x: game.center.x, y: game.center.y + cellWidth },
-          uniqueName: `finish_line${game.suffix}`, credentials,
-        });
+        options.position = { x: game.center.x, y: game.center.y + cellWidth };
+        break;
 
       case WinningCombo.V_LEFT:
-        return topiaAdapter.createWebImage({
-          urlSlug,
-          imageUrl: `${process.env.API_URL}/${color}_vertical.png`,
-          position: { x: game.center.x - cellWidth, y: game.center.y },
-          uniqueName: `finish_line${game.suffix}`, credentials,
-        });
+        options.position = { x: game.center.x - cellWidth, y: game.center.y };
+        options.imageUrl = `${process.env.API_URL}/${color}_vertical.png`;
+        break;
 
       case WinningCombo.V_MID:
-        return topiaAdapter.createWebImage({
-          urlSlug,
-          imageUrl: `${process.env.API_URL}/${color}_vertical.png`,
-          position: game.center,
-          uniqueName: `finish_line${game.suffix}`, credentials,
-        });
+        options.position = game.center;
+        options.imageUrl = `${process.env.API_URL}/${color}_vertical.png`;
+        break;
 
       case WinningCombo.V_RIGHT:
-        return topiaAdapter.createWebImage({
-          urlSlug,
-          imageUrl: `${process.env.API_URL}/${color}_vertical.png`,
-          position: { x: game.center.x + cellWidth, y: game.center.y },
-          uniqueName: `finish_line${game.suffix}`, credentials,
-        });
+        options.position = { x: game.center.x + cellWidth, y: game.center.y };
+        options.imageUrl = `${process.env.API_URL}/${color}_vertical.png`;
+        break;
 
       case WinningCombo.L_CROSS:
-        return topiaAdapter.createWebImage({
-          urlSlug,
-          imageUrl: `${process.env.API_URL}/${color}_oblique_1.png`,
-          position: { x: game.center.x - cellWidth, y: game.center.y + cellWidth },
-          uniqueName: `finish_line${game.suffix}`, credentials,
-        });
+        options.position = { x: game.center.x - cellWidth, y: game.center.y + cellWidth };
+        options.imageUrl = `${process.env.API_URL}/${color}_oblique_1.png`;
+        break;
 
       case WinningCombo.R_CROSS:
-        return topiaAdapter.createWebImage({
-          urlSlug,
-          imageUrl: `${process.env.API_URL}/${color}_oblique.png`,
-          position: { x: game.center.x - cellWidth, y: game.center.y - cellWidth },
-          uniqueName: `finish_line${game.suffix}`, credentials,
-        });
+        options.position = { x: game.center.x - cellWidth, y: game.center.y - cellWidth };
+        options.imageUrl = `${process.env.API_URL}/${color}_oblique.png`;
+        break;
     }
+
+    return topiaAdapter.createWebImage(options);
   },
 
   extractSuffix: async (request: Request): Promise<string | undefined> => {
