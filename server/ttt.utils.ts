@@ -4,6 +4,8 @@ import { initDroppedAsset, initWorld } from "./topia/topia.factories.js";
 import { DroppedAssetInterface, InteractiveCredentials } from "@rtsdk/topia";
 import { Request } from "express";
 
+const cellWidth = 80;
+
 export const WinningCombo = {
   H_TOP: [0, 1, 2],
   H_MID: [3, 4, 5],
@@ -96,13 +98,11 @@ export default {
    * Drops a finish line in the world
    */
   dropFinishLine: async (urlSlug: string, game: Game, combo: readonly [number, number, number], credentials: InteractiveCredentials) => {
-    const cellWidth = 90;
-
     const color = game.player1.visitorId === credentials.visitorId ? "pink" : "blue";
     const options = {
       urlSlug,
       imageUrl: `${process.env.API_URL}/${color}_horizontal.png`,
-      position: { x: game.center.x, y: game.center.y + cellWidth },
+      position: { x: game.center.x, y: game.center.y - cellWidth },
       uniqueName: `finish_line${game.suffix}`, credentials,
     };
 
@@ -112,7 +112,7 @@ export default {
         break;
 
       case WinningCombo.H_BOT:
-        options.position = { x: game.center.x, y: game.center.y - cellWidth };
+        options.position = { x: game.center.x, y: game.center.y + cellWidth };
         break;
 
       case WinningCombo.V_LEFT:

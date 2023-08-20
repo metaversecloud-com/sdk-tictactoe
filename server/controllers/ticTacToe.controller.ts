@@ -6,6 +6,7 @@ import { initDroppedAsset } from "../topia/topia.factories.js";
 import { DroppedAssetInterface } from "@rtsdk/topia";
 
 const activeGames: { [urlSlug: string]: Game[] } = {};
+const cellWidth = 80;
 
 const ticTacToeController = {
   leaderboard: async (req: Request, res: Response) => {
@@ -76,12 +77,11 @@ const ticTacToeController = {
     const center = new Position(p1box.position);
 
     console.log(`scale: ${scale}\nplayerBox position: `, center);
-    const cellWidth = 90;
 
     if (player === 1)
-      center.y -= cellWidth * scale;
-    else
       center.y += cellWidth * scale;
+    else
+      center.y -= cellWidth * scale;
     center.x += Math.floor(cellWidth * scale * 2.5);
 
     console.log(`center: `, center);
@@ -107,7 +107,7 @@ const ticTacToeController = {
       } else {
         // todo Find position from the values of scale and center
         activeGame.messageTextId = (await topiaAdapter.createText({
-          position: { x: center.x - 90, y: center.y + 300 * scale },
+          position: { x: center.x - cellWidth, y: center.y + 2.5 * cellWidth * scale },
           credentials: req.visitor.credentials,
           text: "Find a second player!",
           textColor: "#333333",
@@ -187,7 +187,7 @@ const ticTacToeController = {
     // Dropping 👑 and player's name
     game.messageTextId = (await topiaAdapter.createText({
       // position: { x: game.center.x, y: game.center.y - 60 },
-      position: { x: game.center.x - 90, y: game.center.y + 300 * cellAsset.assetScale },
+      position: { x: game.center.x - cellWidth, y: game.center.y + 2.5 * cellWidth * cellAsset.assetScale },
       credentials: req.visitor.credentials, text: `👑 ${mover?.username}`, textColor: "#ffffff", textSize: 24,
       urlSlug: req.body.urlSlug, textWidth: 300, uniqueName: `win_msg${suffix}`,
     }))?.id;
