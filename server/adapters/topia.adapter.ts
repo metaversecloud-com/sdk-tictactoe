@@ -12,7 +12,7 @@ const topiaAdapter = {
     textWidth: number,
     uniqueName: string,
     urlSlug: string,
-  }): Promise<DroppedAsset | null> => {
+  }) => {
     try {
       const textAsset = await InteractiveAsset({
         ...{
@@ -32,8 +32,7 @@ const topiaAdapter = {
     } catch (e) {
       const r = "Error updating track text";
       console.log(r, e);
-      // return Promise.reject(r);
-      return null;
+      return Promise.reject(r);
     }
   },
 

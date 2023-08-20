@@ -53,7 +53,8 @@ const ticTacToeController = {
     const action = req.params.action as "entered" | "exited";
     const { urlSlug, visitorId, assetId, interactiveNonce } = req.body;
     const suffix = await tttUtils.extractSuffix(req);
-    if (!suffix) return res.status(400).send({ message: "Cannot find suffix" });
+    if (!suffix)
+      return res.status(400).send({ message: "Cannot find suffix" });
 
     const username = req.body.eventText.split("\"")[1];
 
@@ -83,9 +84,9 @@ const ticTacToeController = {
     const cellWidth = 90;
 
     if (player === 1)
-      center.y -= cellWidth * scale;
-    else
       center.y += cellWidth * scale;
+    else
+      center.y -= cellWidth * scale;
     center.x += Math.floor(cellWidth * scale * 2.5);
 
     console.log(`center: `, center);
@@ -138,12 +139,13 @@ const ticTacToeController = {
       return res.status(400).send({ message: "visitorId must be a number." });
 
     const suffix = await tttUtils.extractSuffix(req);
-    if (!suffix) return res.status(400).send({ message: "Cannot find suffix" });
+    if (!suffix)
+      return res.status(400).send({ message: "Cannot find suffix" });
 
     console.log(`active games found in worlds: `, Object.keys(activeGames));
     console.log(`activeGames: `, activeGames);
 
-    const game = activeGames[urlSlug]?.find(ag => ag.suffix === suffix);
+    const game: Game | undefined = activeGames[urlSlug]?.find(ag => ag.suffix === suffix);
     if (!game)
       return res.status(404).send({ message: "No active games found." });
 
