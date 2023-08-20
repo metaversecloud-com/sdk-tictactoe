@@ -2,12 +2,12 @@ import tttUtils from "../ttt.utils.js";
 import { Request, Response } from "express";
 import topiaAdapter from "../adapters/topia.adapter.js";
 import { Game, Player, Position } from "../topia/topia.models.js";
-import { initDroppedAsset, initWorld } from "../topia/topia.factories.js";
+import { initDroppedAsset } from "../topia/topia.factories.js";
 import { DroppedAssetInterface } from "@rtsdk/topia";
 
 const activeGames: { [urlSlug: string]: Game[] } = {};
 
-export default {
+const ticTacToeController = {
   leaderboard: async (req: Request, res: Response) => {
     // let { urlSlug, pageSize, page } = req.body;
     // pageSize = pageSize ? Number(pageSize) : 3;
@@ -46,21 +46,6 @@ export default {
 
     await Promise.allSettled([finishLine.deleteDroppedAsset(), message.deleteDroppedAsset(), ...moves.map(m => m.deleteDroppedAsset())]);
     return res.status(200).send({ message: "Game reset" });
-  },
-
-  removeStartBtn: async (req: Request, res: Response) => {
-    const { urlSlug, visitorId, assetId, interactiveNonce } = req.body;
-    const suffix = await tttUtils.extractSuffix(req);
-    if (!suffix) return res.status(400).send({ message: "Cannot find suffix" });
-
-    let activeGame = activeGames[urlSlug]?.find(g => g.suffix === suffix);
-    if (!activeGame)
-      return res.status(400).send({ message: "Game not found." });
-
-    const world = initWorld().create(urlSlug, { credentials: req.visitor.credentials });
-    // const startBtn = initDroppedAsset().create(activeGame.startBtnId, urlSlug, { credentials: req.visitor.credentials });
-    // await startBtn.deleteDroppedAsset();
-    return res.status(200).send({ message: "Start button removed." });
   },
 
   playerMovement: async (req: Request, res: Response) => {
@@ -126,13 +111,13 @@ export default {
       } else {
         // todo Find position from the values of scale and center
         activeGame.messageTextId = (await topiaAdapter.createText({
-          position: { x: center.x - 90, y: center.y + 200 * scale },
+          position: { x: center.x - 90, y: center.y + 300 * scale },
           credentials: req.visitor.credentials,
           text: "Find a second player!",
           textColor: "#333333",
           textSize: 20,
           urlSlug,
-          textWidth: 150,
+          textWidth: 300,
           uniqueName: `message${suffix}`,
         }))?.id;
       }
@@ -172,6 +157,10 @@ export default {
     if (!mover)
       return res.status(400).send({ message: "It's not your turn." });
 
+    if (game.finishLineId)
+      // The game is already won, resetting it.
+      return ticTacToeController.resetBoard(req, res);
+
     if (game.status[cell] !== 0)
       return res.status(400).send({ message: "Cannot place your move here." });
 
@@ -199,11 +188,12 @@ export default {
     // Dropping 👑 and player's name
     game.messageTextId = (await topiaAdapter.createText({
       // position: { x: game.center.x, y: game.center.y - 60 },
-      position: { x: game.center.x - 90, y: game.center.y + 200 * cellAsset.assetScale },
+      position: { x: game.center.x - 90, y: game.center.y + 300 * cellAsset.assetScale },
       credentials: req.visitor.credentials, text: `👑 ${mover?.username}`, textColor: "#ffffff", textSize: 24,
-      urlSlug: req.body.urlSlug, textWidth: 150, uniqueName: `win_msg${suffix}`,
+      urlSlug: req.body.urlSlug, textWidth: 300, uniqueName: `win_msg${suffix}`,
     }))?.id;
     res.status(200).send({ message: "Move completed." });
   },
 };
 
+export default ticTacToeController;

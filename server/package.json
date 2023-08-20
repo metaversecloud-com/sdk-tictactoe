@@ -15,11 +15,11 @@
   "devDependencies": {
     "@tsconfig/node-lts": "^18.12.3",
     "@types/express": "^4.17.17",
-    "@types/node": "^20.5.0",
+    "@types/node": "^20.5.1",
     "nodemon": "^3.0.1",
     "ts-node": "^10.9.1",
     "typescript": "^5.1.6",
-    "eslint-config-next": "13.4.17",
+    "eslint-config-next": "13.4.19",
     "@types/node-cron": "^3.0.8",
     "@types/jsonwebtoken": "^9.0.2",
     "@types/cors": "^2.8.13",

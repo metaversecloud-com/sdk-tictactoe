@@ -102,7 +102,7 @@ export default {
     const options = {
       urlSlug,
       imageUrl: `${process.env.API_URL}/${color}_horizontal.png`,
-      position: { x: game.center.x, y: game.center.y - cellWidth },
+      position: { x: game.center.x, y: game.center.y + cellWidth },
       uniqueName: `finish_line${game.suffix}`, credentials,
     };
 
@@ -112,7 +112,7 @@ export default {
         break;
 
       case WinningCombo.H_BOT:
-        options.position = { x: game.center.x, y: game.center.y + cellWidth };
+        options.position = { x: game.center.x, y: game.center.y - cellWidth };
         break;
 
       case WinningCombo.V_LEFT:
@@ -131,12 +131,14 @@ export default {
         break;
 
       case WinningCombo.L_CROSS:
-        options.position = { x: game.center.x - cellWidth, y: game.center.y + cellWidth };
+        // options.position = { x: game.center.x - cellWidth, y: game.center.y + cellWidth };
+        options.position = game.center;
         options.imageUrl = `${process.env.API_URL}/${color}_oblique_1.png`;
         break;
 
       case WinningCombo.R_CROSS:
-        options.position = { x: game.center.x - cellWidth, y: game.center.y - cellWidth };
+        // options.position = { x: game.center.x - cellWidth, y: game.center.y - cellWidth };
+        options.position = game.center;
         options.imageUrl = `${process.env.API_URL}/${color}_oblique.png`;
         break;
     }

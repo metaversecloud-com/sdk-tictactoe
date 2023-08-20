@@ -30,7 +30,7 @@ Run `npm install` or `yarn install` on the root directory.
 Notes: 
 
 1. Root package.json is for general/shared dependencies.
-2. Client and Server package.json files are for app specific dependencies. 
+2. Client and Server package.json files are for app specific dependencies.
 3. We DO want to keep the ts-config files separate, given that we might have different needs for client and server.
 
 
