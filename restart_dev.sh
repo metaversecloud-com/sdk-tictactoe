@@ -1,3 +1,5 @@
+git reset --hard
+git fetch -p
 git pull
 npm install
 apt update
