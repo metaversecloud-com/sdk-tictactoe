@@ -146,6 +146,18 @@ export default {
     return topiaAdapter.createWebImage(options);
   },
 
+  resetBoard: async (activeGame: Game, urlSlug: string, credentials: InteractiveCredentials) => {
+    const finishLine = initDroppedAsset().create(activeGame.finishLineId, urlSlug, { credentials });
+    const message = initDroppedAsset().create(activeGame.messageTextId, urlSlug, { credentials });
+    const moves = activeGame.moves.map(m => initDroppedAsset().create(m, urlSlug, { credentials }));
+    activeGame.moves = [];
+    activeGame.status = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+    activeGame.messageTextId = undefined;
+    activeGame.finishLineId = undefined;
+
+    await Promise.allSettled([finishLine.deleteDroppedAsset(), message.deleteDroppedAsset(), ...moves.map(m => m.deleteDroppedAsset())]);
+  },
+
   extractSuffix: async (request: Request): Promise<string | undefined> => {
     const asset = await initDroppedAsset().get(request.body.assetId, request.body.urlSlug, { credentials: request.visitor.credentials }) as DroppedAssetInterface | undefined;
     if (!asset)

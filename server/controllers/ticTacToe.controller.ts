@@ -32,19 +32,14 @@ const ticTacToeController = {
   resetBoard: async (req: Request, res: Response) => {
     const urlSlug: string = req.body.urlSlug;
     const suffix = await tttUtils.extractSuffix(req);
-    if (!suffix) return res.status(400).send({ message: "Cannot find suffix" });
+    if (!suffix)
+      return res.status(400).send({ message: "Cannot find suffix" });
 
     let activeGame = activeGames[urlSlug]?.find(g => g.suffix === suffix);
     if (!activeGame)
       return res.status(400).send({ message: "Game not found." });
 
-    const finishLine = initDroppedAsset().create(activeGame.finishLineId, urlSlug, { credentials: req.visitor.credentials });
-    const message = initDroppedAsset().create(activeGame.messageTextId, urlSlug, { credentials: req.visitor.credentials });
-    const moves = activeGame.moves.map(m => initDroppedAsset().create(m, urlSlug, { credentials: req.visitor.credentials }));
-    activeGame.moves = [];
-    activeGame.status = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-
-    await Promise.allSettled([finishLine.deleteDroppedAsset(), message.deleteDroppedAsset(), ...moves.map(m => m.deleteDroppedAsset())]);
+    await tttUtils.resetBoard(activeGame, urlSlug, req.visitor.credentials);
     return res.status(200).send({ message: "Game reset" });
   },
 
@@ -80,13 +75,13 @@ const ticTacToeController = {
     const scale: number = p1box.assetScale;
     const center = new Position(p1box.position);
 
-    console.log(`scale: ${scale}\ncenter: `, center);
+    console.log(`scale: ${scale}\nplayerBox position: `, center);
     const cellWidth = 90;
 
     if (player === 1)
-      center.y += cellWidth * scale;
-    else
       center.y -= cellWidth * scale;
+    else
+      center.y += cellWidth * scale;
     center.x += Math.floor(cellWidth * scale * 2.5);
 
     console.log(`center: `, center);
@@ -159,9 +154,11 @@ const ticTacToeController = {
     if (!mover)
       return res.status(400).send({ message: "It's not your turn." });
 
-    if (game.finishLineId)
+    if (game.finishLineId) {
       // The game is already won, resetting it.
-      return ticTacToeController.resetBoard(req, res);
+      await tttUtils.resetBoard(game, urlSlug, req.visitor.credentials);
+      return res.status(200).send({ message: "Game reset." });
+    }
 
     if (game.status[cell] !== 0)
       return res.status(400).send({ message: "Cannot place your move here." });
