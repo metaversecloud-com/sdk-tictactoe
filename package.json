@@ -3,14 +3,14 @@
   "private": true,
   "author": "Automatipia-MC",
   "version": "1.0.0",
-  "description": "This boilerplate is for the RND projects. It's provided to be as clean as possible",
+  "description": "This boilerplate is for the RND projects.",
   "main": "index.js",
   "workspaces": [
     "client",
     "server"
   ],
   "scripts": {
-    "start:dev": "npm run dev --workspace=server & npm run dev --workspace=client",
+    "start:dev": "concurrently \"npm run serve --workspace=server\" \"npm run dev --workspace=client\"",
     "build:prod": "npm run build -w server && npm run build -w client"
   },
   "repository": {
@@ -22,5 +22,8 @@
   "bugs": {
     "url": "https://github.com/Automatopia-MC/rnd-boilerplate/issues"
   },
-  "homepage": "https://github.com/Automatopia-MC/rnd-boilerplate#readme"
+  "homepage": "https://github.com/Automatopia-MC/rnd-boilerplate#readme",
+  "devDependencies": {
+    "concurrently": "^8.2.1"
+  }
 }
