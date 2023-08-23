@@ -1,9 +1,5 @@
 # TicTacToe (In world)
 
-# Getting Started
-
-This boilerplate is meant to give you a simple starting point to build new features in Topia using our Javascript SDK.
-
 # NOTES
 
 - This repository uses NPM Workspaces

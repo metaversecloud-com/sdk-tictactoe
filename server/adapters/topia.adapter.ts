@@ -161,7 +161,6 @@ const topiaAdapter = {
       let droppedAssets = Object.values(world.droppedAssets) as DroppedAssetInterface[];
 
       if (options?.nameSubstr)
-        // @ts-ignore
         droppedAssets = droppedAssets.filter(da => da.uniqueName).filter(da => da.uniqueName.indexOf(options.nameSubstr) > -1);
 
       console.log(`Found ${droppedAssets.length} dropped assets in world ${credentials.urlSlug}.`);

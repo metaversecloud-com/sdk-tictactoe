@@ -5,7 +5,7 @@ import { Game, Player, Position } from "../topia/topia.models.js";
 import { initDroppedAsset } from "../topia/topia.factories.js";
 import { DroppedAssetInterface } from "@rtsdk/topia";
 
-const activeGames: { [urlSlug: string]: Game[] } = {};
+const activeGames: { [urlSlug: string]: Game } = {};
 const cellWidth = 80;
 
 const ticTacToeController = {
@@ -32,11 +32,8 @@ const ticTacToeController = {
 
   resetBoard: async (req: Request, res: Response) => {
     const urlSlug: string = req.body.urlSlug;
-    const suffix = await tttUtils.extractSuffix(req);
-    if (!suffix)
-      return res.status(400).send({ message: "Cannot find suffix" });
 
-    let activeGame = activeGames[urlSlug]?.find(g => g.suffix === suffix);
+    let activeGame = activeGames[urlSlug];
     if (!activeGame)
       return res.status(400).send({ message: "Game not found." });
 
@@ -48,13 +45,10 @@ const ticTacToeController = {
     const player = Number(req.params.player);
     const action = req.params.action as "entered" | "exited";
     const { urlSlug, visitorId, assetId, interactiveNonce } = req.body;
-    const suffix = await tttUtils.extractSuffix(req);
-    if (!suffix)
-      return res.status(400).send({ message: "Cannot find suffix" });
 
     const username = req.body.eventText.split("\"")[1];
 
-    let activeGame = activeGames[urlSlug]?.find(g => g.suffix === suffix);
+    let activeGame = activeGames[urlSlug];
 
     if (activeGame && action === "exited") {
       if (player === 1)
@@ -63,11 +57,11 @@ const ticTacToeController = {
         activeGame.player2 = undefined;
 
       if (!activeGame.player1 && !activeGame.player2)
-        await tttUtils.removeMessages(urlSlug, suffix, req.visitor.credentials);
+        await tttUtils.removeMessages(urlSlug, activeGame.id, req.visitor.credentials);
       return res.status(200).send({ message: "Player moved." });
     }
 
-    console.log(`player: ${player}\naction: ${action}\nurlSlug: ${urlSlug}\nvisitorId: ${visitorId}\nassetId: ${assetId}\nsuffix: ${suffix}\nusername: ${username}`);
+    console.log(`player: ${player}\naction: ${action}\nurlSlug: ${urlSlug}\nvisitorId: ${visitorId}\nassetId: ${assetId}\nusername: ${username}`);
 
     // Calculating center position from the position of the p1 or p2 asset
     const p1box = await initDroppedAsset().get(assetId, urlSlug, { credentials: req.visitor.credentials }) as DroppedAssetInterface;
@@ -89,11 +83,8 @@ const ticTacToeController = {
     if (action === "entered") {
       if (!activeGame) {
         // Get position of assetID -NPNcpKdPhRyhnL0VWf_ for center, and the first player box is
-        activeGame = new Game(suffix, center);
-        if (activeGames[urlSlug]?.length)
-          activeGames[urlSlug].push(activeGame);
-        else
-          activeGames[urlSlug] = [activeGame];
+        activeGame = new Game(center);
+        activeGames[urlSlug] = activeGame;
       }
 
       if (player === 1 && !activeGame.player1)
@@ -102,7 +93,7 @@ const ticTacToeController = {
         activeGame.player2 = { visitorId, username, interactiveNonce };
 
       if (activeGame.player1 && activeGame.player2) {
-        await tttUtils.removeMessages(urlSlug, suffix, req.visitor.credentials);
+        await tttUtils.removeMessages(urlSlug, activeGame.id, req.visitor.credentials);
         // activeGame.startBtnId = (await tttUtils.dropStartButton(urlSlug, activeGame, req.visitor.credentials))?.id;
       } else {
         // todo Find position from the values of scale and center
@@ -114,7 +105,7 @@ const ticTacToeController = {
           textSize: 20,
           urlSlug,
           textWidth: 300,
-          uniqueName: `message${suffix}`,
+          uniqueName: `message${activeGame.id}`,
         }))?.id;
       }
     }
@@ -133,14 +124,10 @@ const ticTacToeController = {
     if (isNaN(pVisitorId))
       return res.status(400).send({ message: "visitorId must be a number." });
 
-    const suffix = await tttUtils.extractSuffix(req);
-    if (!suffix)
-      return res.status(400).send({ message: "Cannot find suffix" });
-
     console.log(`active games found in worlds: `, Object.keys(activeGames));
     console.log(`activeGames: `, activeGames);
 
-    const game: Game | undefined = activeGames[urlSlug]?.find(ag => ag.suffix === suffix);
+    const game: Game | undefined = activeGames[urlSlug];
     if (!game)
       return res.status(404).send({ message: "No active games found." });
 
@@ -189,7 +176,7 @@ const ticTacToeController = {
       // position: { x: game.center.x, y: game.center.y - 60 },
       position: { x: game.center.x - cellWidth, y: game.center.y + 2.5 * cellWidth * cellAsset.assetScale },
       credentials: req.visitor.credentials, text: `👑 ${mover?.username}`, textColor: "#ffffff", textSize: 24,
-      urlSlug: req.body.urlSlug, textWidth: 300, uniqueName: `win_msg${suffix}`,
+      urlSlug: req.body.urlSlug, textWidth: 300, uniqueName: `win_msg${game.id}`,
     }))?.id;
     res.status(200).send({ message: "Move completed." });
   },

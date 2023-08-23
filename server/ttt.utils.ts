@@ -1,8 +1,7 @@
 import { Game, Position } from "./topia/topia.models.js";
 import topiaAdapter from "./adapters/topia.adapter.js";
 import { initDroppedAsset, initWorld } from "./topia/topia.factories.js";
-import { DroppedAssetInterface, InteractiveCredentials } from "@rtsdk/topia";
-import { Request } from "express";
+import { InteractiveCredentials } from "@rtsdk/topia";
 
 const cellWidth = 80;
 
@@ -64,7 +63,7 @@ export default {
     // todo drop a start button at the given position, set a webhook to start the game as well
     const startBtn = await topiaAdapter.createWebImage({
       urlSlug, imageUrl: `${process.env.API_URL}/start_button.png`, position: game.center,
-      uniqueName: `start_btn${game.suffix}`, credentials,
+      uniqueName: `start_btn${game.id}`, credentials,
     });
 
     await startBtn.addWebhook({
@@ -90,7 +89,7 @@ export default {
     urlSlug: options.urlSlug,
     imageUrl: `${process.env.API_URL}/${options.cross ? "pink_cross" : "blue_o"}.png`,
     position: options.position,
-    uniqueName: `${Date.now()}_move${options.game.suffix}`,
+    uniqueName: `${Date.now()}_move${options.game.id}`,
     credentials: options.credentials,
   }),
 
@@ -103,7 +102,7 @@ export default {
       urlSlug,
       imageUrl: `${process.env.API_URL}/${color}_horizontal.png`,
       position: { x: game.center.x, y: game.center.y - cellWidth },
-      uniqueName: `finish_line${game.suffix}`, credentials,
+      uniqueName: `finish_line${game.id}`, credentials,
     };
 
     switch (combo) {
@@ -158,19 +157,10 @@ export default {
     await Promise.allSettled([finishLine.deleteDroppedAsset(), message.deleteDroppedAsset(), ...moves.map(m => m.deleteDroppedAsset())]);
   },
 
-  extractSuffix: async (request: Request): Promise<string | undefined> => {
-    const asset = await initDroppedAsset().get(request.body.assetId, request.body.urlSlug, { credentials: request.visitor.credentials }) as DroppedAssetInterface | undefined;
-    if (!asset)
-      return undefined;
-    // @ts-ignore
-    const suffix = asset.uniqueName;
-    console.log("Suffix: ", suffix);
-    return suffix;
-  },
-
-  removeMessages: async (urlSlug: string, suffix: string, credentials: InteractiveCredentials) => {
+  removeMessages: async (urlSlug: string, gameId: string, credentials: InteractiveCredentials) => {
     const world = initWorld().create(urlSlug, { credentials });
-    const messages = await world.fetchDroppedAssetsWithUniqueName({ uniqueName: `message${suffix}` });
+    // think of a way to remove messages
+    const messages = await world.fetchDroppedAssetsWithUniqueName({ uniqueName: `message${gameId}`, isPartial: true });
     console.log("messageAssets.length: ", messages.length);
     if (messages.length) {
       await Promise.allSettled(messages.map(m => m.deleteDroppedAsset()));

@@ -1,10 +1,11 @@
-import { DroppedAsset, DroppedAssetInterface, Visitor, VisitorInterface } from "@rtsdk/topia";
-import { TttStats } from "../models.js";
+import { DroppedAssetInterface, UserInterface, VisitorInterface } from "@rtsdk/topia";
 
 /**
- * Generic class to support saving data in `visitor.dataObject` on Topia.
+ * Generic class to support saving data in dataObjects of Visitor, DroppedAsset or User on Topia.
+ *
+ * @param
  */
-class DataObject<D extends VisitorInterface | DroppedAssetInterface, T> {
+class DataObject<D extends VisitorInterface | DroppedAssetInterface | UserInterface, T> {
   _fieldName: string;
 
   constructor(fieldName: string) {
@@ -13,7 +14,6 @@ class DataObject<D extends VisitorInterface | DroppedAssetInterface, T> {
 
   read = async (dataHolder: D): Promise<T | undefined> => {
     await dataHolder.fetchDataObject();
-    // fixme user.dataObject is not defined. That's why it cannot be used as a supertype of D. This is a lacuna in Topia RTSDK.
     const d = dataHolder.dataObject as any;
     if (!d || !d[this._fieldName])
       return undefined;
@@ -41,7 +41,27 @@ class DataObject<D extends VisitorInterface | DroppedAssetInterface, T> {
 }
 
 /**
- * App-specific data for a visitor.
+ * Example usage
+ * ```{typescript}
+ * First describe your data like this,
+ * export const TttStatsData = new DataObject<Visitor, TttStats>("tttStats");
+ *
+ * It means, we want to keep TttStats object in `tttStats` field in visitors' dataObjects.
+ *
+ * export const BoardIdData = new DataObject<DroppedAsset, number>("boardId");
+ *
+ * This means, we want to keep a number in `boardId` field in a DroppedAsset's dataObject.
+ *
+ * Now use it,
+ * await BardIdData.write(droppedAsset, 4);
+ *
+ * This will write 4 to the `boardId` property of dataObject of the given droppedAsset.
+ *
+ * await BoardIdData.read(droppedAsset);
+ * It will return a number if found in the boardId property of the dataObject of the given droppedAsset, undefined otherwise.
+ *
+ * await BoardIdData.remove(droppedAsset);
+ *
+ * It removes boardId property from the dataObject of the given droppedAsset.
+ * ```
  */
-export const TttStatsData = new DataObject<Visitor, TttStats>("tttStats");
-export const BoardIdData = new DataObject<DroppedAsset, number>("boardId");
