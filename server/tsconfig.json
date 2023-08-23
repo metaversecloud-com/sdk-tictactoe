@@ -7,7 +7,8 @@
     "esModuleInterop": true,
     "module": "ESNext",
     "strict": false,
-    // "moduleResolution": "node",
+    "lib": ["esnext"],
+    "moduleResolution": "node",
     "typeRoots": [
       "./types",
       "./node_modules/@types"
@@ -25,3 +26,4 @@
     "experimentalSpecifierResolution": "node"
   }
 }
+
