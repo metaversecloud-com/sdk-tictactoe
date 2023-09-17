@@ -81,16 +81,15 @@ export default {
 
   makeMove: async (options: {
     urlSlug: string,
-    game: Game,
+    gameId: String,
     cross: boolean,
     position: Position,
     credentials: InteractiveCredentials
   }) => topiaAdapter.createWebImage({
-    urlSlug: options.urlSlug,
-    imageUrl: `${process.env.API_URL}/${options.cross ? "pink_cross" : "blue_o"}.png`,
-    position: options.position,
-    uniqueName: `${Date.now()}_move${options.game.id}`,
-    credentials: options.credentials,
+    ...options, ...{
+      imageUrl: `${process.env.API_URL}/${options.cross ? "pink_cross" : "blue_o"}.png`,
+      uniqueName: `${Date.now()}_move${options.gameId}`,
+    },
   }),
 
   /**

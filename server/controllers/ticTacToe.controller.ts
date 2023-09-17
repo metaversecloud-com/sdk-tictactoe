@@ -9,6 +9,9 @@ const activeGames: { [urlSlug: string]: Game } = {};
 const cellWidth = 80;
 
 const ticTacToeController = {
+  /**
+   * Responds with leaderboard data for the given urlSlug.
+   */
   leaderboard: async (req: Request, res: Response) => {
     // let { urlSlug, pageSize, page } = req.body;
     // pageSize = pageSize ? Number(pageSize) : 3;
@@ -30,6 +33,9 @@ const ticTacToeController = {
     res.status(200).send([]);
   },
 
+  /**
+   * Resets the board, and removes all messages.
+   */
   resetBoard: async (req: Request, res: Response) => {
     const urlSlug: string = req.body.urlSlug;
 
@@ -41,6 +47,9 @@ const ticTacToeController = {
     return res.status(200).send({ message: "Game reset" });
   },
 
+  /**
+   * Handles movement of player into player-boxes and out of them.
+   */
   playerMovement: async (req: Request, res: Response) => {
     const player = Number(req.params.player);
     const action = req.params.action as "entered" | "exited";
@@ -113,6 +122,9 @@ const ticTacToeController = {
     res.status(200).send({ message: "Player moved." });
   },
 
+  /**
+   * Handles the moves made by the players.
+   */
   gameMoves: async (req: Request, res: Response) => {
     const { urlSlug, assetId, visitorId } = req.body;
     const username = req.body.eventText.split("\"")[1];
@@ -123,9 +135,6 @@ const ticTacToeController = {
     const pVisitorId = visitorId ? Number(visitorId) : NaN;
     if (isNaN(pVisitorId))
       return res.status(400).send({ message: "visitorId must be a number." });
-
-    console.log(`active games found in worlds: `, Object.keys(activeGames));
-    console.log(`activeGames: `, activeGames);
 
     const game: Game | undefined = activeGames[urlSlug];
     if (!game)
@@ -158,7 +167,7 @@ const ticTacToeController = {
 
     // todo drop a ❌ or a ⭕
     const move = await tttUtils.makeMove({
-      urlSlug, game, position: new Position(cellAsset.position), credentials: req.visitor.credentials,
+      urlSlug, gameId: game.id, position: new Position(cellAsset.position), credentials: req.visitor.credentials,
       cross: pVisitorId === game.player1!!.visitorId,
     });
     game.moves[cell] = move.id;
@@ -178,7 +187,7 @@ const ticTacToeController = {
       credentials: req.visitor.credentials, text: `👑 ${mover?.username}`, textColor: "#ffffff", textSize: 24,
       urlSlug: req.body.urlSlug, textWidth: 300, uniqueName: `win_msg${game.id}`,
     }))?.id;
-    res.status(200).send({ message: "Move completed." });
+    res.status(200).send({ message: "Move made." });
   },
 };
 
