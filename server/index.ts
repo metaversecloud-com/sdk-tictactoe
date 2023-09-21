@@ -18,7 +18,7 @@ checkEnvVariables();
 
 const PORT = process.env.PORT || 3000;
 const app = express();
-if (process.env.NODE_ENV === "development") app.use(cors());
+app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
