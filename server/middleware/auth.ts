@@ -9,12 +9,11 @@ export default async (req: Request, res: Response, next: NextFunction) => {
   try {
     const credentials = utils.credentialsFromRequest(req);
     console.log(`Extracted credentials: `, credentials);
-    const visitor = await initVisitor().get(credentials.visitorId!!, credentials.urlSlug!!,
-      { credentials });
+    const visitor = await initVisitor().get(credentials.visitorId!!, credentials.urlSlug!!, { credentials });
     req.visitor = visitor;
 
     if (!visitor) {
-      const message = "401 Please use Topia.io to use this app.";
+      const message = "401 Please visit Topia.io to use this app.";
       console.error(message);
       return res.status(401).send({ message });
     }
