@@ -34,7 +34,12 @@ Notes:
 
 1. For local development run `docker-compose up`. This runs the client(3001) and server(3000) on separate ports. You can access them separately. They are also setup with auto-build on save.
 2. To build an image for delivery run `docker build . -t [add a name]:v[version_number]`. This will generate an image that you can push out to ECR for deployment.
-3. To locally run, use the following command.
+3. To push to ECR
+   1. `aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 542603814457.dkr.ecr.us-east-2.amazonaws.com`
+   2. `docker build . -t 542603814457.dkr.ecr.us-east-2.amazonaws.com/randd-tictactoe:latest`
+   3. `docker tag <image-id> 542603814457.dkr.ecr.us-east-2.amazonaws.com/randd-tictactoe:latest`
+   4. `docker push 542603814457.dkr.ecr.us-east-2.amazonaws.com/randd-tictactoe:latest`
+4. To locally run, use the following command.
    ```bash
     docker run -p 3000:3000 -p 3001:3001 -d --env INSTANCE_DOMAIN=api.topia.io --env INTERACTIVE_KEY=eDtTM1wKgP0B39pYidZc --env INTERACTIVE_SECRET=1314f7b5-4ec8-46ba-ac8d-8b0c06e11b3b --env CUSTOM_TEXT=rXLgzCs1wxpx96YLZAN5 --env WEB_IMAGE=webImageAsset --env API_URL=https://ttt.topia-randd.io <image_id>
    ```
