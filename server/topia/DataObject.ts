@@ -5,8 +5,8 @@ import { DroppedAssetInterface, UserInterface, VisitorInterface } from "@rtsdk/t
  *
  * @param
  */
-class DataObject<D extends VisitorInterface | DroppedAssetInterface | UserInterface, T> {
-  _fieldName: string;
+export default class DataObject<D extends VisitorInterface | DroppedAssetInterface | UserInterface, T> {
+  private readonly _fieldName: string;
 
   constructor(fieldName: string) {
     this._fieldName = fieldName;

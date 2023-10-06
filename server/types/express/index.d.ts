@@ -1,9 +1,9 @@
-import { Visitor } from "@rtsdk/topia";
+import { Visitor, VisitorInterface } from "@rtsdk/topia";
 
 declare global {
   namespace Express {
     export interface Request {
-      visitor?: Visitor;
+      visitor?: Visitor & VisitorInterface;
     }
   }
 }

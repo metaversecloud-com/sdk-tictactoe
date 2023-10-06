@@ -3,12 +3,17 @@ import { Request, Response } from "express";
 import topiaAdapter from "../adapters/topia.adapter.js";
 import { Game, Player, Position } from "../topia/topia.models.js";
 import { initDroppedAsset } from "../topia/topia.factories.js";
-import { DroppedAssetInterface } from "@rtsdk/topia";
+import DataObject from "../topia/DataObject.js";
+import { DroppedAssetInterface, User } from "@rtsdk/topia";
+import { TttStats } from "../models";
 
 const activeGames: { [urlSlug: string]: Game } = {};
 const cellWidth = 80;
 
+const statsDO = new DataObject<User, TttStats>("tttStats");
+
 const ticTacToeController = {
+
   /**
    * Responds with leaderboard data for the given urlSlug.
    */
@@ -43,8 +48,67 @@ const ticTacToeController = {
     if (!activeGame)
       return res.status(400).send({ message: "Game not found." });
 
+    if (!req.visitor.isAdmin && req.visitor.id !== activeGame.player1?.visitorId && req.visitor.id !== activeGame.player2?.visitorId)
+      return res.status(403).send({ message: "You are not authorized to reset this board." });
+
     await tttUtils.resetBoard(activeGame, urlSlug, req.visitor.credentials);
     return res.status(200).send({ message: "Game reset" });
+  },
+
+  /**
+   * Handles click on cross or o button in the world. These buttons let the players choose their symbol.
+   */
+  playerSelection: async (req: Request, res: Response) => {
+    const symbol = req.params.symbol as "cross" | "o";
+    const player1 = symbol === "cross";
+    const { urlSlug, visitorId, assetId, interactiveNonce } = req.body;
+
+    const username = req.body.eventText.split("\"")[1];
+
+    let activeGame = activeGames[urlSlug];
+
+    if (activeGame) {
+      if (player1 && activeGame.player1)
+        return res.status(400).send({ message: "Player 1 already selected." });
+      if (!player1 && activeGame.player2)
+        return res.status(400).send({ message: "Player 2 already selected." });
+    }
+
+    const symbolAsset = await initDroppedAsset().get(assetId, urlSlug, { credentials: req.visitor.credentials }) as DroppedAssetInterface;
+
+    const scale: number = symbolAsset.assetScale;
+    const center = new Position(symbolAsset.position);
+
+    // todo calculate the center of the board from the position of the symbolAsset
+    if (!activeGame) {
+      activeGame = new Game(center);
+      activeGames[urlSlug] = activeGame;
+    }
+
+    if (player1)
+      activeGame.player1 = { visitorId, username, interactiveNonce };
+    else
+      activeGame.player2 = { visitorId, username, interactiveNonce };
+
+    // todo show the name of the player on board against the symbolAsset
+
+    if (activeGame.player1 && activeGame.player2) {
+      await tttUtils.removeMessages(urlSlug, activeGame.id, req.visitor.credentials);
+      // activeGame.startBtnId = (await tttUtils.dropStartButton(urlSlug, activeGame, req.visitor.credentials))?.id;
+    } else {
+      activeGame.messageTextId = (await topiaAdapter.createText({
+        position: { x: center.x - cellWidth, y: center.y + 2.5 * cellWidth * scale },
+        credentials: req.visitor.credentials,
+        text: "Find another player!",
+        textColor: "#333333",
+        textSize: 20,
+        urlSlug,
+        textWidth: 300,
+        uniqueName: `message${activeGame.id}`,
+      }))?.id;
+    }
+
+    res.status(200).send({ message: "Player selected." });
   },
 
   /**
