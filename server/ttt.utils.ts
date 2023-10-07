@@ -1,7 +1,9 @@
 import { Game, Position } from "./topia/topia.models.js";
 import topiaAdapter from "./adapters/topia.adapter.js";
-import { initDroppedAsset, initWorld } from "./topia/topia.factories.js";
-import { InteractiveCredentials } from "@rtsdk/topia";
+import { initDroppedAsset, initVisitor, initWorld } from "./topia/topia.factories.js";
+import { InteractiveCredentials, User } from "@rtsdk/topia";
+import { TttStats } from "./models";
+import DataObject from "./topia/DataObject";
 
 const cellWidth = 80;
 
@@ -42,6 +44,8 @@ export const WinningCombo = {
     return null;
   },
 } as const;
+
+export const statsDO = new DataObject<User, TttStats>("tttStats");
 
 export default {
   updateLeaderboard: () => {
@@ -164,6 +168,36 @@ export default {
     if (messages.length) {
       await Promise.allSettled(messages.map(m => m.deleteDroppedAsset()));
     }
+  },
+
+  /**
+   * Lifetime scores for the two players in a game
+   *
+   */
+  getScores: async (urlSlug: string, game: Game, credentials: InteractiveCredentials) => {
+    const stats: { [visitorId: number]: TttStats } = {};
+
+    if (game.player1) {
+      const v = initVisitor().create(game.player1.visitorId, urlSlug, { credentials });
+      let playerData = await statsDO.read(v);
+      if (!playerData) {
+        playerData = { played: 0, won: 0, lost: 0 };
+        await statsDO.write(v, playerData);
+      }
+      stats[game.player1.visitorId] = playerData;
+    }
+
+    if (game.player2) {
+      const v = initVisitor().create(game.player2.visitorId, urlSlug, { credentials });
+      let playerData = await statsDO.read(v);
+      if (!playerData) {
+        playerData = { played: 0, won: 0, lost: 0 };
+        await statsDO.write(v, playerData);
+      }
+      stats[game.player2.visitorId] = playerData;
+    }
+
+    return stats;
   },
 };
 

@@ -3,39 +3,24 @@ import { Request, Response } from "express";
 import topiaAdapter from "../adapters/topia.adapter.js";
 import { Game, Player, Position } from "../topia/topia.models.js";
 import { initDroppedAsset } from "../topia/topia.factories.js";
-import DataObject from "../topia/DataObject.js";
-import { DroppedAssetInterface, User } from "@rtsdk/topia";
-import { TttStats } from "../models";
+import { DroppedAssetInterface } from "@rtsdk/topia";
 
 const activeGames: { [urlSlug: string]: Game } = {};
 const cellWidth = 80;
 
-const statsDO = new DataObject<User, TttStats>("tttStats");
-
 const ticTacToeController = {
 
   /**
-   * Responds with leaderboard data for the given urlSlug.
+   * Responds with the stats of the players in the game at the given urlSlug.
    */
-  leaderboard: async (req: Request, res: Response) => {
-    // let { urlSlug, pageSize, page } = req.body;
-    // pageSize = pageSize ? Number(pageSize) : 3;
-    // if (isNaN(pageSize))
-    //   pageSize = 3;
-    // page = page ? Number(page) : 0;
-    // if (isNaN(page))
-    //   page = 0;
+  scores: async (req: Request, res: Response) => {
+    const urlSlug: string = req.body.urlSlug;
 
-    // todo list all visitors, and then get their data-object. No pagination.
+    let activeGame = activeGames[urlSlug];
+    if (!activeGame)
+      return res.status(404).send({ message: "Game not found." });
 
-    // const r = await TttPlayer.findAndCountAll({
-    //   where: { urlSlug },
-    //   order: ["won", "DESC"],
-    //   limit: pageSize,
-    //   offset: page * pageSize,
-    // });
-
-    res.status(200).send([]);
+    res.status(200).send(tttUtils.getScores(urlSlug, activeGame, req.visitor.credentials));
   },
 
   /**
@@ -83,14 +68,17 @@ const ticTacToeController = {
     if (!activeGame) {
       activeGame = new Game(center);
       activeGames[urlSlug] = activeGame;
+
+      // todo if webhooks can be added on the fly, then add all the webimageassets on all the cells, and turn-marker
     }
 
     if (player1)
-      activeGame.player1 = { visitorId, username, interactiveNonce };
+      activeGame.player1 = { visitorId, username };
     else
-      activeGame.player2 = { visitorId, username, interactiveNonce };
+      activeGame.player2 = { visitorId, username };
 
     // todo show the name of the player on board against the symbolAsset
+    // todo show the score of the player on the board against his name
 
     if (activeGame.player1 && activeGame.player2) {
       await tttUtils.removeMessages(urlSlug, activeGame.id, req.visitor.credentials);
@@ -161,9 +149,9 @@ const ticTacToeController = {
       }
 
       if (player === 1 && !activeGame.player1)
-        activeGame.player1 = { visitorId, username, interactiveNonce };
+        activeGame.player1 = { visitorId, username };
       else if (player === 2 && !activeGame.player2)
-        activeGame.player2 = { visitorId, username, interactiveNonce };
+        activeGame.player2 = { visitorId, username };
 
       if (activeGame.player1 && activeGame.player2) {
         await tttUtils.removeMessages(urlSlug, activeGame.id, req.visitor.credentials);

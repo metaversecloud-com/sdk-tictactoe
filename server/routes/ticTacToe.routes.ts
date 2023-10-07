@@ -4,7 +4,7 @@ import auth from "../middleware/auth.js";
 
 const tttRouter = Router();
 
-tttRouter.get("/leaderboard", auth, ticTacToeController.leaderboard);
+tttRouter.get("/scores/:gameId", auth, ticTacToeController.scores);
 tttRouter.post("/click/:cell", auth, ticTacToeController.gameMoves);
 tttRouter.post("/select-player/:symbol", auth, ticTacToeController.playerSelection);
 tttRouter.post("/:player/:action", auth, ticTacToeController.playerMovement);
