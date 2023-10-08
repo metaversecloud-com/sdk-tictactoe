@@ -52,6 +52,13 @@ export class Game {
   inControl: 0 | 1 = 0;
   finishLineId?: string;
   messageTextId?: string;
+  player1TextId?: string;
+  player2TextId?: string;
+  player1ScoreId?: string;
+  player2ScoreId?: string;
+
+  lastUpdated: Date;
+
   moves: [string?, string?, string?, string?, string?, string?, string?, string?, string?];
   status: [number, number, number, number, number, number, number, number, number];
 
@@ -61,6 +68,7 @@ export class Game {
     this.status = [0, 0, 0, 0, 0, 0, 0, 0, 0];
     this.moves = [];
     this.inControl = 0;
+    this.lastUpdated = new Date();
   }
 }
 

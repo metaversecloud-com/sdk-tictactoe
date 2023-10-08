@@ -96,6 +96,8 @@ const ticTacToeController = {
       }))?.id;
     }
 
+    // todo show scores of the players
+
     res.status(200).send({ message: "Player selected." });
   },
 

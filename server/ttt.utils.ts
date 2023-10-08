@@ -1,7 +1,7 @@
 import { Game, Position } from "./topia/topia.models.js";
 import topiaAdapter from "./adapters/topia.adapter.js";
 import { initDroppedAsset, initVisitor, initWorld } from "./topia/topia.factories.js";
-import { InteractiveCredentials, User } from "@rtsdk/topia";
+import { DroppedAsset, InteractiveCredentials, User } from "@rtsdk/topia";
 import { TttStats } from "./models";
 import DataObject from "./topia/DataObject";
 
@@ -149,15 +149,26 @@ export default {
   },
 
   resetBoard: async (activeGame: Game, urlSlug: string, credentials: InteractiveCredentials) => {
-    const finishLine = initDroppedAsset().create(activeGame.finishLineId, urlSlug, { credentials });
-    const message = initDroppedAsset().create(activeGame.messageTextId, urlSlug, { credentials });
+    const finishLine: DroppedAsset | undefined = activeGame.finishLineId ? initDroppedAsset().create(activeGame.finishLineId, urlSlug, { credentials }) : undefined;
+    const message = activeGame.messageTextId ? initDroppedAsset().create(activeGame.messageTextId, urlSlug, { credentials }) : undefined;
+    const player1Text = activeGame.player1TextId ? initDroppedAsset().create(activeGame.player1TextId, urlSlug, { credentials }) : undefined;
+    const player2Text = activeGame.player2TextId ? initDroppedAsset().create(activeGame.player2TextId, urlSlug, { credentials }) : undefined;
+    const player1Score = activeGame.player1ScoreId ? initDroppedAsset().create(activeGame.player1ScoreId, urlSlug, { credentials }) : undefined;
+    const player2Score = activeGame.player2ScoreId ? initDroppedAsset().create(activeGame.player2ScoreId, urlSlug, { credentials }) : undefined;
+
     const moves = activeGame.moves.map(m => initDroppedAsset().create(m, urlSlug, { credentials }));
     activeGame.moves = [];
     activeGame.status = [0, 0, 0, 0, 0, 0, 0, 0, 0];
     activeGame.messageTextId = undefined;
     activeGame.finishLineId = undefined;
+    activeGame.player1TextId = undefined;
+    activeGame.player2TextId = undefined;
+    activeGame.player1ScoreId = undefined;
+    activeGame.player2ScoreId = undefined;
 
-    await Promise.allSettled([finishLine.deleteDroppedAsset(), message.deleteDroppedAsset(), ...moves.map(m => m.deleteDroppedAsset())]);
+    await Promise.allSettled([finishLine?.deleteDroppedAsset(), message?.deleteDroppedAsset(),
+      player1Text?.deleteDroppedAsset(), player1Score?.deleteDroppedAsset(), player2Score?.deleteDroppedAsset(),
+      player2Text?.deleteDroppedAsset(), ...moves.map(m => m.deleteDroppedAsset())]);
   },
 
   removeMessages: async (urlSlug: string, gameId: string, credentials: InteractiveCredentials) => {
