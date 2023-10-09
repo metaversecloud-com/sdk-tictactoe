@@ -1,6 +1,6 @@
-FROM node:lts-alpine
+FROM oven/bun
 WORKDIR /usr/app
 COPY . ./
-RUN npm install
+RUN bun install
 EXPOSE 3000 3001
-CMD ["npm", "run", "start:dev"]
+CMD ["bun", "run", "start:dev"]
