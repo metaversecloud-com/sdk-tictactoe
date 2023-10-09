@@ -44,31 +44,161 @@ export class Position {
 }
 
 export class Game {
-  player1?: Player;
-  player2?: Player;
-  id: string;
-  center: Position;
-  // startBtnId?: string;
-  inControl: 0 | 1 = 0;
-  finishLineId?: string;
-  messageTextId?: string;
-  player1TextId?: string;
-  player2TextId?: string;
-  player1ScoreId?: string;
-  player2ScoreId?: string;
-
-  lastUpdated: Date;
-
-  moves: [string?, string?, string?, string?, string?, string?, string?, string?, string?];
-  status: [number, number, number, number, number, number, number, number, number];
+  readonly id: string;
+  readonly center: Position;
+  public clearStatus = this.clearMoves;
+  private _moves: [string?, string?, string?, string?, string?, string?, string?, string?, string?];
+  private _status: [number, number, number, number, number, number, number, number, number];
 
   constructor(center: Position) {
     this.center = center;
     this.id = utils.generateRandomString();
-    this.status = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-    this.moves = [];
-    this.inControl = 0;
-    this.lastUpdated = new Date();
+    this._status = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+    this._moves = [];
+    this._inControl = 0;
+    this._lastUpdated = new Date();
   }
+
+  private _player1?: Player;
+
+  get player1() {
+    return this._player1;
+  }
+
+  set player1(p: Player | undefined) {
+    this._player1 = p;
+    this._lastUpdated = new Date();
+  }
+
+  private _player2?: Player;
+
+  get player2() {
+    return this._player2;
+  }
+
+  set player2(p: Player | undefined) {
+    this._player2 = p;
+    this._lastUpdated = new Date();
+  }
+
+  // startBtnId?: string;
+  private _inControl: 0 | 1 = 0;
+
+  get inControl() {
+    return this._inControl;
+  }
+
+  private _finishLineId?: string;
+
+  get finishLineId() {
+    return this._finishLineId;
+  }
+
+  set finishLineId(id: string | undefined) {
+    this._finishLineId = id;
+    this._lastUpdated = new Date();
+  }
+
+  private _messageTextId?: string;
+
+  get messageTextId() {
+    return this._messageTextId;
+  }
+
+  set messageTextId(id: string | undefined) {
+    this._messageTextId = id;
+    this._lastUpdated = new Date();
+  }
+
+  private _player1TextId?: string;
+
+  get player1TextId() {
+    return this._player1TextId;
+  }
+
+  set player1TextId(id: string | undefined) {
+    this._player1TextId = id;
+    this._lastUpdated = new Date();
+  }
+
+  private _player2TextId?: string;
+
+  get player2TextId() {
+    return this._player2TextId;
+  }
+
+  set player2TextId(id: string | undefined) {
+    this._player2TextId = id;
+    this._lastUpdated = new Date();
+  }
+
+  private _player1ScoreId?: string;
+
+  get player1ScoreId() {
+    return this._player1ScoreId;
+  }
+
+  set player1ScoreId(id: string | undefined) {
+    this._player1ScoreId = id;
+    this._lastUpdated = new Date();
+  }
+
+  private _player2ScoreId?: string;
+
+  get player2ScoreId() {
+    return this._player2ScoreId;
+  }
+
+  set player2ScoreId(id: string | undefined) {
+    this._player2ScoreId = id;
+    this._lastUpdated = new Date();
+  }
+
+  private _lastUpdated: Date;
+
+  get lastUpdated() {
+    return this._lastUpdated;
+  }
+
+  /**
+   *
+   * To get all the moves. Iterate i from 0 to 8 and call `getMove(i)`.
+   */
+  getMove(i: number) {
+    // fixme Handle this error peacefully
+    if (i < 0 || i > 8)
+      throw new Error("IndexOutOfBounds");
+    return this._moves[i];
+  }
+
+  addMove(i: number, m: string) {
+    this._moves[i] = m;
+    this._status[i] = this._inControl ? this._player2.visitorId : this._player1.visitorId;
+    this._inControl = ((this._inControl + 1) % 2) as 0 | 1;
+    this._lastUpdated = new Date();
+  }
+
+  clearMoves() {
+    this._moves = [];
+    this._status = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+    this._lastUpdated = new Date();
+  }
+
+  getStatus(i: number) {
+    if (i < 0 || i > 8)
+      throw new Error("IndexOutOfBounds");
+    return this._status[i];
+  }
+
+  reset() {
+    this._messageTextId = undefined;
+    this._finishLineId = undefined;
+    this._player1TextId = undefined;
+    this._player2TextId = undefined;
+    this._player1ScoreId = undefined;
+    this._player2ScoreId = undefined;
+    this.clearMoves();
+  }
+
 }
 

@@ -7,6 +7,7 @@ import { DroppedAssetInterface } from "@rtsdk/topia";
 
 const activeGames: { [urlSlug: string]: Game } = {};
 const cellWidth = 80;
+const TTL = 0.5; // In hour
 
 const ticTacToeController = {
 
@@ -45,17 +46,18 @@ const ticTacToeController = {
    */
   playerSelection: async (req: Request, res: Response) => {
     const symbol = req.params.symbol as "cross" | "o";
-    const player1 = symbol === "cross";
+    const player = symbol === "cross" ? 0 : 1;
     const { urlSlug, visitorId, assetId, interactiveNonce } = req.body;
 
     const username = req.body.eventText.split("\"")[1];
 
     let activeGame = activeGames[urlSlug];
 
-    if (activeGame) {
-      if (player1 && activeGame.player1)
+    if (activeGame && activeGame.lastUpdated.getTime() > Date.now() - 1000 * 60 * 60 * TTL) {
+      // let the player be re-assigned if the game has not been updated from quite some time.
+      if (!player && activeGame.player1)
         return res.status(400).send({ message: "Player 1 already selected." });
-      if (!player1 && activeGame.player2)
+      if (player && activeGame.player2)
         return res.status(400).send({ message: "Player 2 already selected." });
     }
 
@@ -68,17 +70,14 @@ const ticTacToeController = {
     if (!activeGame) {
       activeGame = new Game(center);
       activeGames[urlSlug] = activeGame;
-
-      // todo if webhooks can be added on the fly, then add all the webimageassets on all the cells, and turn-marker
+      // todo if webhooks can be added on the fly, then add all the webimageassets on all the cells
+      // topiaAdapter.createWebImage({
+      //   urlSlug, imageUrl: `${process.env.API_URL}/turn_marker.png`, position: center, credentials: req.visitor.credentials, uniqueName:
+      // });
     }
 
-    if (player1)
-      activeGame.player1 = { visitorId, username };
-    else
-      activeGame.player2 = { visitorId, username };
-
-    // todo show the name of the player on board against the symbolAsset
-    // todo show the score of the player on the board against his name
+    activeGame[`player${player + 1}`] = { visitorId, username };
+    await tttUtils.showNameAndScore(activeGame, player, symbolAsset, urlSlug, req.visitor.credentials);
 
     if (activeGame.player1 && activeGame.player2) {
       await tttUtils.removeMessages(urlSlug, activeGame.id, req.visitor.credentials);
@@ -95,8 +94,6 @@ const ticTacToeController = {
         uniqueName: `message${activeGame.id}`,
       }))?.id;
     }
-
-    // todo show scores of the players
 
     res.status(200).send({ message: "Player selected." });
   },
@@ -196,9 +193,9 @@ const ticTacToeController = {
 
     // Figure out the player who clicked on this cell
     let mover: Player | undefined = undefined;
-    if (game.player1?.username === username && game.player1?.visitorId && game.inControl === 0)
+    if (game.player1?.username === username && game.player1?.visitorId && !game.inControl)
       mover = game.player1;
-    if (game.player2?.username === username && game.player2?.visitorId && game.inControl === 1)
+    if (game.player2?.username === username && game.player2?.visitorId && game.inControl)
       mover = game.player2;
 
     if (!mover)
@@ -210,24 +207,24 @@ const ticTacToeController = {
       return res.status(200).send({ message: "Game reset." });
     }
 
-    if (game.status[cell] !== 0)
+    if (game.getStatus(cell) !== 0)
       return res.status(400).send({ message: "Cannot place your move here." });
 
     const cellAsset = (await initDroppedAsset().get(assetId, urlSlug, { credentials: req.visitor.credentials })) as DroppedAssetInterface;
 
-    game.status[cell] = pVisitorId;
-    game.inControl = (game.inControl + 1) % 2 as 0 | 1;
-    console.log("urlSlug: ", urlSlug, "\nassetId: ", assetId, "\npVisitorId: ", pVisitorId, "\ngame.status: ", game.status);
+    // game.getStatus(cell) = pVisitorId;
+    // game.inControl = (game.inControl + 1) % 2 as 0 | 1;
+    // console.log("urlSlug: ", urlSlug, "\nassetId: ", assetId, "\npVisitorId: ", pVisitorId, "\ngame.status: ", game.status);
 
     // todo drop a ❌ or a ⭕
     const move = await tttUtils.makeMove({
       urlSlug, gameId: game.id, position: new Position(cellAsset.position), credentials: req.visitor.credentials,
       cross: pVisitorId === game.player1!!.visitorId,
     });
-    game.moves[cell] = move.id;
-    console.log("game.moves: ", game.moves);
+    game.addMove(cell, move.id);
+    // console.log("game.moves: ", game.moves);
 
-    const r = tttUtils.findWinningCombo(game.status);
+    const r = tttUtils.findWinningCombo(game);
     if (!r)
       return res.status(200).send("Move made.");
 

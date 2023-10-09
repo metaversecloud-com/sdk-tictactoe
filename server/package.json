@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "serve": "bun tsc -w & bun nodemon -q build/index.js",
-    "build": "bun tsc",
+    "build": "npm tsc",
     "start": "bun index.ts"
   },
   "keywords": [],
