@@ -3,7 +3,7 @@ import topiaAdapter from "./adapters/topia.adapter.js";
 import { initDroppedAsset, initVisitor, initWorld } from "./topia/topia.factories.js";
 import { DroppedAsset, DroppedAssetInterface, InteractiveCredentials, User } from "@rtsdk/topia";
 import { TttStats } from "./models";
-import DataObject from "./topia/DataObject";
+import DataObject from "./topia/DataObject.js";
 
 const cellWidth = 80;
 
