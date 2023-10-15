@@ -1,7 +1,7 @@
 git reset --hard
 git fetch -p
 git pull
-bun install
+npm install
 apt update
 apt upgrade -y
 apt autoremove -y

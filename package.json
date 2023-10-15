@@ -10,8 +10,8 @@
     "server"
   ],
   "scripts": {
-    "start:dev": "concurrently \"bun run --cwd server start\" \"bun run --cwd client dev\"",
-    "build:prod": "bun run --cwd server build && bun run --cwd client build"
+    "start:dev": "concurrently \"npm run serve --workspace=server\" \"npm run dev --workspace=client\"",
+    "build:prod": "npm run build -w server && npm run build -w client"
   },
   "repository": {
     "type": "git",

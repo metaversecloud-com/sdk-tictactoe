@@ -4,9 +4,10 @@
   "description": "Handles all the webhooks from Topia world",
   "type": "module",
   "scripts": {
-    "serve": "bun tsc -w & bun nodemon -q build/index.js",
-    "build": "npm tsc",
-    "start": "bun index.ts"
+    "serve": "npx tsc -w & npx nodemon -q build/index.js",
+    "dev_1": "npm run build & npm run start",
+    "build": "npx tsc",
+    "start": "node build/index.js"
   },
   "keywords": [],
   "author": "Automatopia-MC",
