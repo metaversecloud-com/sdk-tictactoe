@@ -4,8 +4,8 @@ import topiaAdapter from "../adapters/topia.adapter.js";
 import { Game, Player, Position } from "../topia/topia.models.js";
 import { initDroppedAsset } from "../topia/topia.factories.js";
 import { DroppedAssetInterface } from "@rtsdk/topia";
+import mongoAdapter from "../adapters/mongo.adapter";
 
-const activeGames: { [urlSlug: string]: Game } = {};
 const cellWidth = 80;
 const TTL = 0.5; // In hour
 
@@ -17,7 +17,7 @@ const ticTacToeController = {
   scores: async (req: Request, res: Response) => {
     const urlSlug: string = req.body.urlSlug;
 
-    let activeGame = activeGames[urlSlug];
+    let activeGame = await mongoAdapter.getGame(urlSlug);
     if (!activeGame)
       return res.status(404).send({ message: "Game not found." });
 
@@ -30,7 +30,7 @@ const ticTacToeController = {
   resetBoard: async (req: Request, res: Response) => {
     const urlSlug: string = req.body.urlSlug;
 
-    let activeGame = activeGames[urlSlug];
+    let activeGame = await mongoAdapter.getGame(urlSlug);
     if (!activeGame)
       return res.status(400).send({ message: "Game not found." });
 
@@ -51,7 +51,7 @@ const ticTacToeController = {
 
     const username = req.body.eventText.split("\"")[1];
 
-    let activeGame = activeGames[urlSlug];
+    let activeGame = await mongoAdapter.getGame(urlSlug);
 
     if (activeGame && activeGame.lastUpdated.getTime() > Date.now() - 1000 * 60 * 60 * TTL) {
       // let the player be re-assigned if the game has not been updated from quite some time.
@@ -65,11 +65,17 @@ const ticTacToeController = {
 
     const scale: number = symbolAsset.assetScale;
     const center = new Position(symbolAsset.position);
+    center.y += 2.5 * cellWidth * scale;
 
-    // todo calculate the center of the board from the position of the symbolAsset
+    // fixme calculate the center of the board from the position of the symbolAsset
+    if (symbol == "cross")
+      center.x += 6.5 * cellWidth * scale;
+    else
+      center.x -= 6.5 * cellWidth * scale;
+
     if (!activeGame) {
-      activeGame = new Game(center);
-      activeGames[urlSlug] = activeGame;
+      activeGame = new Game(center, urlSlug);
+      await mongoAdapter.saveGame(activeGame);
       // todo if webhooks can be added on the fly, then add all the webimageassets on all the cells
       // topiaAdapter.createWebImage({
       //   urlSlug, imageUrl: `${process.env.API_URL}/turn_marker.png`, position: center, credentials: req.visitor.credentials, uniqueName:
@@ -84,7 +90,7 @@ const ticTacToeController = {
       // activeGame.startBtnId = (await tttUtils.dropStartButton(urlSlug, activeGame, req.visitor.credentials))?.id;
     } else {
       activeGame.messageTextId = (await topiaAdapter.createText({
-        position: { x: center.x - cellWidth, y: center.y + 2.5 * cellWidth * scale },
+        position: { x: center.x - cellWidth, y: center.y - 2.5 * cellWidth * scale },
         credentials: req.visitor.credentials,
         text: "Find another player!",
         textColor: "#333333",
@@ -94,6 +100,8 @@ const ticTacToeController = {
         uniqueName: `message${activeGame.id}`,
       }))?.id;
     }
+
+    mongoAdapter.saveGame(activeGame).then((r) => console.log("Game saved: ", r)).catch((e) => console.log("Error saving game: ", e));
 
     res.status(200).send({ message: "Player selected." });
   },
@@ -108,7 +116,7 @@ const ticTacToeController = {
 
     const username = req.body.eventText.split("\"")[1];
 
-    let activeGame = activeGames[urlSlug];
+    let activeGame = await mongoAdapter.getGame(urlSlug);
 
     if (activeGame && action === "exited") {
       if (player === 1)
@@ -143,8 +151,8 @@ const ticTacToeController = {
     if (action === "entered") {
       if (!activeGame) {
         // Get position of assetID -NPNcpKdPhRyhnL0VWf_ for center, and the first player box is
-        activeGame = new Game(center);
-        activeGames[urlSlug] = activeGame;
+        activeGame = new Game(center, urlSlug);
+        await mongoAdapter.saveGame(activeGame);
       }
 
       if (player === 1 && !activeGame.player1)
@@ -187,7 +195,7 @@ const ticTacToeController = {
     if (isNaN(pVisitorId))
       return res.status(400).send({ message: "visitorId must be a number." });
 
-    const game: Game | undefined = activeGames[urlSlug];
+    const game = await mongoAdapter.getGame(urlSlug);
     if (!game)
       return res.status(404).send({ message: "No active games found." });
 

@@ -45,21 +45,33 @@ export class Position {
 
 export class Game {
   readonly id: string;
+  readonly urlSlug: string;
   readonly center: Position;
+
+  private _player1?: Player;
+  private _player2?: Player;
+  private _inControl: 0 | 1 = 0;
+  private _finishLineId?: string;
+  private _messageTextId?: string;
+  private _player1TextId?: string;
+  private _player2TextId?: string;
+  private _player1ScoreId?: string;
+  private _player2ScoreId?: string;
+  private _lastUpdated: Date;
+
   public clearStatus = this.clearMoves;
   private _moves: [string?, string?, string?, string?, string?, string?, string?, string?, string?];
   private _status: [number, number, number, number, number, number, number, number, number];
 
-  constructor(center: Position) {
+  constructor(center: Position, urlSlug: string) {
     this.center = center;
+    this.urlSlug = urlSlug;
     this.id = utils.generateRandomString();
     this._status = [0, 0, 0, 0, 0, 0, 0, 0, 0];
     this._moves = [];
     this._inControl = 0;
     this._lastUpdated = new Date();
   }
-
-  private _player1?: Player;
 
   get player1() {
     return this._player1;
@@ -70,8 +82,6 @@ export class Game {
     this._lastUpdated = new Date();
   }
 
-  private _player2?: Player;
-
   get player2() {
     return this._player2;
   }
@@ -81,14 +91,9 @@ export class Game {
     this._lastUpdated = new Date();
   }
 
-  // startBtnId?: string;
-  private _inControl: 0 | 1 = 0;
-
   get inControl() {
     return this._inControl;
   }
-
-  private _finishLineId?: string;
 
   get finishLineId() {
     return this._finishLineId;
@@ -99,8 +104,6 @@ export class Game {
     this._lastUpdated = new Date();
   }
 
-  private _messageTextId?: string;
-
   get messageTextId() {
     return this._messageTextId;
   }
@@ -109,8 +112,6 @@ export class Game {
     this._messageTextId = id;
     this._lastUpdated = new Date();
   }
-
-  private _player1TextId?: string;
 
   get player1TextId() {
     return this._player1TextId;
@@ -121,8 +122,6 @@ export class Game {
     this._lastUpdated = new Date();
   }
 
-  private _player2TextId?: string;
-
   get player2TextId() {
     return this._player2TextId;
   }
@@ -131,8 +130,6 @@ export class Game {
     this._player2TextId = id;
     this._lastUpdated = new Date();
   }
-
-  private _player1ScoreId?: string;
 
   get player1ScoreId() {
     return this._player1ScoreId;
@@ -143,8 +140,6 @@ export class Game {
     this._lastUpdated = new Date();
   }
 
-  private _player2ScoreId?: string;
-
   get player2ScoreId() {
     return this._player2ScoreId;
   }
@@ -153,8 +148,6 @@ export class Game {
     this._player2ScoreId = id;
     this._lastUpdated = new Date();
   }
-
-  private _lastUpdated: Date;
 
   get lastUpdated() {
     return this._lastUpdated;
