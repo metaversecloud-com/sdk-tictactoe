@@ -1,4 +1,4 @@
-import tttUtils from "../ttt.utils.js";
+import tttUtils, { cellWidth } from "../ttt.utils.js";
 import { Request, Response } from "express";
 import topiaAdapter from "../adapters/topia.adapter.js";
 import { Game, Player, Position } from "../topia/topia.models.js";
@@ -6,7 +6,6 @@ import { initDroppedAsset } from "../topia/topia.factories.js";
 import { DroppedAssetInterface } from "@rtsdk/topia";
 import mongoAdapter from "../adapters/mongo.adapter";
 
-const cellWidth = 80;
 const TTL = 0.5; // In hour
 
 const ticTacToeController = {
@@ -74,12 +73,10 @@ const ticTacToeController = {
       center.x -= 6.5 * cellWidth * scale;
 
     if (!activeGame) {
-      activeGame = new Game(center, urlSlug);
+      activeGame = new Game(center, urlSlug, req.visitor.credentials);
       await mongoAdapter.saveGame(activeGame);
       // todo if webhooks can be added on the fly, then add all the webimageassets on all the cells
-      // topiaAdapter.createWebImage({
-      //   urlSlug, imageUrl: `${process.env.API_URL}/turn_marker.png`, position: center, credentials: req.visitor.credentials, uniqueName:
-      // });
+
     }
 
     activeGame[`player${player + 1}`] = { visitorId, username };
@@ -151,7 +148,7 @@ const ticTacToeController = {
     if (action === "entered") {
       if (!activeGame) {
         // Get position of assetID -NPNcpKdPhRyhnL0VWf_ for center, and the first player box is
-        activeGame = new Game(center, urlSlug);
+        activeGame = new Game(center, urlSlug, req.visitor.credentials);
         await mongoAdapter.saveGame(activeGame);
       }
 
@@ -220,16 +217,8 @@ const ticTacToeController = {
 
     const cellAsset = (await initDroppedAsset().get(assetId, urlSlug, { credentials: req.visitor.credentials })) as DroppedAssetInterface;
 
-    // game.getStatus(cell) = pVisitorId;
-    // game.inControl = (game.inControl + 1) % 2 as 0 | 1;
-    // console.log("urlSlug: ", urlSlug, "\nassetId: ", assetId, "\npVisitorId: ", pVisitorId, "\ngame.status: ", game.status);
-
-    // todo drop a ❌ or a ⭕
-    const move = await tttUtils.makeMove({
-      urlSlug, gameId: game.id, position: new Position(cellAsset.position), credentials: req.visitor.credentials,
-      cross: pVisitorId === game.player1!!.visitorId,
-    });
-    game.addMove(cell, move.id);
+    // Changing image URL to a ❌ or a ⭕
+    await game.makeMove(cell, cellAsset, req.visitor.credentials);
     // console.log("game.moves: ", game.moves);
 
     const r = tttUtils.findWinningCombo(game);
@@ -247,7 +236,7 @@ const ticTacToeController = {
       urlSlug: req.body.urlSlug, textWidth: 300, uniqueName: `win_msg${game.id}`,
     }))?.id;
     res.status(200).send({ message: "Move made." });
-  },
+  }
 };
 
 export default ticTacToeController;

@@ -1,11 +1,11 @@
-import { Game, Position } from "./topia/topia.models.js";
+import { Game } from "./topia/topia.models.js";
 import topiaAdapter from "./adapters/topia.adapter.js";
 import { initDroppedAsset, initVisitor, initWorld } from "./topia/topia.factories.js";
 import { DroppedAsset, DroppedAssetInterface, InteractiveCredentials, User } from "@rtsdk/topia";
 import { TttStats } from "./models";
 import DataObject from "./topia/DataObject.js";
 
-const cellWidth = 80;
+export const cellWidth = 80;
 
 export const WinningCombo = {
   H_TOP: [0, 1, 2],
@@ -108,19 +108,6 @@ export default {
     return startBtn;
   },
 
-  makeMove: async (options: {
-    urlSlug: string,
-    gameId: String,
-    cross: boolean,
-    position: Position,
-    credentials: InteractiveCredentials
-  }) => topiaAdapter.createWebImage({
-    ...options, ...{
-      imageUrl: `${process.env.API_URL}/${options.cross ? "pink_cross" : "blue_o"}.png`,
-      uniqueName: `${Date.now()}_move${options.gameId}`,
-    },
-  }),
-
   /**
    * Drops a finish line in the world
    */
@@ -193,7 +180,7 @@ export default {
     await Promise.allSettled([finishLine?.deleteDroppedAsset(), message?.deleteDroppedAsset(),
       player1Text?.deleteDroppedAsset(), player1Score?.deleteDroppedAsset(), player2Score?.deleteDroppedAsset(),
       player2Text?.deleteDroppedAsset(), ...moves.map(m => m.deleteDroppedAsset())]);
-    activeGame.reset();
+    return activeGame.reset(credentials);
   },
 
   removeMessages: async (urlSlug: string, gameId: string, credentials: InteractiveCredentials) => {
@@ -240,5 +227,5 @@ export default {
 
     game[`player${player + 1}TextId`] = nameAsset?.id;
     game[`player${player + 1}ScoreId`] = scoreAsset?.id;
-  },
+  }
 };
