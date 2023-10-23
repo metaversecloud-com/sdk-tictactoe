@@ -2,12 +2,13 @@ name: OCI_Deploy
 
 on:
   push:
-    branches: [ dev ]
+    branches: [ development ]
   workflow_dispatch:
     inputs:
       env:
         required: true
         type: string
+        description: 'The dev environment'
         default: 'dev'
 env:
   REPOSITORY: 'sdk-apps'
