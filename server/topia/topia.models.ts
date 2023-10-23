@@ -1,8 +1,8 @@
 import { initAsset, initDroppedAsset } from "./topia.factories.js";
 import { DroppedAsset, DroppedAssetInterface, InteractiveCredentials } from "@rtsdk/topia";
 import utils from "../utils.js";
-import topiaAdapter from "../adapters/topia.adapter";
-import { cellWidth } from "../ttt.utils";
+import topiaAdapter from "../adapters/topia.adapter.js";
+import { cellWidth } from "../ttt.utils.js";
 
 export const InteractiveAsset = async (options: {
   id: string, credentials: InteractiveCredentials, position: Position,

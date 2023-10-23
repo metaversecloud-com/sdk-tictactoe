@@ -1,7 +1,7 @@
-import { Game } from "../topia/topia.models";
-import DataObject from "../topia/DataObject";
+import { Game } from "../topia/topia.models.js";
+import DataObject from "../topia/DataObject.js";
 import { InteractiveCredentials, WorldInterface } from "@rtsdk/topia";
-import { initWorld } from "../topia/topia.factories";
+import { initWorld } from "../topia/topia.factories.js";
 
 const _cache: { [urlSlug: string]: Game } = {};
 
