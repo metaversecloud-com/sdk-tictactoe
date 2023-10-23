@@ -52,7 +52,7 @@ const ticTacToeController = {
 
     let activeGame = await storageAdapter.getGame(urlSlug, req.visitor.credentials);
 
-    if (activeGame && activeGame.lastUpdated.getTime() > Date.now() - 1000 * 60 * 60 * TTL) {
+    if (activeGame && activeGame.lastUpdated > Date.now() - 1000 * 60 * 60 * TTL) {
       // let the player be re-assigned if the game has not been updated from quite some time.
       if (!player && activeGame.player1)
         return res.status(400).send({ message: "Player 1 already selected." });

@@ -61,19 +61,22 @@ export class Game {
     return this._player1;
   }
 
-  set player1(p: Player | undefined) {
-    this._player1 = p;
-    this._lastUpdated = new Date();
-  }
+  private _lastUpdated: number;
   private _inControl: 0 | 1 = 0;
 
   get player2() {
     return this._player2;
   }
 
-  set player2(p: Player | undefined) {
-    this._player2 = p;
-    this._lastUpdated = new Date();
+  constructor(center: Position, urlSlug: string, credentials: InteractiveCredentials) {
+    this.center = center;
+    this.urlSlug = urlSlug;
+    this.id = utils.generateRandomString();
+    this._status = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+    this._inControl = 0;
+    this._lastUpdated = Date.now();
+    this._moves = [];
+    this.createWebImages(credentials).then(() => console.log(`Created web images for ${this.id}`));
   }
   private _finishLineId?: string;
 
@@ -86,9 +89,9 @@ export class Game {
     return this._finishLineId;
   }
 
-  set finishLineId(id: string | undefined) {
-    this._finishLineId = id;
-    this._lastUpdated = new Date();
+  set player1(p: Player | undefined) {
+    this._player1 = p;
+    this._lastUpdated = Date.now();
   }
   private _player1TextId?: string;
 
@@ -96,9 +99,9 @@ export class Game {
     return this._messageTextId;
   }
 
-  set messageTextId(id: string | undefined) {
-    this._messageTextId = id;
-    this._lastUpdated = new Date();
+  set player2(p: Player | undefined) {
+    this._player2 = p;
+    this._lastUpdated = Date.now();
   }
   private _player2TextId?: string;
 
@@ -106,9 +109,9 @@ export class Game {
     return this._player1TextId;
   }
 
-  set player1TextId(id: string | undefined) {
-    this._player1TextId = id;
-    this._lastUpdated = new Date();
+  set finishLineId(id: string | undefined) {
+    this._finishLineId = id;
+    this._lastUpdated = Date.now();
   }
   private _player1ScoreId?: string;
 
@@ -116,9 +119,9 @@ export class Game {
     return this._player2TextId;
   }
 
-  set player2TextId(id: string | undefined) {
-    this._player2TextId = id;
-    this._lastUpdated = new Date();
+  set messageTextId(id: string | undefined) {
+    this._messageTextId = id;
+    this._lastUpdated = Date.now();
   }
   private _player2ScoreId?: string;
 
@@ -126,30 +129,28 @@ export class Game {
     return this._player1ScoreId;
   }
 
-  set player1ScoreId(id: string | undefined) {
-    this._player1ScoreId = id;
-    this._lastUpdated = new Date();
+  set player1TextId(id: string | undefined) {
+    this._player1TextId = id;
+    this._lastUpdated = Date.now();
   }
-  private _lastUpdated: Date;
+
+  set player2TextId(id: string | undefined) {
+    this._player2TextId = id;
+    this._lastUpdated = Date.now();
+  }
 
   get player2ScoreId() {
     return this._player2ScoreId;
   }
 
-  set player2ScoreId(id: string | undefined) {
-    this._player2ScoreId = id;
-    this._lastUpdated = new Date();
+  set player1ScoreId(id: string | undefined) {
+    this._player1ScoreId = id;
+    this._lastUpdated = Date.now();
   }
 
-  constructor(center: Position, urlSlug: string, credentials: InteractiveCredentials) {
-    this.center = center;
-    this.urlSlug = urlSlug;
-    this.id = utils.generateRandomString();
-    this._status = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-    this._inControl = 0;
-    this._lastUpdated = new Date();
-    this._moves = [];
-    this.createWebImages(credentials).then(() => console.log(`Created web images for ${this.id}`));
+  set player2ScoreId(id: string | undefined) {
+    this._player2ScoreId = id;
+    this._lastUpdated = Date.now();
   }
 
   get lastUpdated() {
@@ -173,7 +174,7 @@ export class Game {
 
     this._status[i] = this._inControl ? this._player2.visitorId : this._player1.visitorId;
     this._inControl = ((this._inControl + 1) % 2) as 0 | 1;
-    this._lastUpdated = new Date();
+    this._lastUpdated = Date.now();
   }
 
   async clearMoves(credentials: InteractiveCredentials) {
@@ -182,7 +183,7 @@ export class Game {
       .map(async a => a.updateWebImageLayers(`${process.env.API_URL}/blank.png`, ""));
     await Promise.allSettled(promises);
     this._status = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-    this._lastUpdated = new Date();
+    this._lastUpdated = Date.now();
   }
 
   getStatus(i: number) {
