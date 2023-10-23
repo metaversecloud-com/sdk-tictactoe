@@ -215,9 +215,9 @@ export class Game {
         dataObject: {},
         isUniqueOnly: false,
         type: "assetClicked",
-        url: `${process.env.API_URL}/backend/move`,
-        title: "Make a move",
-        description: "Make a move",
+        url: `${process.env.API_URL}/backend/click/${i}`,
+        title: `Make a move`,
+        description: `Make a move at cell ${i}`,
       });
 
       this._moves[i] = cellImage.id;
