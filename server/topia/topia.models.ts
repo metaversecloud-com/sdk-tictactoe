@@ -53,8 +53,9 @@ export class Game {
   private readonly _moves: [string?, string?, string?, string?, string?, string?, string?, string?, string?];
   private _status: [number, number, number, number, number, number, number, number, number];
 
-  private _player1?: Player;
   private _player2?: Player;
+
+  private _player1?: Player;
 
   get player1() {
     return this._player1;
@@ -207,7 +208,10 @@ export class Game {
       const cellImage = await topiaAdapter.createWebImage({
         urlSlug: this.urlSlug,
         imageUrl: `${process.env.API_URL}/blank.png`,
-        position: { x: this.center.x + (i % 3 - 1) * cellWidth, y: this.center.y + (i / 3 - 1) * cellWidth },
+        position: {
+          x: this.center.x + cellWidth * (i % 3 - 1),
+          y: this.center.y + cellWidth * (Math.floor(i / 3) - 1),
+        },
         credentials,
         uniqueName: `${this.id}_cell_${i}`,
       }) as DroppedAssetInterface;

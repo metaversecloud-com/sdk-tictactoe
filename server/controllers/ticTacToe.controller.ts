@@ -46,7 +46,7 @@ const ticTacToeController = {
   playerSelection: async (req: Request, res: Response) => {
     const symbol = req.params.symbol as "cross" | "o";
     const player = symbol === "cross" ? 0 : 1;
-    const { urlSlug, visitorId, assetId, interactiveNonce } = req.body;
+    const { urlSlug, visitorId, assetId } = req.body;
 
     const username = req.body.eventText.split("\"")[1];
 
@@ -64,11 +64,11 @@ const ticTacToeController = {
 
     const scale: number = symbolAsset.assetScale;
     const center = new Position(symbolAsset.position);
-    center.y += 2.5 * cellWidth * scale;
+    center.y += cellWidth * scale;
 
     // fixme calculate the center of the board from the position of the symbolAsset
     if (symbol == "cross")
-      center.x += 6.5 * cellWidth * scale;
+      center.x += 5 * cellWidth * scale;
     else
       center.x -= 6.5 * cellWidth * scale;
 
