@@ -180,7 +180,7 @@ export class Game {
   async clearMoves(credentials: InteractiveCredentials) {
     const promises = this._moves.map(assetId => initDroppedAsset().create(assetId, this.urlSlug, { credentials }))
       .map(a => a as DroppedAssetInterface)
-      .map(async a => a.updateWebImageLayers(`${process.env.API_URL}/blank.png`, ""));
+      .map(async a => a.updateWebImageLayers("", `${process.env.API_URL}/blank.png`));
     await Promise.allSettled(promises);
     this._status = [0, 0, 0, 0, 0, 0, 0, 0, 0];
     this._lastUpdated = Date.now();

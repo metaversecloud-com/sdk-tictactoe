@@ -52,7 +52,7 @@ const topiaAdapter = {
         },
       });
 
-      await webImageAsset.updateWebImageLayers(`${process.env.API_URL}/blank.png`, options.imageUrl);
+      await webImageAsset.updateWebImageLayers(``, options.imageUrl);
       return webImageAsset;
     } catch (e) {
       const r = "Error creating web image";
