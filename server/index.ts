@@ -5,7 +5,6 @@ import bodyParser from "body-parser";
 import "dotenv/config";
 import router from "./routes.js";
 import cors from "cors";
-import mongo from "./mongo/db";
 
 function checkEnvVariables() {
   const requiredEnvVariables = ["INSTANCE_DOMAIN", "INTERACTIVE_KEY", "INTERACTIVE_SECRET"];
@@ -15,6 +14,7 @@ function checkEnvVariables() {
     throw new Error(`Missing required environment variables in the .env file: ${missingVariables.join(", ")}`);
   }
 }
+
 checkEnvVariables();
 
 const PORT = process.env.PORT || 3000;
@@ -40,13 +40,6 @@ if (process.env.NODE_ENV !== "development") {
   });
 }
 
-
-mongo.connect().then(c => {
-  if (c) {
-    app.listen(PORT, () => {
-      console.log(`Server listening on ${PORT}`);
-    });
-  } else {
-    console.error("Error connecting to MongoDB");
-  }
+app.listen(PORT, () => {
+  console.log(`Server listening on ${PORT}`);
 });

@@ -4,7 +4,7 @@ import topiaAdapter from "../adapters/topia.adapter.js";
 import { Game, Player, Position } from "../topia/topia.models.js";
 import { initDroppedAsset } from "../topia/topia.factories.js";
 import { DroppedAssetInterface } from "@rtsdk/topia";
-import mongoAdapter from "../adapters/mongo.adapter";
+import storageAdapter from "../adapters/storage.adapter";
 
 const TTL = 0.5; // In hour
 
@@ -16,7 +16,7 @@ const ticTacToeController = {
   scores: async (req: Request, res: Response) => {
     const urlSlug: string = req.body.urlSlug;
 
-    let activeGame = await mongoAdapter.getGame(urlSlug);
+    let activeGame = await storageAdapter.getGame(urlSlug, req.visitor.credentials);
     if (!activeGame)
       return res.status(404).send({ message: "Game not found." });
 
@@ -29,7 +29,7 @@ const ticTacToeController = {
   resetBoard: async (req: Request, res: Response) => {
     const urlSlug: string = req.body.urlSlug;
 
-    let activeGame = await mongoAdapter.getGame(urlSlug);
+    let activeGame = await storageAdapter.getGame(urlSlug, req.visitor.credentials);
     if (!activeGame)
       return res.status(400).send({ message: "Game not found." });
 
@@ -50,7 +50,7 @@ const ticTacToeController = {
 
     const username = req.body.eventText.split("\"")[1];
 
-    let activeGame = await mongoAdapter.getGame(urlSlug);
+    let activeGame = await storageAdapter.getGame(urlSlug, req.visitor.credentials);
 
     if (activeGame && activeGame.lastUpdated.getTime() > Date.now() - 1000 * 60 * 60 * TTL) {
       // let the player be re-assigned if the game has not been updated from quite some time.
@@ -74,7 +74,7 @@ const ticTacToeController = {
 
     if (!activeGame) {
       activeGame = new Game(center, urlSlug, req.visitor.credentials);
-      await mongoAdapter.saveGame(activeGame);
+      await storageAdapter.saveGame(activeGame, req.visitor.credentials);
       // todo if webhooks can be added on the fly, then add all the webimageassets on all the cells
 
     }
@@ -98,7 +98,8 @@ const ticTacToeController = {
       }))?.id;
     }
 
-    mongoAdapter.saveGame(activeGame).then((r) => console.log("Game saved: ", r)).catch((e) => console.log("Error saving game: ", e));
+    storageAdapter.saveGame(activeGame, req.visitor.credentials).then((r) => console.log("Game saved: ", r))
+      .catch((e) => console.log("Error saving game: ", e));
 
     res.status(200).send({ message: "Player selected." });
   },
@@ -113,7 +114,7 @@ const ticTacToeController = {
 
     const username = req.body.eventText.split("\"")[1];
 
-    let activeGame = await mongoAdapter.getGame(urlSlug);
+    let activeGame = await storageAdapter.getGame(urlSlug, req.visitor.credentials);
 
     if (activeGame && action === "exited") {
       if (player === 1)
@@ -149,7 +150,7 @@ const ticTacToeController = {
       if (!activeGame) {
         // Get position of assetID -NPNcpKdPhRyhnL0VWf_ for center, and the first player box is
         activeGame = new Game(center, urlSlug, req.visitor.credentials);
-        await mongoAdapter.saveGame(activeGame);
+        await storageAdapter.saveGame(activeGame, req.visitor.credentials);
       }
 
       if (player === 1 && !activeGame.player1)
@@ -192,7 +193,7 @@ const ticTacToeController = {
     if (isNaN(pVisitorId))
       return res.status(400).send({ message: "visitorId must be a number." });
 
-    const game = await mongoAdapter.getGame(urlSlug);
+    const game = await storageAdapter.getGame(urlSlug, req.visitor.credentials);
     if (!game)
       return res.status(404).send({ message: "No active games found." });
 

@@ -50,7 +50,7 @@ export class Game {
   readonly urlSlug: string;
   readonly center: Position;
   public clearStatus = this.clearMoves;
-  private _moves: [string?, string?, string?, string?, string?, string?, string?, string?, string?];
+  private readonly _moves: [string?, string?, string?, string?, string?, string?, string?, string?, string?];
   private _status: [number, number, number, number, number, number, number, number, number];
 
   private _player1?: Player;

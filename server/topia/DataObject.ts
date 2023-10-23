@@ -1,11 +1,11 @@
-import { DroppedAssetInterface, UserInterface, VisitorInterface } from "@rtsdk/topia";
+import { DroppedAssetInterface, UserInterface, VisitorInterface, WorldInterface } from "@rtsdk/topia";
 
 /**
  * Generic class to support saving data in dataObjects of Visitor, DroppedAsset or User on Topia.
  *
  * @param
  */
-export default class DataObject<D extends VisitorInterface | DroppedAssetInterface | UserInterface, T> {
+export default class DataObject<D extends VisitorInterface | DroppedAssetInterface | UserInterface | WorldInterface, T> {
   private readonly _fieldName: string;
 
   constructor(fieldName: string) {
@@ -14,6 +14,7 @@ export default class DataObject<D extends VisitorInterface | DroppedAssetInterfa
 
   read = async (dataHolder: D): Promise<T | undefined> => {
     await dataHolder.fetchDataObject();
+    // @ts-ignore
     const d = dataHolder.dataObject as any;
     if (!d || !d[this._fieldName])
       return undefined;
@@ -22,6 +23,8 @@ export default class DataObject<D extends VisitorInterface | DroppedAssetInterfa
 
   write = async (dataHolder: D, value: T) => {
     await dataHolder.fetchDataObject();
+    // fixme remove these once dataObject is added to WorldInterface
+    // @ts-ignore
     let d = dataHolder.dataObject as any;
     if (!d)
       d = {};
@@ -31,6 +34,7 @@ export default class DataObject<D extends VisitorInterface | DroppedAssetInterfa
 
   remove = async (dataHolder: D) => {
     await dataHolder.fetchDataObject();
+    // @ts-ignore
     let d = dataHolder.dataObject as any;
     if (d && d[this._fieldName]) {
       d[this._fieldName] = undefined;
