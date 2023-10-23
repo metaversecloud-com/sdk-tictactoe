@@ -160,6 +160,7 @@ export class Game {
   /**
    *
    * To get all the moves. Iterate i from 0 to 8 and call `getMove(i)`.
+   * todo functions don't work when a game is fetched from data-storage. We may have to keep Game object as POJO and move functions into a separate GameUtils.
    */
   getMove(i: number) {
     // fixme Handle this error peacefully

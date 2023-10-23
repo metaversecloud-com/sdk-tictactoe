@@ -22,12 +22,9 @@ const storageAdapter = {
     // return gameData.write(initWorld().create(game.urlSlug, { credentials }), game);
   },
 
-  getGame: async (urlSlug: string, credentials: InteractiveCredentials): Promise<Game | undefined> => {
-    if (_cache[urlSlug])
-      return _cache[urlSlug];
-
-    return _fetchGame(urlSlug, credentials);
-  },
+  // fixme enable it once the placement of web-images is fixed
+  getGame: async (urlSlug: string, credentials: InteractiveCredentials) => _cache[urlSlug],
+  // ?? await _fetchGame(urlSlug, credentials),
 };
 
 export default storageAdapter;
