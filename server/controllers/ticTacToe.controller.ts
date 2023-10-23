@@ -4,7 +4,7 @@ import topiaAdapter from "../adapters/topia.adapter.js";
 import { Game, Player, Position } from "../topia/topia.models.js";
 import { initDroppedAsset } from "../topia/topia.factories.js";
 import { DroppedAssetInterface } from "@rtsdk/topia";
-import storageAdapter from "../adapters/storage.adapter";
+import storageAdapter from "../adapters/storage.adapter.js";
 
 const TTL = 0.5; // In hour
 

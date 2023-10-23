@@ -2,7 +2,7 @@
   "name": "ttt",
   "private": true,
   "author": "Automatipia-MC",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "An in-world TicTacToe game for Topia.",
   "main": "index.js",
   "workspaces": [

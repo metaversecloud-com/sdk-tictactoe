@@ -1,6 +1,6 @@
 {
   "name": "@ttt/server",
-  "version": "2.4.1",
+  "version": "2.5.0",
   "description": "Handles all the webhooks from Topia world",
   "type": "module",
   "scripts": {
