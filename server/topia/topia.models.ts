@@ -243,7 +243,7 @@ export class Game {
   }
 
   private async createWebImages(credentials: InteractiveCredentials) {
-    const promises = [0, 1, 2, 3, 4, 5, 6, 7, 8].map(async (i) => {
+    const promises = [0, 1, 2, 3, 4, 5, 6, 7, 8].map(async i => {
       const cellImage = await topiaAdapter.createWebImage({
         urlSlug: this.data.urlSlug,
         imageUrl: `${process.env.API_URL}/blank.png`,
@@ -254,6 +254,7 @@ export class Game {
         credentials,
         uniqueName: `${this.data.id}_cell_${i}`,
       }) as DroppedAssetInterface;
+
       await cellImage.addWebhook({
         dataObject: {},
         isUniqueOnly: false,
@@ -266,7 +267,7 @@ export class Game {
       this.data.moves[i] = cellImage.id;
     });
 
-    return Promise.all(promises);
+    return Promise.allSettled(promises);
   }
 
 }
