@@ -73,17 +73,17 @@ const ticTacToeController = {
       center.x -= 6.5 * cellWidth * scale;
 
     if (!activeGame) {
-      activeGame = new Game(center, urlSlug, req.visitor.credentials);
+      activeGame = new Game({ newInstance: { center, urlSlug, credentials: req.visitor.credentials } });
       await storageAdapter.saveGame(activeGame, req.visitor.credentials);
-      // todo if webhooks can be added on the fly, then add all the webimageassets on all the cells
-
     }
 
     activeGame[`player${player + 1}`] = { visitorId, username };
     await tttUtils.showNameAndScore(activeGame, player, symbolAsset, urlSlug, req.visitor.credentials);
 
-    if (activeGame.player1 && activeGame.player2) {
-      await tttUtils.removeMessages(urlSlug, activeGame.id, req.visitor.credentials);
+    if (activeGame.player1 && activeGame.player2 && activeGame.messageTextId) {
+      const messageAsset = initDroppedAsset().create(activeGame.messageTextId, urlSlug, { credentials: req.visitor.credentials });
+      await messageAsset.updateCustomTextAsset(undefined, ``);
+      // await tttUtils.removeMessages(urlSlug, activeGame.id, req.visitor.credentials);
       // activeGame.startBtnId = (await tttUtils.dropStartButton(urlSlug, activeGame, req.visitor.credentials))?.id;
     } else {
       activeGame.messageTextId = (await topiaAdapter.createText({
@@ -155,12 +155,18 @@ const ticTacToeController = {
     game.finishLineId = (await tttUtils.dropFinishLine(urlSlug, game, r.combo, req.visitor.credentials)).id;
 
     // Dropping 👑 and player's name
-    game.messageTextId = (await topiaAdapter.createText({
-      // position: { x: game.center.x, y: game.center.y - 60 },
-      position: { x: game.center.x - cellWidth, y: game.center.y + 2.5 * cellWidth * cellAsset.assetScale },
-      credentials: req.visitor.credentials, text: `👑 ${mover?.username}`, textColor: "#ffffff", textSize: 24,
-      urlSlug: req.body.urlSlug, textWidth: 300, uniqueName: `win_msg${game.id}`,
-    }))?.id;
+    // todo Instead of dropping a new text asset, update the existing one
+    if (game.messageTextId) {
+      const messageAsset = initDroppedAsset().create(game.messageTextId, urlSlug, { credentials: req.visitor.credentials });
+      await messageAsset.updateCustomTextAsset(undefined, `👑 ${mover?.username}`);
+    } else {
+      game.messageTextId = (await topiaAdapter.createText({
+        // position: { x: game.center.x, y: game.center.y - 60 },
+        position: { x: game.center.x - cellWidth, y: game.center.y + 2.5 * cellWidth * cellAsset.assetScale },
+        credentials: req.visitor.credentials, text: `👑 ${mover?.username}`, textColor: "#ffffff", textSize: 24,
+        urlSlug: req.body.urlSlug, textWidth: 300, uniqueName: `win_msg${game.id}`,
+      }))?.id;
+    }
     res.status(200).send({ message: "Move made." });
   }
 };

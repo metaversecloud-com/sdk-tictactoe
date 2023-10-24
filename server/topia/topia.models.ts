@@ -45,116 +45,146 @@ export class Position {
   };
 }
 
-export class Game {
+// pojo
+export class GameData {
   readonly id: string;
   readonly urlSlug: string;
   readonly center: Position;
-  public clearStatus = this.clearMoves;
-  private readonly _moves: [string?, string?, string?, string?, string?, string?, string?, string?, string?];
-  private _status: [number, number, number, number, number, number, number, number, number];
+  moves: [string?, string?, string?, string?, string?, string?, string?, string?, string?];
+  status: [number, number, number, number, number, number, number, number, number];
 
-  private _player2?: Player;
+  player1?: Player;
+  player2?: Player;
 
-  private _player1?: Player;
+  lastUpdated: number;
+  inControl: 0 | 1 = 0;
 
-  get player1() {
-    return this._player1;
-  }
+  finishLineId?: string;
+  messageTextId?: string;
 
-  private _lastUpdated: number;
-  private _inControl: 0 | 1 = 0;
+  player1TextId?: string;
+  player2TextId?: string;
+  player1ScoreId?: string;
+  player2ScoreId?: string;
 
-  get player2() {
-    return this._player2;
-  }
-
-  constructor(center: Position, urlSlug: string, credentials: InteractiveCredentials) {
+  constructor(center: Position, urlSlug: string) {
+    this.id = utils.generateRandomString();
     this.center = center;
     this.urlSlug = urlSlug;
-    this.id = utils.generateRandomString();
-    this._status = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-    this._inControl = 0;
-    this._lastUpdated = Date.now();
-    this._moves = [];
-    this.createWebImages(credentials).then(() => console.log(`Created web images for ${this.id}`));
+    this.moves = [];
+    this.status = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+    this.lastUpdated = Date.now();
   }
-  private _finishLineId?: string;
+}
 
-  get inControl() {
-    return this._inControl;
+export class Game {
+  data: GameData;
+
+  constructor(options: {
+    newInstance?: { center: Position, urlSlug: string, credentials: InteractiveCredentials },
+    data?: GameData
+  }) {
+    if (!options.newInstance && !options.data)
+      throw new Error("Either newInstance or data must be provided.");
+
+    if (options.data)
+      this.data = options.data;
+    else if (options.newInstance) {
+      this.data = new GameData(options.newInstance.center, options.newInstance.urlSlug);
+      this.createWebImages(options.newInstance.credentials).then(() => console.log(`Created web images for ${this.data.id}`));
+    }
   }
-  private _messageTextId?: string;
 
-  get finishLineId() {
-    return this._finishLineId;
+  get id() {
+    return this.data.id;
+  }
+
+  get urlSlug() {
+    return this.data.urlSlug;
+  }
+
+  get center() {
+    return this.data.center;
+  }
+
+  get player1() {
+    return this.data.player1;
   }
 
   set player1(p: Player | undefined) {
-    this._player1 = p;
-    this._lastUpdated = Date.now();
+    this.data.player1 = p;
+    this.data.lastUpdated = Date.now();
   }
-  private _player1TextId?: string;
 
-  get messageTextId() {
-    return this._messageTextId;
+  get player2() {
+    return this.data.player2;
   }
 
   set player2(p: Player | undefined) {
-    this._player2 = p;
-    this._lastUpdated = Date.now();
+    this.data.player2 = p;
+    this.data.lastUpdated = Date.now();
   }
-  private _player2TextId?: string;
 
-  get player1TextId() {
-    return this._player1TextId;
+  get inControl() {
+    return this.data.inControl;
+  }
+
+  get finishLineId() {
+    return this.data.finishLineId;
   }
 
   set finishLineId(id: string | undefined) {
-    this._finishLineId = id;
-    this._lastUpdated = Date.now();
-  }
-  private _player1ScoreId?: string;
-
-  get player2TextId() {
-    return this._player2TextId;
+    this.data.finishLineId = id;
+    this.data.lastUpdated = Date.now();
   }
 
-  set messageTextId(id: string | undefined) {
-    this._messageTextId = id;
-    this._lastUpdated = Date.now();
-  }
-  private _player2ScoreId?: string;
-
-  get player1ScoreId() {
-    return this._player1ScoreId;
+  get player1TextId() {
+    return this.data.player1TextId;
   }
 
   set player1TextId(id: string | undefined) {
-    this._player1TextId = id;
-    this._lastUpdated = Date.now();
+    this.data.player1TextId = id;
+    this.data.lastUpdated = Date.now();
+  }
+
+  get player2TextId() {
+    return this.data.player2TextId;
   }
 
   set player2TextId(id: string | undefined) {
-    this._player2TextId = id;
-    this._lastUpdated = Date.now();
+    this.data.player2TextId = id;
+    this.data.lastUpdated = Date.now();
   }
 
-  get player2ScoreId() {
-    return this._player2ScoreId;
+  get messageTextId() {
+    return this.data.messageTextId;
+  }
+
+  set messageTextId(id: string | undefined) {
+    this.data.messageTextId = id;
+    this.data.lastUpdated = Date.now();
+  }
+
+  get player1ScoreId() {
+    return this.data.player1ScoreId;
   }
 
   set player1ScoreId(id: string | undefined) {
-    this._player1ScoreId = id;
-    this._lastUpdated = Date.now();
+    this.data.player1ScoreId = id;
+    this.data.lastUpdated = Date.now();
+  }
+
+  get player2ScoreId() {
+    return this.data.player2ScoreId;
   }
 
   set player2ScoreId(id: string | undefined) {
-    this._player2ScoreId = id;
-    this._lastUpdated = Date.now();
+    this.data.player2ScoreId = id;
+    this.data.lastUpdated = Date.now();
   }
 
   get lastUpdated() {
-    return this._lastUpdated;
+    return this.data.lastUpdated;
   }
 
   /**
@@ -166,56 +196,56 @@ export class Game {
     // fixme Handle this error peacefully
     if (i < 0 || i > 8)
       throw new Error("IndexOutOfBounds");
-    return this._moves[i];
+    return this.data.moves[i];
   }
 
   async makeMove(i: number, cellAsset: DroppedAssetInterface | undefined, credentials: InteractiveCredentials) {
-    cellAsset = cellAsset ?? initDroppedAsset().create(this._moves[i], this.urlSlug, { credentials }) as DroppedAssetInterface;
-    await cellAsset.updateWebImageLayers(``, `${process.env.API_URL}/${this._inControl ? "blue_o" : "pink_cross"}.png`);
+    cellAsset = cellAsset ?? initDroppedAsset().create(this.data.moves[i], this.data.urlSlug, { credentials }) as DroppedAssetInterface;
+    await cellAsset.updateWebImageLayers(``, `${process.env.API_URL}/${this.data.inControl ? "blue_o" : "pink_cross"}.png`);
 
-    this._status[i] = this._inControl ? this._player2.visitorId : this._player1.visitorId;
-    this._inControl = ((this._inControl + 1) % 2) as 0 | 1;
-    this._lastUpdated = Date.now();
+    this.data.status[i] = this.data.inControl ? this.data.player2.visitorId : this.data.player1.visitorId;
+    this.data.inControl = ((this.data.inControl + 1) % 2) as 0 | 1;
+    this.data.lastUpdated = Date.now();
   }
 
   async clearMoves(credentials: InteractiveCredentials) {
-    const promises = this._moves.map(assetId => initDroppedAsset().create(assetId, this.urlSlug, { credentials }))
+    const promises = this.data.moves.map(assetId => initDroppedAsset().create(assetId, this.data.urlSlug, { credentials }))
       .map(a => a as DroppedAssetInterface)
       .map(async a => a.updateWebImageLayers("", `${process.env.API_URL}/blank.png`));
     await Promise.allSettled(promises);
-    this._status = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-    this._lastUpdated = Date.now();
+    this.data.status = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+    this.data.lastUpdated = Date.now();
   }
 
   getStatus(i: number) {
     if (i < 0 || i > 8)
       throw new Error("IndexOutOfBounds");
-    return this._status[i];
+    return this.data.status[i];
   }
 
   async reset(credentials: InteractiveCredentials) {
-    this._messageTextId = undefined;
-    this._finishLineId = undefined;
-    this._player1TextId = undefined;
-    this._player2TextId = undefined;
-    this._player1ScoreId = undefined;
-    this._player2ScoreId = undefined;
-    this._player1 = undefined;
-    this._player2 = undefined;
+    this.data.messageTextId = undefined;
+    this.data.finishLineId = undefined;
+    this.data.player1TextId = undefined;
+    this.data.player2TextId = undefined;
+    this.data.player1ScoreId = undefined;
+    this.data.player2ScoreId = undefined;
+    this.data.player1 = undefined;
+    this.data.player2 = undefined;
     return this.clearMoves(credentials);
   }
 
   private async createWebImages(credentials: InteractiveCredentials) {
     const promises = [0, 1, 2, 3, 4, 5, 6, 7, 8].map(async (i) => {
       const cellImage = await topiaAdapter.createWebImage({
-        urlSlug: this.urlSlug,
+        urlSlug: this.data.urlSlug,
         imageUrl: `${process.env.API_URL}/blank.png`,
         position: {
-          x: this.center.x + cellWidth * (i % 3 - 1),
-          y: this.center.y + cellWidth * (Math.floor(i / 3) - 1),
+          x: this.data.center.x + cellWidth * (i % 3 - 1),
+          y: this.data.center.y + cellWidth * (Math.floor(i / 3) - 1),
         },
         credentials,
-        uniqueName: `${this.id}_cell_${i}`,
+        uniqueName: `${this.data.id}_cell_${i}`,
       }) as DroppedAssetInterface;
       await cellImage.addWebhook({
         dataObject: {},
@@ -226,7 +256,7 @@ export class Game {
         description: `Make a move at cell ${i}`,
       });
 
-      this._moves[i] = cellImage.id;
+      this.data.moves[i] = cellImage.id;
     });
 
     return Promise.all(promises);

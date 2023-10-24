@@ -88,26 +88,6 @@ export default {
     return { player: game.getStatus(combo[0]), combo };
   },
 
-  dropStartButton: async (urlSlug: string, game: Game, credentials: InteractiveCredentials) => {
-    // todo drop a start button at the given position, set a webhook to start the game as well
-    const startBtn = await topiaAdapter.createWebImage({
-      urlSlug, imageUrl: `${process.env.API_URL}/start_button.png`, position: game.center,
-      uniqueName: `start_btn${game.id}`, credentials,
-    });
-
-    await startBtn.addWebhook({
-      dataObject: {},
-      isUniqueOnly: false,
-      type: "assetClicked",
-      url: `${process.env.API_URL}/backend/start`,
-      title: "Start Game",
-      description: "Starts the game",
-    });
-
-    // game.startBtnId = startBtn.id;
-    return startBtn;
-  },
-
   /**
    * Drops a finish line in the world
    */
@@ -183,6 +163,9 @@ export default {
     return activeGame.reset(credentials);
   },
 
+  /**
+   * @deprecated Do not remove the message, just remove the text. We want the asset to put the text back.
+   */
   removeMessages: async (urlSlug: string, gameId: string, credentials: InteractiveCredentials) => {
     const world = initWorld().create(urlSlug, { credentials });
     // think of a way to remove messages
@@ -216,7 +199,7 @@ export default {
       uniqueName: `player${player + 1}Text${game.id}`,
       urlSlug, text,
     }), topiaAdapter.createText({
-      position: { x: symbolAsset.position.x, y: symbolAsset.position.y + cellWidth * symbolAsset.assetScale },
+      position: { x: symbolAsset.position.x, y: symbolAsset.position.y + cellWidth * 2 * symbolAsset.assetScale },
       credentials,
       textColor: "#333333",
       textSize: 20,
@@ -227,5 +210,5 @@ export default {
 
     game[`player${player + 1}TextId`] = nameAsset?.id;
     game[`player${player + 1}ScoreId`] = scoreAsset?.id;
-  }
+  },
 };
