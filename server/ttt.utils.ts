@@ -1,9 +1,9 @@
 import { Game } from "./topia/topia.models.js";
 import topiaAdapter from "./adapters/topia.adapter.js";
-import { initDroppedAsset, initVisitor, initWorld } from "./topia/topia.factories.js";
-import { DroppedAsset, DroppedAssetInterface, InteractiveCredentials, User } from "@rtsdk/topia";
-import { TttStats } from "./models";
-import DataObject from "./topia/DataObject.js";
+import { initDroppedAsset } from "./topia/topia.factories.js";
+import { DroppedAsset, DroppedAssetInterface, InteractiveCredentials } from "@rtsdk/topia";
+import { TttStats } from "./models.js";
+import storageAdapter from "./adapters/storage.adapter.js";
 
 export const cellWidth = 80;
 
@@ -44,33 +44,6 @@ export const WinningCombo = {
     return null;
   },
 } as const;
-
-export const statsDO = new DataObject<User, TttStats>("tttStats");
-const _getScores = async (urlSlug: string, game: Game, credentials: InteractiveCredentials) => {
-  const stats: { [visitorId: number]: TttStats } = {};
-
-  if (game.player1) {
-    const v = initVisitor().create(game.player1.visitorId, urlSlug, { credentials });
-    let playerData = await statsDO.read(v);
-    if (!playerData) {
-      playerData = { played: 0, won: 0, lost: 0 };
-      await statsDO.write(v, playerData);
-    }
-    stats[game.player1.visitorId] = playerData;
-  }
-
-  if (game.player2) {
-    const v = initVisitor().create(game.player2.visitorId, urlSlug, { credentials });
-    let playerData = await statsDO.read(v);
-    if (!playerData) {
-      playerData = { played: 0, won: 0, lost: 0 };
-      await statsDO.write(v, playerData);
-    }
-    stats[game.player2.visitorId] = playerData;
-  }
-
-  return stats;
-};
 
 export default {
   updateLeaderboard: () => {
@@ -163,31 +136,34 @@ export default {
     return activeGame.reset(credentials);
   },
 
-  /**
-   * @deprecated Do not remove the message, just remove the text. We want the asset to put the text back.
-   */
-  removeMessages: async (urlSlug: string, gameId: string, credentials: InteractiveCredentials) => {
-    const world = initWorld().create(urlSlug, { credentials });
-    // think of a way to remove messages
-    const messages = await world.fetchDroppedAssetsWithUniqueName({ uniqueName: `message${gameId}`, isPartial: true });
-    console.log("messageAssets.length: ", messages.length);
-    if (messages.length) {
-      await Promise.allSettled(messages.map(m => m.deleteDroppedAsset()));
+  updateNameInGame: async (game: Game, credentials: InteractiveCredentials) => {
+    if (game.player1TextId) {
+      const txtAsset = initDroppedAsset().create(game.player1TextId, game.urlSlug, { credentials });
+      await txtAsset.updateCustomTextAsset(undefined, game.inControl ? game.player1.username : `> ${game.player1.username}`);
+    }
+
+    if (game.player2TextId) {
+      const txtAsset = initDroppedAsset().create(game.player2TextId, game.urlSlug, { credentials });
+      await txtAsset.updateCustomTextAsset(undefined, game.inControl ? `> ${game.player2.username}` : game.player1.username);
     }
   },
 
-  /**
-   * Lifetime scores for the two players in a game
-   *
-   */
-  getScores: _getScores,
+  updateScoreInGame: async (game: Game, player1: boolean, score: TttStats, credentials: InteractiveCredentials) => {
+    if (player1 && game.player1ScoreId) {
+      const txtAsset = initDroppedAsset().create(game.player1ScoreId, game.urlSlug, { credentials });
+      await txtAsset.updateCustomTextAsset(undefined, `${score.played}-${score.won}-${score.lost}`);
+    } else if (game.player2ScoreId) {
+      const txtAsset = initDroppedAsset().create(game.player2ScoreId, game.urlSlug, { credentials });
+      await txtAsset.updateCustomTextAsset(undefined, `${score.played}-${score.won}-${score.lost}`);
+    }
+  },
 
   showNameAndScore: async (game: Game, player: 0 | 1, symbolAsset: DroppedAssetInterface, urlSlug: string, credentials: InteractiveCredentials) => {
     let text = game[`player${player + 1}`].username;
     if (game.inControl == player)
-      text = "➡️ " + text;
+      text = `> ${text}`;
 
-    const score: TttStats = (await _getScores(urlSlug, game, credentials))[game[`player${player + 1}`].visitorId];
+    const score: TttStats = (await storageAdapter.getScores(urlSlug, game, credentials))[game[`player${player + 1}`].visitorId];
     const scoreText = `${score.played}-${score.won}-${score.lost}`;
 
     const [nameAsset, scoreAsset] = await Promise.all([topiaAdapter.createText({

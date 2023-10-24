@@ -199,13 +199,18 @@ export class Game {
     return this.data.moves[i];
   }
 
-  async makeMove(i: number, cellAsset: DroppedAssetInterface | undefined, credentials: InteractiveCredentials) {
+  /**
+   * @returns {Promise<boolean>} `true` if this is the first move made by this player
+   */
+  async makeMove(i: number, cellAsset: DroppedAssetInterface | undefined, credentials: InteractiveCredentials): Promise<boolean> {
     cellAsset = cellAsset ?? initDroppedAsset().create(this.data.moves[i], this.data.urlSlug, { credentials }) as DroppedAssetInterface;
     await cellAsset.updateWebImageLayers(``, `${process.env.API_URL}/${this.data.inControl ? "blue_o" : "pink_cross"}.png`);
 
     this.data.status[i] = this.data.inControl ? this.data.player2.visitorId : this.data.player1.visitorId;
     this.data.inControl = ((this.data.inControl + 1) % 2) as 0 | 1;
     this.data.lastUpdated = Date.now();
+
+    return this.data.status.filter(s => s === this.data.status[i]).length === 1;
   }
 
   async clearMoves(credentials: InteractiveCredentials) {

@@ -20,7 +20,7 @@ const ticTacToeController = {
     if (!activeGame)
       return res.status(404).send({ message: "Game not found." });
 
-    res.status(200).send(tttUtils.getScores(urlSlug, activeGame, req.visitor.credentials));
+    res.status(200).send(storageAdapter.getScores(urlSlug, activeGame, req.visitor.credentials));
   },
 
   /**
@@ -124,10 +124,15 @@ const ticTacToeController = {
 
     // Figure out the player who clicked on this cell
     let mover: Player | undefined = undefined;
-    if (game.player1?.username === username && game.player1?.visitorId && !game.inControl)
+    let player: 0 | 1 = 0;
+    if (game.player1?.username === username && game.player1?.visitorId && !game.inControl) {
       mover = game.player1;
-    if (game.player2?.username === username && game.player2?.visitorId && game.inControl)
+      player = 0;
+    }
+    if (game.player2?.username === username && game.player2?.visitorId && game.inControl) {
       mover = game.player2;
+      player = 1;
+    }
 
     if (!mover)
       return res.status(400).send({ message: "It's not your turn." });
@@ -144,15 +149,43 @@ const ticTacToeController = {
     const cellAsset = (await initDroppedAsset().get(assetId, urlSlug, { credentials: req.visitor.credentials })) as DroppedAssetInterface;
 
     // Changing image URL to a ❌ or a ⭕
-    await game.makeMove(cell, cellAsset, req.visitor.credentials);
+    const firstMove = await game.makeMove(cell, cellAsset, req.visitor.credentials);
     // console.log("game.moves: ", game.moves);
 
     const r = tttUtils.findWinningCombo(game);
-    if (!r)
+    if (!r) {
+      // updating the score if this is the first move made by this player, increase its played count
+      if (firstMove)
+        await tttUtils.updateScoreInGame(game, !!player, (await storageAdapter.updateScore(urlSlug, mover.visitorId, {
+          played: 1,
+          won: 0,
+          lost: 0,
+        }, req.visitor.credentials)), req.visitor.credentials);
+
+      // updating the turn marker in the world
+      await tttUtils.updateNameInGame(game, req.visitor.credentials);
       return res.status(200).send("Move made.");
+    }
 
     // Dropping a finishing line
     game.finishLineId = (await tttUtils.dropFinishLine(urlSlug, game, r.combo, req.visitor.credentials)).id;
+    await storageAdapter.updateScore(urlSlug, mover.visitorId, {
+      played: 0,
+      won: 1,
+      lost: 0,
+    }, req.visitor.credentials);
+    if (player)
+      await storageAdapter.updateScore(urlSlug, game.player1.visitorId, {
+        played: 0,
+        won: 0,
+        lost: 1,
+      }, req.visitor.credentials);
+    else
+      await storageAdapter.updateScore(urlSlug, game.player2.visitorId, {
+        played: 0,
+        won: 0,
+        lost: 1,
+      }, req.visitor.credentials);
 
     // Dropping 👑 and player's name
     // todo Instead of dropping a new text asset, update the existing one
@@ -168,7 +201,7 @@ const ticTacToeController = {
       }))?.id;
     }
     res.status(200).send({ message: "Move made." });
-  }
+  },
 };
 
 export default ticTacToeController;
