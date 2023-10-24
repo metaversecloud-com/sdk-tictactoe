@@ -80,21 +80,6 @@ export class GameData {
 export class Game {
   data: GameData;
 
-  constructor(options: {
-    newInstance?: { center: Position, urlSlug: string, credentials: InteractiveCredentials },
-    data?: GameData
-  }) {
-    if (!options.newInstance && !options.data)
-      throw new Error("Either newInstance or data must be provided.");
-
-    if (options.data)
-      this.data = options.data;
-    else if (options.newInstance) {
-      this.data = new GameData(options.newInstance.center, options.newInstance.urlSlug);
-      this.createWebImages(options.newInstance.credentials).then(() => console.log(`Created web images for ${this.data.id}`));
-    }
-  }
-
   get id() {
     return this.data.id;
   }
@@ -185,6 +170,23 @@ export class Game {
 
   get lastUpdated() {
     return this.data.lastUpdated;
+  }
+
+  async init(options: {
+    newInstance?: { center: Position, urlSlug: string, credentials: InteractiveCredentials },
+    data?: GameData
+  }) {
+    if (!options.newInstance && !options.data)
+      throw new Error("Either newInstance or data must be provided.");
+
+    if (options.data)
+      this.data = options.data;
+    else if (options.newInstance) {
+      this.data = new GameData(options.newInstance.center, options.newInstance.urlSlug);
+      await this.createWebImages(options.newInstance.credentials);
+      console.log(`Created web images for ${this.data.id}`);
+    }
+    return this;
   }
 
   /**
