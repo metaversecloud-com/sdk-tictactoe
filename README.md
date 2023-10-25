@@ -9,7 +9,7 @@
 
 ## Initial Setup
 
-### Setup the npm workspace 
+### Set up the npm workspace
 
 After you have cloned the repository, locate `name` key in the three `package.json` files. Then change the values as the following: 
 

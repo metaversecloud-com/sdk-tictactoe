@@ -183,7 +183,8 @@ export class Game {
       this.data = options.data;
     else if (options.newInstance) {
       this.data = new GameData(options.newInstance.center, options.newInstance.urlSlug);
-      await this.createWebImages(options.newInstance.credentials);
+      const r = await this.createWebImages(options.newInstance.credentials);
+      r.forEach(r1=> r1.status === "rejected" && console.error('Error in creating web-image assets for cells:', r1.reason));
       console.log(`Created web images for ${this.data.id}`);
     }
     return this;
