@@ -12,7 +12,7 @@ export const InteractiveAsset = async (options: {
 }): Promise<DroppedAsset | null> => {
   try {
     const asset = initAsset().create(options.id, { credentials: options.credentials });
-    const droppedAsset = await initDroppedAsset().drop(asset, options);
+    let droppedAsset = await initDroppedAsset().drop(asset, options);
 
     // This adds your public developer key to the dropped asset so visitors can interact with it in-world.
     if (droppedAsset)
@@ -20,6 +20,7 @@ export const InteractiveAsset = async (options: {
         isInteractive: true,
         interactivePublicKey: options.credentials.interactivePublicKey,
       });
+    droppedAsset = await initDroppedAsset().get(droppedAsset.id, options.urlSlug, { credentials: options.credentials });
     return droppedAsset;
   } catch (e: any) {
     const m = "Error creating interactive asset";
