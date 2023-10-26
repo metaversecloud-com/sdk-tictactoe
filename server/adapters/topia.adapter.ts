@@ -44,7 +44,7 @@ const topiaAdapter = {
     urlSlug: string,
   }) => {
     try {
-      return InteractiveAsset({
+      const webImageAsset = await InteractiveAsset({
         ...options, ...{
           id: process.env.WEB_IMAGE || "webImageAsset",
           bottom: "",
@@ -52,8 +52,8 @@ const topiaAdapter = {
         },
       });
 
-      // await webImageAsset.updateWebImageLayers(``, options.imageUrl);
-      // return webImageAsset;
+      await webImageAsset.updateWebImageLayers(``, options.imageUrl);
+      return webImageAsset;
     } catch (e) {
       const r = "Error creating web image";
       console.error(r, e);
