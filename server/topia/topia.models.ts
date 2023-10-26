@@ -1,7 +1,8 @@
 import { initAsset, initDroppedAsset } from "./topia.factories.js";
-import { DroppedAsset, DroppedAssetInterface, InteractiveCredentials } from "@rtsdk/topia";
+import { DroppedAsset, DroppedAssetClickType, DroppedAssetInterface, InteractiveCredentials } from "@rtsdk/topia";
 import utils from "../utils.js";
 import { cellWidth } from "../ttt.utils.js";
+import topiaAdapter from "../adapters/topia.adapter.js";
 
 export const InteractiveAsset = async (options: {
   id: string, credentials: InteractiveCredentials, position: Position,
@@ -11,16 +12,19 @@ export const InteractiveAsset = async (options: {
 }): Promise<DroppedAsset | null> => {
   try {
     const asset = initAsset().create(options.id, { credentials: options.credentials });
-    return initDroppedAsset().drop(asset, { ...options, interactivePublicKey: process.env.INTERACTIVE_KEY });
+    const droppedAsset = await initDroppedAsset().drop(asset, {
+      ...options,
+      interactivePublicKey: options.credentials.interactivePublicKey,
+    });
 
     // This adds your public developer key to the dropped asset so visitors can interact with it in-world.
-    // if (droppedAsset)
-    //   await droppedAsset.setInteractiveSettings({
-    //     isInteractive: true,
-    //     interactivePublicKey: options.credentials.interactivePublicKey,
-    //   });
+    if (droppedAsset)
+      await droppedAsset.setInteractiveSettings({
+        isInteractive: true,
+        interactivePublicKey: options.credentials.interactivePublicKey,
+      });
     // droppedAsset = await initDroppedAsset().get(droppedAsset.id, options.urlSlug, { credentials: options.credentials });
-    // return droppedAsset;
+    return droppedAsset;
   } catch (e: any) {
     const m = "Error creating interactive asset";
     console.log(m, e);
@@ -245,28 +249,16 @@ export class Game {
 
   private async createWebImages(credentials: InteractiveCredentials) {
     const promises = [0, 1, 2, 3, 4, 5, 6, 7, 8].map(async i => {
-      // const cellImage = await topiaAdapter.createWebImage({
-      //   urlSlug: this.data.urlSlug,
-      //   imageUrl: `${process.env.API_URL}/blank.png`,
-      //   position: {
-      //     x: this.data.center.x + cellWidth * (i % 3 - 1),
-      //     y: this.data.center.y + cellWidth * (Math.floor(i / 3) - 1),
-      //   },
-      //   credentials,
-      //   uniqueName: `${this.data.id}_cell_${i}`,
-      // }) as DroppedAssetInterface;
-
-
-      const a = initAsset().create("webImageAsset", { credentials });
-      const cellImage = await initDroppedAsset().drop(a, {
-        interactivePublicKey: process.env.INTERACTIVE_KEY, urlSlug: credentials.urlSlug, position: {
+      const cellImage = await topiaAdapter.createWebImage({
+        urlSlug: this.data.urlSlug,
+        imageUrl: `${process.env.API_URL}/blank.png`,
+        position: {
           x: this.data.center.x + cellWidth * (i % 3 - 1),
           y: this.data.center.y + cellWidth * (Math.floor(i / 3) - 1),
         },
+        credentials,
         uniqueName: `${this.data.id}_cell_${i}`,
-      })
-      console.log("cellImage: ", cellImage);
-      await cellImage.updateWebImageLayers("", `${process.env.API_URL}/blank.png`);
+      }) as DroppedAssetInterface;
 
       await cellImage.addWebhook({
         dataObject: {},
@@ -275,6 +267,15 @@ export class Game {
         url: `${process.env.API_URL}/backend/click/${i}`,
         title: `Make a move`,
         description: `Make a move at cell ${i}`,
+      });
+      await cellImage.updateClickType({
+        clickType: DroppedAssetClickType.LINK,
+        clickableLink: "",
+        clickableDisplayTextDescription: "",
+        clickableLinkTitle: "",
+        clickableDisplayTextHeadline: "",
+        portalName: "",
+        position: { x: 0, y: 0 },
       });
 
       this.data.moves[i] = cellImage.id;

@@ -44,6 +44,11 @@ Notes:
     docker run -p 3000:3000 -p 3001:3001 -d --env INSTANCE_DOMAIN=api.topia.io --env INTERACTIVE_KEY=eDtTM1wKgP0B39pYidZc --env INTERACTIVE_SECRET=1314f7b5-4ec8-46ba-ac8d-8b0c06e11b3b --env CUSTOM_TEXT=rXLgzCs1wxpx96YLZAN5 --env WEB_IMAGE=webImageAsset --env API_URL=https://ttt.topia-randd.io <image_id>
    ```
 
+### Deployments
+
+1. https://ttt.topia-randd.io/ - Dev IP 143.198.150.65
+2. https://tictactoe.topia-randd.io/ - Prod
+
 ## Add your .env environmental variables
 
 For the server you need to set up environment variables. Copy the `.env-exmaple` file and rename it `.env`.
