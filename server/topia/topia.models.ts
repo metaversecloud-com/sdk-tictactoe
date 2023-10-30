@@ -1,8 +1,6 @@
 import { initAsset, initDroppedAsset } from "./topia.factories.js";
-import { DroppedAsset, DroppedAssetClickType, DroppedAssetInterface, InteractiveCredentials } from "@rtsdk/topia";
+import { DroppedAsset, DroppedAssetInterface, InteractiveCredentials } from "@rtsdk/topia";
 import utils from "../utils.js";
-import { cellWidth } from "../ttt.utils.js";
-import topiaAdapter from "../adapters/topia.adapter.js";
 
 export const InteractiveAsset = async (options: {
   id: string, credentials: InteractiveCredentials, position: Position,
@@ -176,7 +174,7 @@ export class Game {
     return this.data.lastUpdated;
   }
 
-  async init(options: {
+  constructor(options: {
     newInstance?: { center: Position, urlSlug: string, credentials: InteractiveCredentials },
     data?: GameData
   }) {
@@ -187,11 +185,7 @@ export class Game {
       this.data = options.data;
     else if (options.newInstance) {
       this.data = new GameData(options.newInstance.center, options.newInstance.urlSlug);
-      const r = await this.createWebImages(options.newInstance.credentials);
-      r.forEach(r1=> r1.status === "rejected" && console.error('Error in creating web-image assets for cells:', r1.reason));
-      console.log(`Created web images for ${this.data.id}`);
     }
-    return this;
   }
 
   /**
@@ -213,6 +207,7 @@ export class Game {
     cellAsset = cellAsset ?? initDroppedAsset().create(this.data.moves[i], this.data.urlSlug, { credentials }) as DroppedAssetInterface;
     await cellAsset.updateWebImageLayers(``, `${process.env.API_URL}/${this.data.inControl ? "blue_o" : "pink_cross"}.png`);
 
+    this.data.moves[i] = cellAsset.id;
     this.data.status[i] = this.data.inControl ? this.data.player2.visitorId : this.data.player1.visitorId;
     this.data.inControl = ((this.data.inControl + 1) % 2) as 0 | 1;
     this.data.lastUpdated = Date.now();
@@ -245,43 +240,6 @@ export class Game {
     this.data.player1 = undefined;
     this.data.player2 = undefined;
     return this.clearMoves(credentials);
-  }
-
-  private async createWebImages(credentials: InteractiveCredentials) {
-    const promises = [0, 1, 2, 3, 4, 5, 6, 7, 8].map(async i => {
-      const cellImage = await topiaAdapter.createWebImage({
-        urlSlug: this.data.urlSlug,
-        imageUrl: `${process.env.API_URL}/blank.png`,
-        position: {
-          x: this.data.center.x + cellWidth * (i % 3 - 1),
-          y: this.data.center.y + cellWidth * (Math.floor(i / 3) - 1),
-        },
-        credentials,
-        uniqueName: `${this.data.id}_cell_${i}`,
-      }) as DroppedAssetInterface;
-
-      await cellImage.addWebhook({
-        dataObject: {},
-        isUniqueOnly: false,
-        type: "assetClicked",
-        url: `${process.env.API_URL}/backend/click/${i}`,
-        title: `Make a move`,
-        description: `Make a move at cell ${i}`,
-      });
-      await cellImage.updateClickType({
-        clickType: DroppedAssetClickType.LINK,
-        clickableLink: "",
-        clickableDisplayTextDescription: "",
-        clickableLinkTitle: "",
-        clickableDisplayTextHeadline: "",
-        portalName: "",
-        position: { x: 0, y: 0 },
-      });
-
-      this.data.moves[i] = cellImage.id;
-    });
-
-    return Promise.allSettled(promises);
   }
 
 }

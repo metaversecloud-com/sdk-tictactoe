@@ -73,7 +73,7 @@ const ticTacToeController = {
       center.x -= 6.5 * cellWidth * scale;
 
     if (!activeGame) {
-      activeGame = await new Game().init({ newInstance: { center, urlSlug, credentials: req.visitor.credentials } });
+      activeGame = new Game({ newInstance: { center, urlSlug, credentials: req.visitor.credentials } });
       await storageAdapter.saveGame(activeGame, req.visitor.credentials);
     }
 

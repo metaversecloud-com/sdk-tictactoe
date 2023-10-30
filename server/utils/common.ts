@@ -16,20 +16,14 @@ export const credentialsFromQuery = (req: any): Credentials => {
     interactiveNonce: query.interactiveNonce as string,
     interactivePublicKey: query.interactivePublicKey as string,
     urlSlug: query.urlSlug as string,
-    visitorId: query.visitorId as string,
+    visitorId: Number(query.visitorId),
     assetId: query.assetId as string,
   };
 };
 
 export const getProfile = async (credentials: Credentials) => {
   try {
-    const visitor = await initVisitor().get(
-      parseInt(credentials.visitorId),
-      credentials.urlSlug,
-      {
-        credentials,
-      },
-    );
+    const visitor = await initVisitor().get(credentials.visitorId, credentials.urlSlug, { credentials });
 
     const { isAdmin, profileId, username } = visitor as any;
 

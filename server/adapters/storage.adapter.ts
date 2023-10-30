@@ -30,7 +30,7 @@ const storageAdapter = {
     // ?? await _fetchGame(urlSlug, credentials);
     if (!data)
       return undefined;
-    return new Game().init({data});
+    return new Game({ data });
   },
 
   getScores: async (urlSlug: string, game: Game, credentials: InteractiveCredentials) => {

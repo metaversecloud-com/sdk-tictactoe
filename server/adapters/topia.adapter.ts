@@ -61,50 +61,6 @@ const topiaAdapter = {
     }
   },
 
-  // findWebhooks: async (urlSlug: string) => {
-  //     const r = await _axios.get<{
-  //         "assetId": null | string,
-  //         "webhookId": null | string,
-  //         "urlSlug": string,
-  //         "url": string,
-  //         "enteredBy": null | string,
-  //         "enteredByUid": null | string,
-  //         "type": string,
-  //         "description": string,
-  //         "dateAdded": {
-  //             "_seconds": number,
-  //             "_nanoseconds": number
-  //         },
-  //         "isUniqueOnly": boolean,
-  //         "active": boolean,
-  //         "title": string
-  //     }[]>(`/world/${urlSlug}/webhooks`,
-  //         {headers: {Authorization: process.env.API_KEY}})
-  //     return r.data
-  // },
-
-  // addWorldWebhook: async (urlSlug: string) => {
-  //     const existingWebhooks = await topiaAdapter.findWebhooks(urlSlug)
-  //     const ourWebhooks = existingWebhooks.filter(wh => wh.type === "join").filter(wh => wh.url.startsWith("https://mini-topia.infinityweb.dev"))
-  //     if (ourWebhooks.length)
-  //         return ourWebhooks[0]
-  //
-  //     const payload = {
-  //         active: true,
-  //         description: "Rings the doorbell",
-  //         enteredBy: "Alok",
-  //         dataObject: {},
-  //         isUniqueOnly: false,
-  //         title: "Ring on join",
-  //         type: "join",
-  //         url: "https://mini-topia.infinityweb.dev/doorbell",
-  //         urlSlug
-  //     }
-  //
-  //     const r = await _axios.post(`/world/${urlSlug}/webhooks`, payload, {headers: {Authorization: process.env.API_KEY}})
-  //     return r.data
-  // },
-
   listAssets: async (email: string, visitor: Visitor) => {
     const user = initUser().create({
       credentials: visitor.credentials,
