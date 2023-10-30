@@ -12,7 +12,11 @@ export default async (req: Request, res: Response, next: NextFunction) => {
 
     const visitor = await initVisitor().get(credentials.visitorId!!, credentials.urlSlug!!, { credentials });
     req.visitor = visitor;
+    console.log(`req.visitor.credentials: `, req.visitor.credentials);
 
+    req.visitor.credentials = credentials;
+
+    console.log(`req.visitor.credentials: `, req.visitor.credentials);
     if (!visitor) {
       const message = "401 Please visit Topia.io to use this app.";
       console.error(message);
