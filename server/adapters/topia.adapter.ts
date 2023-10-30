@@ -1,6 +1,6 @@
 import { InteractiveAsset, Position } from "../topia/topia.models.js";
-import { initUser, initWorld, initWorldActivity } from "../topia/topia.factories.js";
-import { DroppedAsset, DroppedAssetInterface, InteractiveCredentials, Visitor } from "@rtsdk/topia";
+import { initAsset, initDroppedAsset, initUser, initWorld, initWorldActivity } from "../topia/topia.factories.js";
+import { DroppedAssetInterface, InteractiveCredentials, Visitor } from "@rtsdk/topia";
 
 const topiaAdapter = {
   createText: async (options: {
@@ -14,24 +14,23 @@ const topiaAdapter = {
     urlSlug: string,
   }) => {
     try {
-      const textAsset = await InteractiveAsset({
-        ...{
-          id: process.env.CUSTOM_TEXT || "rXLgzCs1wxpx96YLZAN5",
-        }, ...options,
+      const asset = initAsset().create(process.env.CUSTOM_TEXT || "rXLgzCs1wxpx96YLZAN5", { credentials: options.credentials });
+      const textAsset = await initDroppedAsset().drop(asset, {
+        ...options,
+        isInteractive: true,
+        interactivePublicKey: options.credentials.interactivePublicKey,
       });
-
       await textAsset?.updateCustomTextAsset({
-          ...{
             textFontFamily: "Arial",
             textWeight: "normal",
-          }, ...options,
+          ...options,
         },
         options.text,
       );
       return textAsset;
     } catch (e) {
-      const r = "Error updating track text";
-      console.log(r, e);
+      const r = "Error updating text";
+      console.error(r, e);
       return Promise.reject(r);
     }
   },
@@ -45,11 +44,10 @@ const topiaAdapter = {
   }) => {
     try {
       const webImageAsset = await InteractiveAsset({
-        ...options, ...{
+        ...options,
           id: process.env.WEB_IMAGE || "webImageAsset",
           bottom: "",
           top: options.imageUrl,
-        },
       });
 
       await webImageAsset.updateWebImageLayers(``, options.imageUrl);
@@ -70,24 +68,6 @@ const topiaAdapter = {
     await user.fetchAssets();
     return Object.values(user.assets);
   },
-
-  dropAsset: async (urlSlug: string, options: {
-    assetId: string,
-    position: Position,
-    uniqueName?: string
-  }, credentials: InteractiveCredentials): Promise<DroppedAsset | null> => InteractiveAsset({
-    id: options.assetId, position: options.position,
-    uniqueName: options.uniqueName || Date.now() + "", credentials, urlSlug,
-  }),
-
-  dropScene: async (urlSlug: string, config: {
-    sceneId: string,
-    position: {
-      x: number,
-      y: number
-    },
-    assetSuffix: string
-  }, credentials: InteractiveCredentials) => initWorld().create(urlSlug, { credentials }).dropScene(config),
 
   /**
    * Using interactive credentials
