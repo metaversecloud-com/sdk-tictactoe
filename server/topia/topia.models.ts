@@ -216,7 +216,7 @@ export class Game {
   }
 
   async clearMoves(credentials: InteractiveCredentials) {
-    const promises = this.data.moves.map(assetId => initDroppedAsset().create(assetId, this.data.urlSlug, { credentials }))
+    const promises = this.data.moves.filter(a => a).map(assetId => initDroppedAsset().create(assetId, this.data.urlSlug, { credentials }))
       .map(a => a as DroppedAssetInterface)
       .map(async a => a.updateWebImageLayers("", `${process.env.API_URL}/blank.png`));
     await Promise.allSettled(promises);

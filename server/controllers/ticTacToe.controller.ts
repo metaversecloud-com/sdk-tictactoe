@@ -70,7 +70,7 @@ const ticTacToeController = {
     if (symbol == "cross")
       center.x += 5 * cellWidth * scale;
     else
-      center.x -= 6.5 * cellWidth * scale;
+      center.x -= 5.5 * cellWidth * scale;
 
     if (!activeGame) {
       activeGame = new Game({ newInstance: { center, urlSlug, credentials: req.visitor.credentials } });
@@ -80,22 +80,27 @@ const ticTacToeController = {
     activeGame[`player${player + 1}`] = { visitorId, username };
     await tttUtils.showNameAndScore(activeGame, player, symbolAsset, urlSlug, req.visitor.credentials);
 
-    if (activeGame.player1 && activeGame.player2 && activeGame.messageTextId) {
-      const messageAsset = initDroppedAsset().create(activeGame.messageTextId, urlSlug, { credentials: req.visitor.credentials });
-      await messageAsset.updateCustomTextAsset(undefined, ``);
-      // await tttUtils.removeMessages(urlSlug, activeGame.id, req.visitor.credentials);
-      // activeGame.startBtnId = (await tttUtils.dropStartButton(urlSlug, activeGame, req.visitor.credentials))?.id;
+    if (activeGame.player1 && activeGame.player2) {
+      if (activeGame.messageTextId) {
+        const messageAsset = initDroppedAsset().create(activeGame.messageTextId, urlSlug, { credentials: req.visitor.credentials });
+        await messageAsset.updateCustomTextAsset(undefined, ``);
+      }
     } else {
-      activeGame.messageTextId = (await topiaAdapter.createText({
-        position: { x: center.x - cellWidth, y: center.y - 2.5 * cellWidth * scale },
-        credentials: req.visitor.credentials,
-        text: "Find another player!",
-        textColor: "#333333",
-        textSize: 20,
-        urlSlug,
-        textWidth: 300,
-        uniqueName: `message${activeGame.id}`,
-      }))?.id;
+      if (activeGame.messageTextId) {
+        const messageAsset = initDroppedAsset().create(activeGame.messageTextId, urlSlug, { credentials: req.visitor.credentials });
+        await messageAsset.updateCustomTextAsset(undefined, `Waiting for another player...`);
+      } else {
+        activeGame.messageTextId = (await topiaAdapter.createText({
+          position: { x: center.x - cellWidth, y: center.y - 2.5 * cellWidth * scale },
+          credentials: req.visitor.credentials,
+          text: "Find another player!",
+          textColor: "#333333",
+          textSize: 20,
+          urlSlug,
+          textWidth: 300,
+          uniqueName: `message${activeGame.id}`,
+        }))?.id;
+      }
     }
 
     storageAdapter.saveGame(activeGame, req.visitor.credentials).then((r) => console.log("Game saved: ", r))
