@@ -231,12 +231,12 @@ export class Game {
   }
 
   async reset(credentials: InteractiveCredentials) {
-    this.data.messageTextId = undefined;
+    // this.data.messageTextId = undefined;
     this.data.finishLineId = undefined;
-    this.data.player1TextId = undefined;
-    this.data.player2TextId = undefined;
-    this.data.player1ScoreId = undefined;
-    this.data.player2ScoreId = undefined;
+    // this.data.player1TextId = undefined;
+    // this.data.player2TextId = undefined;
+    // this.data.player1ScoreId = undefined;
+    // this.data.player2ScoreId = undefined;
     this.data.player1 = undefined;
     this.data.player2 = undefined;
     return this.clearMoves(credentials);

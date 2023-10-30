@@ -1,5 +1,5 @@
 import { InteractiveAsset, Position } from "../topia/topia.models.js";
-import { initDroppedAsset, initUser, initWorld, initWorldActivity } from "../topia/topia.factories.js";
+import { initUser, initWorld, initWorldActivity } from "../topia/topia.factories.js";
 import { DroppedAsset, DroppedAssetInterface, InteractiveCredentials, Visitor } from "@rtsdk/topia";
 
 const topiaAdapter = {
@@ -88,15 +88,6 @@ const topiaAdapter = {
     },
     assetSuffix: string
   }, credentials: InteractiveCredentials) => initWorld().create(urlSlug, { credentials }).dropScene(config),
-
-  removeDroppedAsset: async (urlSlug: string, droppedAssetId: string, credentials: InteractiveCredentials) => {
-    const droppedAsset = initDroppedAsset().create(droppedAssetId, urlSlug, { credentials });
-    await droppedAsset.deleteDroppedAsset();
-    console.log(`Removed ${droppedAssetId} from ${urlSlug}.`);
-  },
-
-  removeDroppedAssets: async (urlSlug: string, assetIds: string[], credentials: InteractiveCredentials) =>
-    Promise.allSettled(assetIds.map(id => topiaAdapter.removeDroppedAsset(urlSlug, id, credentials))),
 
   /**
    * Using interactive credentials

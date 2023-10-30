@@ -1,10 +1,10 @@
 // common functions
 
-import { Credentials } from "./types";
 import { initDroppedAsset, initVisitor, initWorld } from "../topia/topia.factories";
+import { InteractiveCredentials } from "@rtsdk/topia";
 
 // returns the credentials from the query
-export const credentialsFromQuery = (req: any): Credentials => {
+export const credentialsFromQuery = (req: any): InteractiveCredentials => {
   const requiredFields = ["interactiveNonce", "interactivePublicKey", "urlSlug", "visitorId", "assetId"];
   const { query } = req;
   const missingFields = requiredFields.filter((variable) => !query[variable]);
@@ -21,7 +21,7 @@ export const credentialsFromQuery = (req: any): Credentials => {
   };
 };
 
-export const getProfile = async (credentials: Credentials) => {
+export const getProfile = async (credentials: InteractiveCredentials) => {
   try {
     const visitor = await initVisitor().get(credentials.visitorId, credentials.urlSlug, { credentials });
 
@@ -39,7 +39,7 @@ export const getProfileInformationFromVisitorId = (visitorId: string) => {
 };
 
 // WRITE DATA OBJECT TO DROPPEDASSETID
-export const writeDataObjectToDroppedAssetId = async (credentials: Credentials, droppedAssetId: string, dataObject: any = {}) => {
+export const writeDataObjectToDroppedAssetId = async (credentials: InteractiveCredentials, droppedAssetId: string, dataObject: any = {}) => {
 
   // either empty dataObject
   // or we need to update a key
@@ -53,7 +53,7 @@ export const writeDataObjectToDroppedAssetId = async (credentials: Credentials, 
 // GET DROPPED ASSET BY NAME FROM SCENEDROPID
 
 // returns an array where the key is the dropped assets or asset
-export const getDroppedAssetByNameFromSceneDropId = async (name: string[], credentials: Credentials) => {
+export const getDroppedAssetByNameFromSceneDropId = async (name: string[], credentials: InteractiveCredentials) => {
   try {
     const world = initWorld().create(credentials.urlSlug, { credentials });
     const { sceneDropIds } = (await world.fetchSceneDropIds()) as any;
