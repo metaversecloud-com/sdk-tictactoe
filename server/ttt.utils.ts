@@ -138,7 +138,7 @@ export default {
 
     if (game.player2TextId) {
       const txtAsset = initDroppedAsset().create(game.player2TextId, game.urlSlug, { credentials });
-      await txtAsset.updateCustomTextAsset(undefined, game.inControl ? `> ${game.player2.username}` : game.player1.username);
+      await txtAsset.updateCustomTextAsset(undefined, game.inControl ? `> ${game.player2.username}` : game.player2.username);
     }
   },
 

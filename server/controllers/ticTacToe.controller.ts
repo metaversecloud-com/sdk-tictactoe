@@ -70,7 +70,7 @@ const ticTacToeController = {
     if (symbol == "cross")
       center.x += 5 * cellWidth * scale;
     else
-      center.x -= 5.5 * cellWidth * scale;
+      center.x -= 5 * cellWidth * scale;
 
     if (!activeGame) {
       activeGame = new Game({ newInstance: { center, urlSlug, credentials: req.credentials } });
