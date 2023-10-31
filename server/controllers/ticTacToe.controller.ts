@@ -161,7 +161,7 @@ const ticTacToeController = {
     if (!r) {
       // updating the score if this is the first move made by this player, increase its played count
       if (firstMove)
-        await tttUtils.updateScoreInGame(game, !!player, (await storageAdapter.updateScore(urlSlug, mover.visitorId, {
+        await tttUtils.updateScoreInGame(game, player, (await storageAdapter.updateScore(urlSlug, mover.visitorId, {
           played: 1,
           won: 0,
           lost: 0,

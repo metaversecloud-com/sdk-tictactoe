@@ -142,14 +142,13 @@ export default {
     }
   },
 
-  updateScoreInGame: async (game: Game, player1: boolean, score: TttStats, credentials: InteractiveCredentials) => {
-    if (player1 && game.player1ScoreId) {
-      const txtAsset = initDroppedAsset().create(game.player1ScoreId, game.urlSlug, { credentials });
-      await txtAsset.updateCustomTextAsset(undefined, `${score.played}-${score.won}-${score.lost}`);
-    } else if (game.player2ScoreId) {
-      const txtAsset = initDroppedAsset().create(game.player2ScoreId, game.urlSlug, { credentials });
-      await txtAsset.updateCustomTextAsset(undefined, `${score.played}-${score.won}-${score.lost}`);
-    }
+  updateScoreInGame: async (game: Game, player: 0 | 1, score: TttStats, credentials: InteractiveCredentials) => {
+    let txtAsset: DroppedAsset | undefined;
+    if (!player && game.player1ScoreId)
+      txtAsset = initDroppedAsset().create(game.player1ScoreId, game.urlSlug, { credentials });
+    else if (player && game.player2ScoreId)
+      txtAsset = initDroppedAsset().create(game.player2ScoreId, game.urlSlug, { credentials });
+    await txtAsset?.updateCustomTextAsset(undefined, `${score.played}-${score.won}-${score.lost}`);
   },
 
   showNameAndScore: async (game: Game, player: 0 | 1, symbolAsset: DroppedAssetInterface, urlSlug: string, credentials: InteractiveCredentials) => {
