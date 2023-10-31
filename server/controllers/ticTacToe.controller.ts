@@ -64,7 +64,7 @@ const ticTacToeController = {
 
     const scale: number = symbolAsset.assetScale;
     const center = new Position(symbolAsset.position);
-    center.y += 2.5 * cellWidth * scale;
+    center.y += 2 * cellWidth * scale;
 
     // fixme calculate the center of the board from the position of the symbolAsset
     if (symbol == "cross")
@@ -203,7 +203,7 @@ const ticTacToeController = {
         // position: { x: game.center.x, y: game.center.y - 60 },
         position: {
           x: game.center.x - cellWidth * cellAsset.assetScale,
-          y: game.center.y + 2.5 * cellWidth * cellAsset.assetScale,
+          y: game.center.y + 2 * cellWidth * cellAsset.assetScale,
         },
         credentials: req.credentials, text: `👑 ${mover?.username}`, textColor: "#ffffff", textSize: 24,
         urlSlug: req.body.urlSlug, textWidth: 300, uniqueName: `win_msg${game.id}`,
