@@ -64,7 +64,7 @@ const ticTacToeController = {
 
     const scale: number = symbolAsset.assetScale;
     const center = new Position(symbolAsset.position);
-    center.y += 2 * cellWidth * scale;
+    center.y += 1.5 * cellWidth * scale;
 
     // fixme calculate the center of the board from the position of the symbolAsset
     if (symbol == "cross")
@@ -91,7 +91,7 @@ const ticTacToeController = {
         await messageAsset.updateCustomTextAsset(undefined, `Waiting for another player...`);
       } else {
         activeGame.messageTextId = (await topiaAdapter.createText({
-          position: { x: center.x - cellWidth, y: center.y - 2.5 * cellWidth * scale },
+          position: { x: center.x, y: center.y - 3 * cellWidth * scale },
           credentials: req.credentials,
           text: "Find another player!",
           textColor: "#333333",
