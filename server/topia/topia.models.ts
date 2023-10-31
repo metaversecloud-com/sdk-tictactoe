@@ -1,5 +1,5 @@
 import { initAsset, initDroppedAsset } from "./topia.factories.js";
-import { DroppedAsset, DroppedAssetInterface, InteractiveCredentials } from "@rtsdk/topia";
+import { DroppedAsset, InteractiveCredentials } from "@rtsdk/topia";
 import utils from "../utils.js";
 import storageAdapter from "../adapters/storage.adapter.js";
 
@@ -196,8 +196,8 @@ export class Game {
   /**
    * @returns {Promise<boolean>} `true` if this is the first move made by this player
    */
-  async makeMove(i: number, cellAsset: DroppedAssetInterface | undefined, credentials: InteractiveCredentials): Promise<boolean> {
-    cellAsset = cellAsset ?? initDroppedAsset().create(this.data.moves[i], this.data.urlSlug, { credentials }) as DroppedAssetInterface;
+  async makeMove(i: number, cellAsset: DroppedAsset | undefined, credentials: InteractiveCredentials): Promise<boolean> {
+    cellAsset = cellAsset ?? initDroppedAsset().create(this.data.moves[i], this.data.urlSlug, { credentials });
     await cellAsset.updateWebImageLayers(``, `${process.env.API_URL}/${this.data.inControl ? "blue_o" : "pink_cross"}.png`);
 
     this.data.moves[i] = cellAsset.id;

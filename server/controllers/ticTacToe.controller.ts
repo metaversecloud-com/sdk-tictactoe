@@ -130,11 +130,11 @@ const ticTacToeController = {
     // Figure out the player who clicked on this cell
     let mover: Player | undefined = undefined;
     let player: 0 | 1 = 0;
-    if (game.player1?.username === username && game.player1?.visitorId && !game.inControl) {
+    if (!game.inControl && game.player1?.visitorId && game.player1?.username === username) {
       mover = game.player1;
       player = 0;
     }
-    if (game.player2?.username === username && game.player2?.visitorId && game.inControl) {
+    if (game.inControl && game.player2?.visitorId && game.player2?.username === username) {
       mover = game.player2;
       player = 1;
     }
@@ -151,11 +151,11 @@ const ticTacToeController = {
     if (game.getStatus(cell) !== 0)
       return res.status(400).send({ message: "Cannot place your move here." });
 
-    const cellAsset = (await initDroppedAsset().get(assetId, urlSlug, { credentials: req.credentials })) as DroppedAssetInterface;
+    const cellAsset = await initDroppedAsset().get(assetId, urlSlug, { credentials: req.credentials });
 
     // Changing image URL to a ❌ or a ⭕
     const firstMove = await game.makeMove(cell, cellAsset, req.credentials);
-    // console.log("game.moves: ", game.moves);
+    console.log("firstMove: ", firstMove);
 
     const r = tttUtils.findWinningCombo(game);
     if (!r) {
@@ -169,6 +169,7 @@ const ticTacToeController = {
 
       // updating the turn marker in the world
       await tttUtils.updateNameInGame(game, req.credentials);
+      await storageAdapter.saveGame(game, req.credentials);
       return res.status(200).send("Move made.");
     }
 
@@ -200,11 +201,15 @@ const ticTacToeController = {
     } else {
       game.messageTextId = (await topiaAdapter.createText({
         // position: { x: game.center.x, y: game.center.y - 60 },
-        position: { x: game.center.x - cellWidth, y: game.center.y + 2.5 * cellWidth * cellAsset.assetScale },
+        position: {
+          x: game.center.x - cellWidth,
+          y: game.center.y + 2.5 * cellWidth * (cellAsset as DroppedAssetInterface).assetScale,
+        },
         credentials: req.credentials, text: `👑 ${mover?.username}`, textColor: "#ffffff", textSize: 24,
         urlSlug: req.body.urlSlug, textWidth: 300, uniqueName: `win_msg${game.id}`,
       }))?.id;
     }
+    await storageAdapter.saveGame(game, req.credentials);
     res.status(200).send({ message: "Move made." });
   },
 };
