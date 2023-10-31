@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 import topiaAdapter from "../adapters/topia.adapter.js";
 import { Game, Player, Position } from "../topia/topia.models.js";
 import { initDroppedAsset } from "../topia/topia.factories.js";
-import { DroppedAssetInterface } from "@rtsdk/topia";
+import { DroppedAsset, DroppedAssetInterface } from "@rtsdk/topia";
 import storageAdapter from "../adapters/storage.adapter.js";
 
 const TTL = 0.5; // In hour
@@ -64,13 +64,13 @@ const ticTacToeController = {
 
     const scale: number = symbolAsset.assetScale;
     const center = new Position(symbolAsset.position);
-    center.y += cellWidth * scale;
+    center.y += 2.5 * cellWidth * scale;
 
     // fixme calculate the center of the board from the position of the symbolAsset
     if (symbol == "cross")
-      center.x += 5 * cellWidth * scale;
+      center.x += 4.5 * cellWidth * scale;
     else
-      center.x -= 5 * cellWidth * scale;
+      center.x -= 5.5 * cellWidth * scale;
 
     if (!activeGame) {
       activeGame = new Game({ newInstance: { center, urlSlug, credentials: req.credentials } });
@@ -151,7 +151,7 @@ const ticTacToeController = {
     if (game.getStatus(cell) !== 0)
       return res.status(400).send({ message: "Cannot place your move here." });
 
-    const cellAsset = await initDroppedAsset().get(assetId, urlSlug, { credentials: req.credentials });
+    const cellAsset = (await initDroppedAsset().get(assetId, urlSlug, { credentials: req.credentials })) as DroppedAsset & DroppedAssetInterface;
 
     // Changing image URL to a ❌ or a ⭕
     const firstMove = await game.makeMove(cell, cellAsset, req.credentials);
@@ -202,8 +202,8 @@ const ticTacToeController = {
       game.messageTextId = (await topiaAdapter.createText({
         // position: { x: game.center.x, y: game.center.y - 60 },
         position: {
-          x: game.center.x - cellWidth,
-          y: game.center.y + 2.5 * cellWidth * (cellAsset as DroppedAssetInterface).assetScale,
+          x: game.center.x - cellWidth * cellAsset.assetScale,
+          y: game.center.y + 2.5 * cellWidth * cellAsset.assetScale,
         },
         credentials: req.credentials, text: `👑 ${mover?.username}`, textColor: "#ffffff", textSize: 24,
         urlSlug: req.body.urlSlug, textWidth: 300, uniqueName: `win_msg${game.id}`,
