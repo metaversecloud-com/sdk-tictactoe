@@ -16,11 +16,11 @@ const ticTacToeController = {
   scores: async (req: Request, res: Response) => {
     const urlSlug: string = req.body.urlSlug;
 
-    let activeGame = await storageAdapter.getGame(urlSlug, req.visitor.credentials);
+    let activeGame = await storageAdapter.getGame(urlSlug, req.credentials);
     if (!activeGame)
       return res.status(404).send({ message: "Game not found." });
 
-    res.status(200).send(storageAdapter.getScores(urlSlug, activeGame, req.visitor.credentials));
+    res.status(200).send(storageAdapter.getScores(urlSlug, activeGame, req.credentials));
   },
 
   /**
@@ -29,14 +29,14 @@ const ticTacToeController = {
   resetBoard: async (req: Request, res: Response) => {
     const urlSlug: string = req.body.urlSlug;
 
-    let activeGame = await storageAdapter.getGame(urlSlug, req.visitor.credentials);
+    let activeGame = await storageAdapter.getGame(urlSlug, req.credentials);
     if (!activeGame)
       return res.status(400).send({ message: "Game not found." });
 
     if (!req.visitor.isAdmin && req.visitor.id !== activeGame.player1?.visitorId && req.visitor.id !== activeGame.player2?.visitorId)
       return res.status(403).send({ message: "You are not authorized to reset this board." });
 
-    await tttUtils.resetBoard(activeGame, urlSlug, req.visitor.credentials);
+    await tttUtils.resetBoard(activeGame, urlSlug, req.credentials);
     return res.status(200).send({ message: "Game reset" });
   },
 
@@ -50,7 +50,7 @@ const ticTacToeController = {
 
     const username = req.body.eventText.split("\"")[1];
 
-    let activeGame = await storageAdapter.getGame(urlSlug, req.visitor.credentials);
+    let activeGame = await storageAdapter.getGame(urlSlug, req.credentials);
 
     if (activeGame && activeGame.lastUpdated > Date.now() - 1000 * 60 * 60 * TTL) {
       // let the player be re-assigned if the game has not been updated from quite some time.
@@ -60,7 +60,7 @@ const ticTacToeController = {
         return res.status(400).send({ message: "Player 2 already selected." });
     }
 
-    const symbolAsset = await initDroppedAsset().get(assetId, urlSlug, { credentials: req.visitor.credentials }) as DroppedAssetInterface;
+    const symbolAsset = await initDroppedAsset().get(assetId, urlSlug, { credentials: req.credentials }) as DroppedAssetInterface;
 
     const scale: number = symbolAsset.assetScale;
     const center = new Position(symbolAsset.position);
@@ -73,26 +73,26 @@ const ticTacToeController = {
       center.x -= 5.5 * cellWidth * scale;
 
     if (!activeGame) {
-      activeGame = new Game({ newInstance: { center, urlSlug, credentials: req.visitor.credentials } });
-      await storageAdapter.saveGame(activeGame, req.visitor.credentials);
+      activeGame = new Game({ newInstance: { center, urlSlug, credentials: req.credentials } });
+      await storageAdapter.saveGame(activeGame, req.credentials);
     }
 
     activeGame[`player${player + 1}`] = { visitorId, username };
-    await tttUtils.showNameAndScore(activeGame, player, symbolAsset, urlSlug, req.visitor.credentials);
+    await tttUtils.showNameAndScore(activeGame, player, symbolAsset, urlSlug, req.credentials);
 
     if (activeGame.player1 && activeGame.player2) {
       if (activeGame.messageTextId) {
-        const messageAsset = initDroppedAsset().create(activeGame.messageTextId, urlSlug, { credentials: req.visitor.credentials });
+        const messageAsset = initDroppedAsset().create(activeGame.messageTextId, urlSlug, { credentials: req.credentials });
         await messageAsset.updateCustomTextAsset(undefined, ``);
       }
     } else {
       if (activeGame.messageTextId) {
-        const messageAsset = initDroppedAsset().create(activeGame.messageTextId, urlSlug, { credentials: req.visitor.credentials });
+        const messageAsset = initDroppedAsset().create(activeGame.messageTextId, urlSlug, { credentials: req.credentials });
         await messageAsset.updateCustomTextAsset(undefined, `Waiting for another player...`);
       } else {
         activeGame.messageTextId = (await topiaAdapter.createText({
           position: { x: center.x - cellWidth, y: center.y - 2.5 * cellWidth * scale },
-          credentials: req.visitor.credentials,
+          credentials: req.credentials,
           text: "Find another player!",
           textColor: "#333333",
           textSize: 20,
@@ -103,7 +103,7 @@ const ticTacToeController = {
       }
     }
 
-    storageAdapter.saveGame(activeGame, req.visitor.credentials).then((r) => console.log("Game saved: ", r))
+    storageAdapter.saveGame(activeGame, req.credentials).then((r) => console.log("Game saved: ", r))
       .catch((e) => console.log("Error saving game: ", e));
 
     res.status(200).send({ message: "Player selected." });
@@ -123,7 +123,7 @@ const ticTacToeController = {
     if (isNaN(pVisitorId))
       return res.status(400).send({ message: "visitorId must be a number." });
 
-    const game = await storageAdapter.getGame(urlSlug, req.visitor.credentials);
+    const game = await storageAdapter.getGame(urlSlug, req.credentials);
     if (!game)
       return res.status(404).send({ message: "No active games found." });
 
@@ -144,17 +144,17 @@ const ticTacToeController = {
 
     if (game.finishLineId) {
       // The game is already won, resetting it.
-      await tttUtils.resetBoard(game, urlSlug, req.visitor.credentials);
+      await tttUtils.resetBoard(game, urlSlug, req.credentials);
       return res.status(200).send({ message: "Game reset." });
     }
 
     if (game.getStatus(cell) !== 0)
       return res.status(400).send({ message: "Cannot place your move here." });
 
-    const cellAsset = (await initDroppedAsset().get(assetId, urlSlug, { credentials: req.visitor.credentials })) as DroppedAssetInterface;
+    const cellAsset = (await initDroppedAsset().get(assetId, urlSlug, { credentials: req.credentials })) as DroppedAssetInterface;
 
     // Changing image URL to a ❌ or a ⭕
-    const firstMove = await game.makeMove(cell, cellAsset, req.visitor.credentials);
+    const firstMove = await game.makeMove(cell, cellAsset, req.credentials);
     // console.log("game.moves: ", game.moves);
 
     const r = tttUtils.findWinningCombo(game);
@@ -165,43 +165,43 @@ const ticTacToeController = {
           played: 1,
           won: 0,
           lost: 0,
-        }, req.visitor.credentials)), req.visitor.credentials);
+        }, req.credentials)), req.credentials);
 
       // updating the turn marker in the world
-      await tttUtils.updateNameInGame(game, req.visitor.credentials);
+      await tttUtils.updateNameInGame(game, req.credentials);
       return res.status(200).send("Move made.");
     }
 
     // Dropping a finishing line
-    game.finishLineId = (await tttUtils.dropFinishLine(urlSlug, game, r.combo, req.visitor.credentials)).id;
+    game.finishLineId = (await tttUtils.dropFinishLine(urlSlug, game, r.combo, req.credentials)).id;
     await storageAdapter.updateScore(urlSlug, mover.visitorId, {
       played: 0,
       won: 1,
       lost: 0,
-    }, req.visitor.credentials);
+    }, req.credentials);
     if (player)
       await storageAdapter.updateScore(urlSlug, game.player1.visitorId, {
         played: 0,
         won: 0,
         lost: 1,
-      }, req.visitor.credentials);
+      }, req.credentials);
     else
       await storageAdapter.updateScore(urlSlug, game.player2.visitorId, {
         played: 0,
         won: 0,
         lost: 1,
-      }, req.visitor.credentials);
+      }, req.credentials);
 
     // Dropping 👑 and player's name
     // todo Instead of dropping a new text asset, update the existing one
     if (game.messageTextId) {
-      const messageAsset = initDroppedAsset().create(game.messageTextId, urlSlug, { credentials: req.visitor.credentials });
+      const messageAsset = initDroppedAsset().create(game.messageTextId, urlSlug, { credentials: req.credentials });
       await messageAsset.updateCustomTextAsset(undefined, `👑 ${mover?.username}`);
     } else {
       game.messageTextId = (await topiaAdapter.createText({
         // position: { x: game.center.x, y: game.center.y - 60 },
         position: { x: game.center.x - cellWidth, y: game.center.y + 2.5 * cellWidth * cellAsset.assetScale },
-        credentials: req.visitor.credentials, text: `👑 ${mover?.username}`, textColor: "#ffffff", textSize: 24,
+        credentials: req.credentials, text: `👑 ${mover?.username}`, textColor: "#ffffff", textSize: 24,
         urlSlug: req.body.urlSlug, textWidth: 300, uniqueName: `win_msg${game.id}`,
       }))?.id;
     }

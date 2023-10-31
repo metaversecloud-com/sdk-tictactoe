@@ -1,11 +1,10 @@
-import { Visitor, VisitorInterface } from "@rtsdk/topia";
-import { Db } from "mongodb";
+import { InteractiveCredentials, Visitor, VisitorInterface } from "@rtsdk/topia";
 
 declare global {
   namespace Express {
     export interface Request {
       visitor?: Visitor & VisitorInterface;
-      db?: Db;
+      credentials?: InteractiveCredentials;
     }
   }
 }

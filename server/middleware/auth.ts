@@ -8,21 +8,17 @@ export default async (req: Request, res: Response, next: NextFunction) => {
 
   try {
     const credentials = utils.credentialsFromRequest(req);
-    console.log(`Extracted credentials: `, credentials);
+    console.debug(`Extracted credentials: `, credentials);
 
     const visitor = await initVisitor().get(credentials.visitorId!!, credentials.urlSlug!!, { credentials });
-    req.visitor = visitor;
-    console.log(`req.visitor.credentials: `, req.visitor.credentials);
-
-    req.visitor.credentials = credentials;
-
-    console.log(`req.visitor.credentials: `, req.visitor.credentials);
     if (!visitor) {
       const message = "401 Please visit Topia.io to use this app.";
       console.error(message);
       return res.status(401).send({ message });
     }
 
+    req.visitor = visitor;
+    req.credentials = credentials;
     return next();
   } catch (e: any) {
     console.error(`Error occurred`, e);

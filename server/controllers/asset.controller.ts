@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 
 export default {
   getDropped: async (req: Request, res: Response) =>
-    res.status(200).send(await topiaAdapter.getDroppedAssets(req.visitor.credentials)),
+    res.status(200).send(await topiaAdapter.getDroppedAssets(req.credentials)),
 
   list: async (req: Request, res: Response) =>
     res.status(200).send(await topiaAdapter.listAssets(req.body.email, req.visitor)),
@@ -15,7 +15,7 @@ export default {
     if (!assets || !assets.length)
       return res.status(200).send({ message: "OK" });
 
-    const droppedAssets = await topiaAdapter.getDroppedAssets(req.visitor.credentials);
+    const droppedAssets = await topiaAdapter.getDroppedAssets(req.credentials);
 
     const selectedAssets = assets.map(id => droppedAssets.find(da => da.id === id));
 
