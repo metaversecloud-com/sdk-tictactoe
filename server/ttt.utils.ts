@@ -121,8 +121,11 @@ export default {
     const player1Score = activeGame.player1ScoreId ? initDroppedAsset().create(activeGame.player1ScoreId, urlSlug, { credentials }) : undefined;
     const player2Score = activeGame.player2ScoreId ? initDroppedAsset().create(activeGame.player2ScoreId, urlSlug, { credentials }) : undefined;
 
-    await Promise.allSettled([finishLine?.deleteDroppedAsset(), message?.updateCustomTextAsset(undefined, ""),
-      player1Text?.updateCustomTextAsset(undefined, ""), player1Score?.updateCustomTextAsset(undefined, ""), player2Score?.updateCustomTextAsset(undefined, ""),
+    await Promise.allSettled([finishLine?.deleteDroppedAsset(),
+      message?.updateCustomTextAsset(undefined, ""),
+      player1Text?.updateCustomTextAsset(undefined, ""),
+      player1Score?.updateCustomTextAsset(undefined, ""),
+      player2Score?.updateCustomTextAsset(undefined, ""),
       player2Text?.updateCustomTextAsset(undefined, "")]);
     return activeGame.reset(credentials);
   },

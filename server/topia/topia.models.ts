@@ -1,6 +1,7 @@
 import { initAsset, initDroppedAsset } from "./topia.factories.js";
 import { DroppedAsset, DroppedAssetInterface, InteractiveCredentials } from "@rtsdk/topia";
 import utils from "../utils.js";
+import storageAdapter from "../adapters/storage.adapter";
 
 export const InteractiveAsset = async (options: {
   id: string, credentials: InteractiveCredentials, position: Position,
@@ -209,11 +210,15 @@ export class Game {
 
   async clearMoves(credentials: InteractiveCredentials) {
     const promises = this.data.moves.filter(a => a).map(assetId => initDroppedAsset().create(assetId, this.data.urlSlug, { credentials }))
-      .map(a => a as DroppedAssetInterface)
-      .map(async a => a.updateWebImageLayers("", `${process.env.API_URL}/blank.png`));
+      .map(a => {
+        // todo remove console.debug
+        console.debug("Clearing move: ", a.id);
+        return a.updateWebImageLayers("", `${process.env.API_URL}/blank.png`);
+      });
     await Promise.allSettled(promises);
     this.data.status = [0, 0, 0, 0, 0, 0, 0, 0, 0];
     this.data.lastUpdated = Date.now();
+    return storageAdapter.saveGame(this, credentials);
   }
 
   getStatus(i: number) {
