@@ -7,7 +7,6 @@ import { DroppedAsset, DroppedAssetInterface } from "@rtsdk/topia";
 import storageAdapter from "../adapters/storage.adapter.js";
 
 const TTL = 0.5; // In hour
-let makingMove = false;
 
 const ticTacToeController = {
 
@@ -78,6 +77,9 @@ const ticTacToeController = {
       await storageAdapter.saveGame(activeGame, req.credentials);
     }
 
+    if (activeGame.player1?.visitorId === visitorId || activeGame.player2?.visitorId === visitorId)
+      return res.status(400).send({ message: "You are already playing this game." });
+
     activeGame[`player${player + 1}`] = { visitorId, username };
     await tttUtils.showNameAndScore(activeGame, player, symbolAsset, urlSlug, req.credentials);
 
@@ -114,30 +116,20 @@ const ticTacToeController = {
    * Handles the moves made by the players.
    */
   gameMoves: async (req: Request, res: Response) => {
-    if (makingMove)
-      return res.status(409).send({ message: "Another move is being made." });
-
-    makingMove = true;
-
     const { urlSlug, assetId, visitorId } = req.body;
+
     const username = req.body.eventText.split("\"")[1];
     const cell = req.params.cell ? Number(req.params.cell) : NaN;
-    if (isNaN(cell)) {
-      makingMove = false;
+    if (isNaN(cell))
       return res.status(400).send({ message: "cell is missing." });
-    }
 
     const pVisitorId = visitorId ? Number(visitorId) : NaN;
-    if (isNaN(pVisitorId)) {
-      makingMove = false;
+    if (isNaN(pVisitorId))
       return res.status(400).send({ message: "visitorId must be a number." });
-    }
 
     const game = await storageAdapter.getGame(urlSlug, req.credentials);
-    if (!game) {
-      makingMove = false;
+    if (!game)
       return res.status(404).send({ message: "No active games found." });
-    }
 
     // Figure out the player who clicked on this cell
     let mover: Player | undefined = undefined;
@@ -151,22 +143,17 @@ const ticTacToeController = {
       player = 1;
     }
 
-    if (!mover) {
-      makingMove = false;
+    if (!mover)
       return res.status(400).send({ message: "It's not your turn." });
-    }
 
     if (game.finishLineId) {
       // The game is already won, resetting it.
       await tttUtils.resetBoard(game, urlSlug, req.credentials);
-      makingMove = false;
       return res.status(200).send({ message: "Game reset." });
     }
 
-    if (game.getStatus(cell) !== 0) {
-      makingMove = false;
+    if (game.getStatus(cell) !== 0)
       return res.status(400).send({ message: "Cannot place your move here." });
-    }
 
     const cellAsset = (await initDroppedAsset().get(assetId, urlSlug, { credentials: req.credentials })) as DroppedAsset & DroppedAssetInterface;
 
@@ -187,7 +174,6 @@ const ticTacToeController = {
       // updating the turn marker in the world
       await tttUtils.updateNameInGame(game, req.credentials);
       await storageAdapter.saveGame(game, req.credentials);
-      makingMove = false;
       return res.status(200).send("Move made.");
     }
 
@@ -228,7 +214,6 @@ const ticTacToeController = {
       }))?.id;
     }
     await storageAdapter.saveGame(game, req.credentials);
-    makingMove = false;
     res.status(200).send({ message: "Move made." });
   },
 };
