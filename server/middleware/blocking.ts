@@ -13,9 +13,12 @@ let processing: { [key: string]: boolean } = {};
  */
 export default async (req: Request, res: Response, next: NextFunction) => {
   const key = req.credentials.urlSlug;
-  if (processing[key])
-    return res.status(409).send({ message: "Currently processing a request." });
-  processing[key] = true;
-  next();
-  processing[key] = false;
+  try {
+    if (processing[key])
+      return res.status(409).send({ message: "Currently processing a request." });
+    processing[key] = true;
+    return next();
+  } finally {
+    processing[key] = false;
+  }
 }
