@@ -11,9 +11,10 @@ let processing: { [key: string]: boolean } = {};
  *
  * CAUTION: This middleware must be used only after `auth` middleware.
  */
-export default async (req: Request, res: Response, next: NextFunction) => {
+export default (req: Request, res: Response, next: NextFunction) => {
   const key = req.credentials.urlSlug;
   try {
+    console.debug(`blocking key: `, key);
     if (processing[key])
       return res.status(409).send({ message: "Currently processing a request." });
     processing[key] = true;
