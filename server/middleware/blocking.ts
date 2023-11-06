@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 
 /**
- * `key` is urlSlug_next.name. This makes sure that only one of the multiple simultaneous calls to the same endpoint is processed.
+ * `key` is urlSlug. This makes sure that only one of the multiple simultaneous calls to the same endpoint is processed.
  */
 let processing: { [key: string]: boolean } = {};
 
@@ -12,7 +12,7 @@ let processing: { [key: string]: boolean } = {};
  * CAUTION: This middleware must be used only after `auth` middleware.
  */
 export default async (req: Request, res: Response, next: NextFunction) => {
-  const key = `${req.credentials.urlSlug}_${next.name}`;
+  const key = req.credentials.urlSlug;
   if (processing[key])
     return res.status(409).send({ message: "Currently processing a request." });
   processing[key] = true;
