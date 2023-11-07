@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { RequestQueue } from "../models";
+import { RequestQueue } from "../models.js";
 
 const queue: RequestQueue = new RequestQueue();
 
