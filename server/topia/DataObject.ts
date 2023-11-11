@@ -21,7 +21,7 @@ export default class DataObject<D extends VisitorInterface | DroppedAssetInterfa
     return d[this._fieldName] as T;
   };
 
-  write = async (dataHolder: D, value: T) => {
+  write = async (dataHolder: D, value: T, lock?: { lockId: string, releaseLock: boolean }) => {
     await dataHolder.fetchDataObject();
     // fixme remove these once dataObject is added to WorldInterface
     // @ts-ignore
@@ -29,6 +29,8 @@ export default class DataObject<D extends VisitorInterface | DroppedAssetInterfa
     if (!d)
       d = {};
     d[this._fieldName] = value;
+    if (lock)
+      return dataHolder.setDataObject(d, { lock });
     return dataHolder.setDataObject(d, {});
   };
 

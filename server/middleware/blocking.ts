@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from "express";
-import { RequestQueue } from "../models.js";
+import DataObject from "../topia/DataObject";
+import { Visitor } from "@rtsdk/topia";
 
-const queue: RequestQueue = new RequestQueue();
+const LockDO = new DataObject<Visitor, boolean>("locking");
 
 /**
  * This middleware is used to allow only one request to an endpoint per `urlSlug` reach the `next` handler. Any more
@@ -9,4 +10,22 @@ const queue: RequestQueue = new RequestQueue();
  *
  * CAUTION: This middleware must be used only after `auth` middleware.
  */
-export default (req: Request, res: Response, next: NextFunction) => queue.enqueue(req, res, next)
+export default async (req: Request, res: Response, next: NextFunction) => {
+  let actionType: "select" | "cell" | "reset" | "" = "";
+
+  if (req.originalUrl.includes("select-player")) {
+    actionType = "select";
+  } else if (req.originalUrl.includes("click")) {
+    actionType = "cell";
+  } else if (req.originalUrl.includes("reset")) {
+    actionType = "reset";
+  }
+
+  const lockId = `${req.credentials.urlSlug}_${actionType}`;
+  console.debug(`blocking key for visitor ${req.visitor.id}: `, lockId);
+  const r = await LockDO.write(req.visitor, true, { lockId, releaseLock: false });
+  console.log(`r: `, JSON.stringify(r, null, 2));
+  if (!r)
+    return res.status(409).send({ message: "Currently processing a request." });
+  return next();
+}
