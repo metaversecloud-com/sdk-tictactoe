@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import DataObject from "../topia/DataObject";
+import DataObject from "../topia/DataObject.js";
 import { Visitor } from "@rtsdk/topia";
 
 const LockDO = new DataObject<Visitor, boolean>("locking");
