@@ -23,9 +23,9 @@ export default async (req: Request, res: Response, next: NextFunction) => {
 
   const lockId = `${req.credentials.urlSlug}_${actionType}`;
   console.debug(`blocking key for visitor ${req.visitor.id}: `, lockId);
-  const r = await LockDO.write(req.visitor, true, { lockId, releaseLock: false });
+  const r = await LockDO.write(req.visitor, true, { lockId });
   console.log(`r: `, JSON.stringify(r, null, 2));
-  if (!r)
+  if (!r || !r.success)
     return res.status(409).send({ message: "Currently processing a request." });
   return next();
 }
