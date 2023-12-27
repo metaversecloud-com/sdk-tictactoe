@@ -1,0 +1,66 @@
+name: AWS-Versioned
+
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+    inputs:
+      version:
+        required: true
+        type: string
+        default: '1.0.0'
+env:
+  REGISTRY: '368076259134.dkr.ecr.us-east-1.amazonaws.com'
+  REPOSITORY: 'SDK-Apps'
+  IMAGE_TAG: 'tictactoe-${{ github.event.inputs.version }}' #${{ github.event.repository.name }}-${{ github.event.inputs.version }})
+  GCP_PROJECT_ID: "topia-gcp" #${{ secrets.GCP_PROJECT_ID }}
+  GCP_REPOSITORY: 'sdk-apps'
+        
+permissions:
+  id-token: write # This is required for requesting the JWT
+  contents: read  # This is required for actions/checkout
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if version exists
+        run: |
+          if [ -z "$(git rev-parse --verify --quiet ${{ github.event.inputs.version }})" ]; then
+            echo "Selected version does not exist: ${{ github.event.inputs.version }}"
+            exit 1
+          else
+            echo "Selected version exists: ${{ github.event.inputs.version }}"
+          fi
+      - name: Checkout
+        uses: actions/checkout@v4.1.1
+        with:
+          ref: ${{ github.event.inputs.version }}
+        
+      - uses: actions/setup-node@v4.0.1
+        with:
+          node-version: 20.10
+          cache: 'npm'
+      - run: npm i
+      - run: CI=false npm run build:prod
+        
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3.0.0
+          
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4.0.1
+        with:
+          role-to-assume: arn:aws:iam::368076259134:role/github-actions-role
+          aws-region: us-east-1
+          
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1.7.1
+
+      - name: Build, tag, and push docker image to Amazon ECR
+        run: |
+          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG  .
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          
+      - name: Publish
+        run: |
+          aws ecs update-service --service $IMAGE_TAG-svc --force-new-deployment --cluster SDK-Example-CLS
