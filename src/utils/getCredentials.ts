@@ -1,5 +1,5 @@
 import { Credentials } from "../types/credentials";
-import { errorHandler } from "../utils/index.js";
+import { errorHandler } from "./index.js";
 
 export const getCredentials = (query: any): Credentials => {
   try {

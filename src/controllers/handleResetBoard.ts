@@ -1,15 +1,30 @@
 import { Request, Response } from "express";
-import { activeGames } from "../constants.js";
-import { errorHandler, resetBoard } from "../utils/index.js";
+import { DroppedAsset, getActiveGames, errorHandler, updateActiveGame, updateGameText } from "../utils/index.js";
 
 export const handleResetBoard = async (req: Request, res: Response) => {
   try {
-    const urlSlug: string = req.body.urlSlug;
+    const credentials = req.credentials;
+    const { urlSlug } = credentials;
 
-    let activeGame = activeGames[urlSlug];
-    if (!activeGame) return res.status(400).send({ message: "Game not found." });
+    const activeGame = getActiveGames(urlSlug);
+    if (activeGame) {
+      const finishLine = DroppedAsset.create(activeGame.finishLineId, urlSlug, { credentials });
+      const message = DroppedAsset.create(activeGame.messageTextId, urlSlug, { credentials });
 
-    await resetBoard(activeGame, req.credentials, urlSlug);
+      let moves = [];
+      for (const move in activeGame.moves) {
+        moves.push(DroppedAsset.create(move, urlSlug, { credentials }));
+      }
+
+      await Promise.allSettled([
+        finishLine.deleteDroppedAsset(),
+        message.deleteDroppedAsset(),
+        ...moves.map((m) => m.deleteDroppedAsset()),
+      ]);
+
+      updateActiveGame({ [urlSlug]: {} }, urlSlug);
+      updateGameText(credentials, "");
+    }
     return res.status(200).send({ message: "Game reset successfully" });
   } catch (error) {
     errorHandler({

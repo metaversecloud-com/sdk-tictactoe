@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { errorHandler, getCredentials } from "../utils/index.js";
-import { DroppedAsset } from "../topia/index.js";
 import { DroppedAssetInterface } from "@rtsdk/topia";
+import { DroppedAsset } from "../utils/topiaInit.js";
 
 export const alignDroppedAssets = async (req: Request, res: Response) => {
   try {

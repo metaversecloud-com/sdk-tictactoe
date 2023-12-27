@@ -1,8 +1,8 @@
 import express from "express";
 import bodyParser from "body-parser";
-import "dotenv/config";
 import router from "./routes.js";
 import cors from "cors";
+import "dotenv/config";
 
 function checkEnvVariables() {
   const requiredEnvVariables = ["INTERACTIVE_KEY", "INTERACTIVE_SECRET"];
@@ -14,14 +14,14 @@ function checkEnvVariables() {
 }
 checkEnvVariables();
 
-const PORT = process.env.PORT || 3000;
 const app = express();
+
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use("/api", router);
 
-app.use("/backend", router);
-
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server listening on ${PORT}`);
 });

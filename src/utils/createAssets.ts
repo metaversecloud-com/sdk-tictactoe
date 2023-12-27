@@ -1,4 +1,4 @@
-import { Asset } from "../topia/index.js";
+import { Asset } from "./topiaInit.js";
 import { Credentials } from "../types/credentials";
 
 export const createTextAsset = (credentials: Credentials) => {

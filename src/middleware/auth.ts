@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
-import { Visitor } from "../topia/index.js";
 import { errorHandler, getCredentials } from "../utils/index.js";
+import { Visitor } from "../utils/topiaInit.js";
 
 export default async (req: Request, res: Response, next: NextFunction) => {
   try {

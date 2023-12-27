@@ -1,10 +1,9 @@
-import { Game } from "../topia/index.js";
-import { combos, errorHandler } from "../utils/index.js";
+import { combos, errorHandler } from "./index.js";
 import { Credentials } from "../types/credentials";
 
 const cellWidth = 80;
 
-export const getFinishLineOptions = (urlSlug: string, game: Game, combo, credentials: Credentials) => {
+export const getFinishLineOptions = (urlSlug: string, game: any, combo, credentials: Credentials) => {
   try {
     const color = game.player1.visitorId === credentials.visitorId ? "pink" : "blue";
     const options = {

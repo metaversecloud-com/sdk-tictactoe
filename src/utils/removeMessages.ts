@@ -1,5 +1,5 @@
-import { World } from "../topia/index.js";
-import { errorHandler } from "../utils/index.js";
+import { errorHandler } from "./index.js";
+import { World } from "./topiaInit.js";
 import { Credentials } from "../types/credentials";
 
 export const removeMessages = async (credentials: Credentials, gameId: string, urlSlug: string) => {
