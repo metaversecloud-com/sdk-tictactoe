@@ -10,6 +10,7 @@
     "server"
   ],
   "scripts": {
+    "start": "concurrently \"npm run serve --workspace=server\" \"npm start --workspace=client\"",
     "start:dev": "concurrently \"npm run serve --workspace=server\" \"npm run dev --workspace=client\"",
     "build:prod": "npm run build -w server && npm run build -w client"
   },
