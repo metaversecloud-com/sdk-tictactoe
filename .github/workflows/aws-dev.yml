@@ -54,4 +54,4 @@ jobs:
           
       - name: Publish
         run: |
-          aws ecs update-service --service $IMAGE_TAG-svc --force-new-deployment --cluster SDK-Example-CLS
+          aws ecs update-service --service sdk-tictactoe-dev-topia0-svc --force-new-deployment --cluster SDK-Example-CLS
