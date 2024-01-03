@@ -4,7 +4,7 @@ import { Visitor } from "../utils/topiaInit.js";
 
 export default async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const credentials = getCredentials(req.query);
+    const credentials = getCredentials(req.body);
     req.credentials = credentials;
 
     const visitor = await Visitor.get(credentials.visitorId, credentials.urlSlug, { credentials });

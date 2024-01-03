@@ -1,50 +1,57 @@
-import { combos, errorHandler } from "./index.js";
+import { combos, DroppedAsset, errorHandler } from "./index.js";
 import { Credentials } from "../types/credentials";
 
 const cellWidth = 80;
 
-export const getFinishLineOptions = (urlSlug: string, game: any, combo, credentials: Credentials) => {
+export const getFinishLineOptions = async (urlSlug: string, game: any, combo, credentials: Credentials) => {
   try {
-    const color = game.player1.visitorId === credentials.visitorId ? "pink" : "blue";
+    const boardAsset = await DroppedAsset.getWithUniqueName(
+      "TicTacToeBoard",
+      urlSlug,
+      credentials.interactivePublicKey,
+      process.env.INTERACTIVE_SECRET,
+    );
+    if (!boardAsset) throw "TicTacToe board not found";
+
+    // @ts-ignore
+    const position = boardAsset.position;
+    const color = game.playerO.visitorId === credentials.visitorId ? "blue" : "pink";
     const options = {
-      layer1: `${process.env.BUCKET}/${color}_horizontal.png`,
-      position: { x: game.center.x, y: game.center.y - cellWidth },
-      uniqueName: `finish_line${game.id}`,
+      layer1: `${process.env.BUCKET}${color}_horizontal.png`,
+      position,
+      uniqueName: `TicTacToe_finishLine_${urlSlug}`,
       urlSlug,
     };
 
     switch (combo) {
-      case combos.H_MID:
-        options.position = game.center;
+      case combos.H_TOP:
+        options.position = { x: position.x, y: position.y - cellWidth };
         break;
 
       case combos.H_BOT:
-        options.position = { x: game.center.x, y: game.center.y + cellWidth };
+        options.position = { x: position.x, y: position.y + cellWidth };
         break;
 
       case combos.V_LEFT:
-        options.position = { x: game.center.x - cellWidth, y: game.center.y };
-        options.layer1 = `${process.env.BUCKET}/${color}_vertical.png`;
+        options.position = { x: position.x - cellWidth, y: position.y };
+        options.layer1 = `${process.env.BUCKET}${color}_vertical.png`;
         break;
 
       case combos.V_MID:
-        options.position = game.center;
-        options.layer1 = `${process.env.BUCKET}/${color}_vertical.png`;
+        options.layer1 = `${process.env.BUCKET}${color}_vertical.png`;
         break;
 
       case combos.V_RIGHT:
-        options.position = { x: game.center.x + cellWidth, y: game.center.y };
-        options.layer1 = `${process.env.BUCKET}/${color}_vertical.png`;
+        options.position = { x: position.x + cellWidth, y: position.y };
+        options.layer1 = `${process.env.BUCKET}${color}_vertical.png`;
         break;
 
       case combos.L_CROSS:
-        options.position = game.center;
-        options.layer1 = `${process.env.BUCKET}/${color}_oblique_1.png`;
+        options.layer1 = `${process.env.BUCKET}${color}_oblique_1.png`;
         break;
 
       case combos.R_CROSS:
-        options.position = game.center;
-        options.layer1 = `${process.env.BUCKET}/${color}_oblique.png`;
+        options.layer1 = `${process.env.BUCKET}${color}_oblique.png`;
         break;
     }
     return options;

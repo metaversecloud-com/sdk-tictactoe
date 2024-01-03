@@ -1,17 +1,29 @@
 {
   "magic": {
-    "magic": {},
-    "messageTextId": "-Nm2wpifQsjcuMl_TpNZ",
-    "player1": {
-      "visitorId": 137,
+    "messageTextId": "-NnFfjW_wNQMjK8s_lr3",
+    "playerX": {
+      "visitorId": 146,
       "username": "Lina"
     },
-    "inControl": 1,
-    "status": {
-      "7": 137
+    "playerO": {
+      "visitorId": 147,
+      "username": "Guest"
     },
+    "status": {
+      "0": 146,
+      "1": 147,
+      "3": 146,
+      "4": 147,
+      "6": 146
+    },
+    "lastTurn": 146,
     "moves": {
-      "7": "-NmdWj3RPibu9bdW-eNh"
-    }
+      "0": "-NnGRYnkzFDy7D9N0D0S",
+      "1": "-NnGRaHhrDHZp8BSuS_3",
+      "3": "-NnGRbexT88H5q1OHB8s",
+      "4": "-NnGRdPr2fyzB9weC88k",
+      "6": "-NnGReMVV9t8zyzwWVUR"
+    },
+    "finishLineId": "-NnGRedVuPrBhcN4jlez"
   }
 }

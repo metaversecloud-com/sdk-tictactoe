@@ -1,8 +1,6 @@
 import { cellWidth } from "../constants.js";
 import { Credentials } from "../types/credentials.js";
-import { createTextAsset } from "./createAssets.js";
-import { errorHandler } from "./errorHandler.js";
-import { DroppedAsset } from "./topiaInit.js";
+import { createTextAsset, errorHandler, DroppedAsset } from "./index.js";
 
 export const updateGameText = async (credentials: Credentials, text: string) => {
   try {

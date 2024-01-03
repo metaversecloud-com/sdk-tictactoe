@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { DroppedAsset, getActiveGames, errorHandler, updateActiveGame, updateGameText } from "../utils/index.js";
+import { DroppedAsset, getActiveGames, errorHandler, updateActiveGame, updateGameText, World } from "../utils/index.js";
 
 export const handleResetBoard = async (req: Request, res: Response) => {
   try {
@@ -8,21 +8,22 @@ export const handleResetBoard = async (req: Request, res: Response) => {
 
     const activeGame = getActiveGames(urlSlug);
     if (activeGame) {
-      const finishLine = DroppedAsset.create(activeGame.finishLineId, urlSlug, { credentials });
-      const message = DroppedAsset.create(activeGame.messageTextId, urlSlug, { credentials });
-
-      let moves = [];
-      for (const move in activeGame.moves) {
-        moves.push(DroppedAsset.create(move, urlSlug, { credentials }));
+      const droppedAssetIds = [];
+      if (activeGame.finishLineId) droppedAssetIds.push(activeGame.finishLineId);
+      if (activeGame.moves) {
+        for (const move in activeGame.moves) {
+          droppedAssetIds.push(activeGame.moves[move]);
+        }
       }
-
-      await Promise.allSettled([
-        finishLine.deleteDroppedAsset(),
-        message.deleteDroppedAsset(),
-        ...moves.map((m) => m.deleteDroppedAsset()),
-      ]);
-
-      updateActiveGame({ [urlSlug]: {} }, urlSlug);
+      if (droppedAssetIds.length > 0) {
+        await World.deleteDroppedAssets(
+          urlSlug,
+          droppedAssetIds,
+          credentials.interactivePublicKey,
+          process.env.INTERACTIVE_SECRET,
+        );
+      }
+      updateActiveGame({}, urlSlug);
       updateGameText(credentials, "");
     }
     return res.status(200).send({ message: "Game reset successfully" });
