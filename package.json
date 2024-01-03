@@ -37,8 +37,7 @@
   "scripts": {
     "serve": "npx tsc -w & npx nodemon -q build/src/index.js",
     "start-dev": "npm run build & npm run start",
-    "build": "npm run tsc",
-    "tsc": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json",
     "start": "node build/src/index.js",
     "link-sdk": "yalc link @rtsdk/topia",
     "unlink-sdk": "yalc remove @rtsdk/topia"
