@@ -1,29 +1,3 @@
 {
-  "magic": {
-    "messageTextId": "-NnFfjW_wNQMjK8s_lr3",
-    "playerX": {
-      "visitorId": 146,
-      "username": "Lina"
-    },
-    "playerO": {
-      "visitorId": 147,
-      "username": "Guest"
-    },
-    "status": {
-      "0": 146,
-      "1": 147,
-      "3": 146,
-      "4": 147,
-      "6": 146
-    },
-    "lastTurn": 146,
-    "moves": {
-      "0": "-NnGRYnkzFDy7D9N0D0S",
-      "1": "-NnGRaHhrDHZp8BSuS_3",
-      "3": "-NnGRbexT88H5q1OHB8s",
-      "4": "-NnGRdPr2fyzB9weC88k",
-      "6": "-NnGReMVV9t8zyzwWVUR"
-    },
-    "finishLineId": "-NnGRedVuPrBhcN4jlez"
-  }
+  "magic": {}
 }
