@@ -1,14 +1,14 @@
 name: AWS-Versioned
 
 on:
-  push:
-    branches: [dev]
+  # push:
+  #   branches: [dev]
   workflow_dispatch:
     inputs:
       version:
         required: true
         type: string
-        default: '1.0.0'
+        default: 'v0.0.1'
 env:
   REGISTRY: '368076259134.dkr.ecr.us-east-1.amazonaws.com'
   REPOSITORY: 'SDK-Apps'
@@ -41,7 +41,7 @@ jobs:
           node-version: 20.10
           cache: 'npm'
       - run: npm i
-      - run: CI=false npm run build:prod
+      - run: CI=false npm run build
         
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3.0.0
