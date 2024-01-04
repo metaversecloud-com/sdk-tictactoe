@@ -1,6 +1,4 @@
 # dependencies
-/client/.pnp
-/client/.yalc
 /.yalc
 yalc.lock
 .pnp.js
@@ -51,12 +49,6 @@ jspm_packages/
 # Credentials
 oauth2.keys.json
 
-# Testing
-/client/coverage/
-
-# Production
-/client/build/
-
 # Misc
 .DS_Store
 .env
@@ -72,8 +64,4 @@ oauth2.keys.json
 # Build
 build/
 
-# Vite specific
-dist
-dist-ssr
-.vite/
-*.local
+Dockerfile.local

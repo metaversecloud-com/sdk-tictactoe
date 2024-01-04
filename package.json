@@ -1,14 +1,39 @@
 {
-  "name": "ttt",
+  "name": "TicTacToe",
   "private": true,
-  "author": "Automatipia-MC",
+  "author": "Topia",
   "version": "2.1.0",
   "description": "An in-world TicTacToe game for Topia.",
-  "main": "index.js",
-  "workspaces": [
-    "client",
-    "server"
-  ],
+  "main": "src/index.ts",
+  "dependencies": {
+    "@rtsdk/topia": "^0.8.1",
+    "@types/cors": "^2.8.13",
+    "axios": "^1.5.0",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-queue": "^0.0.13",
+    "express-timeout-handler": "^2.2.2",
+    "jsonwebtoken": "^9.0.1",
+    "node": "^20.5.1",
+    "node-cron": "^3.0.2",
+    "nodemon": "^3.0.1",
+    "yalc": "^1.0.0-pre.53"
+  },
+  "devDependencies": {
+    "@tsconfig/node-lts": "^20.1.0",
+    "@types/cors": "^2.8.13",
+    "@types/express": "^4.17.17",
+    "@types/jsonwebtoken": "^9.0.2",
+    "@types/node": "^20.10.6",
+    "@types/node-cron": "^3.0.8",
+    "eslint-config-next": "13.4.19",
+    "nodemon": "^3.0.1",
+    "sequelize-typescript": "^2.1.5",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.3.3"
+  },
   "scripts": {
     "start": "concurrently \"npm run serve --workspace=server\" \"npm start --workspace=client\"",
     "start:dev": "concurrently \"npm run serve --workspace=server\" \"npm run dev --workspace=client\"",
@@ -24,7 +49,5 @@
     "url": "https://github.com/Automatopia-MC/tictactoe/issues"
   },
   "homepage": "https://github.com/Automatopia-MC/tictactoe#readme",
-  "devDependencies": {
-    "concurrently": "^8.2.1"
-  }
+  "type": "module"
 }
