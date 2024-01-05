@@ -21,6 +21,10 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use("/api", router);
 
+app.get("/healthcheck", (req, res) => {
+  return res.send(`Server is running on version 2`);
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server listening on ${PORT}`);
