@@ -1,6 +1,6 @@
 import { errorHandler } from "./index.js";
 import fs from "fs";
-const path = "./src/data/activeGames.json";
+const path = "../data/activeGames.json";
 
 export const getActiveGames = (urlSlug?: string) => {
   try {

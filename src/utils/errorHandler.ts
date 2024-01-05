@@ -29,6 +29,7 @@ export const errorHandler = ({
         error: JSON.stringify(error),
       }),
     );
+    console.error("❌ Error", error);
 
     if (res) return res.status(error.status || 500).send({ error, message, success: false });
     return error;
