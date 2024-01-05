@@ -22,11 +22,11 @@
     "yalc": "^1.0.0-pre.53"
   },
   "devDependencies": {
-    "@tsconfig/node-lts": "^18.12.5",
+    "@tsconfig/node-lts": "^20.1.0",
     "@types/cors": "^2.8.13",
     "@types/express": "^4.17.17",
     "@types/jsonwebtoken": "^9.0.2",
-    "@types/node": "^20.5.7",
+    "@types/node": "^20.10.6",
     "@types/node-cron": "^3.0.8",
     "eslint-config-next": "13.4.19",
     "nodemon": "^3.0.1",
@@ -36,7 +36,7 @@
   },
   "scripts": {
     "serve": "npx tsc -w & npx nodemon -q build/src/index.js",
-    "start-dev": "npm run build & npm run start",
+    "start-dev": "npm run build & node build/src/index.js",
     "build": "tsc -p tsconfig.json",
     "start": "node build/src/index.js",
     "link-sdk": "yalc link @rtsdk/topia",
