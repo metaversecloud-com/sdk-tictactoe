@@ -22,7 +22,10 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use("/api", router);
 
 app.get("/healthcheck", (req, res) => {
-  return res.send(`Server is running on version 1`);
+  return res.json({
+    appVersion: process.env.APP_VERSION || 1,
+    status: "OK",
+  });
 });
 
 const PORT = process.env.PORT || 3000;
