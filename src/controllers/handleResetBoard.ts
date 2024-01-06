@@ -6,7 +6,7 @@ export const handleResetBoard = async (req: Request, res: Response) => {
     const credentials = req.credentials;
     const { urlSlug } = credentials;
 
-    const activeGame = getActiveGames(urlSlug);
+    const activeGame = await getActiveGames(urlSlug);
     if (activeGame) {
       const droppedAssetIds = [];
       if (activeGame.finishLineId) droppedAssetIds.push(activeGame.finishLineId);
@@ -23,7 +23,7 @@ export const handleResetBoard = async (req: Request, res: Response) => {
           process.env.INTERACTIVE_SECRET,
         );
       }
-      updateActiveGame({}, urlSlug);
+      await updateActiveGame({}, urlSlug);
       updateGameText(credentials, "");
     }
     return res.status(200).send({ message: "Game reset successfully" });

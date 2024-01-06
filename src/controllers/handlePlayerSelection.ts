@@ -12,8 +12,7 @@ export const handlePlayerSelection = async (req: Request, res: Response) => {
     let text = "",
       shouldUpdateGame = true;
 
-    let activeGame = getActiveGames(urlSlug);
-    if (!activeGame) activeGame = updateActiveGame(activeGame, urlSlug);
+    const activeGame = await getActiveGames(urlSlug);
 
     if (activeGame.playerX?.visitorId === visitorId) {
       text = `You are already player X`;

@@ -22,7 +22,7 @@ export const handleClaimCell = async (req: Request, res: Response) => {
     const cell = parseInt(req.params.cell);
     if (isNaN(cell)) throw "Cell is missing.";
 
-    let activeGame = getActiveGames(urlSlug);
+    const activeGame = await getActiveGames(urlSlug);
     if (!activeGame.status) activeGame.status = {};
 
     if (!activeGame) {
@@ -59,7 +59,7 @@ export const handleClaimCell = async (req: Request, res: Response) => {
     if (!activeGame.moves) activeGame.moves = {};
     activeGame.moves[cell] = droppedAsset.id;
 
-    updateActiveGame(activeGame, urlSlug);
+    await updateActiveGame(activeGame, urlSlug);
 
     const winningCombo = await getWinningCombo(activeGame.status);
     if (winningCombo) {
@@ -77,7 +77,7 @@ export const handleClaimCell = async (req: Request, res: Response) => {
       const textAsset = await updateGameText(credentials, text);
       activeGame.messageTextId = textAsset.id;
 
-      updateActiveGame(activeGame, urlSlug);
+      await updateActiveGame(activeGame, urlSlug);
     }
 
     return res.status(200).send({ message: "Move successfully made." });

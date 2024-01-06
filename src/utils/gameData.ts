@@ -1,10 +1,16 @@
 import { errorHandler } from "./index.js";
 import fs from "fs";
-const path = "../data/activeGames.json";
+const path = "src/data/activeGames.json";
 
-export const getActiveGames = (urlSlug?: string) => {
+export const getActiveGames = async (urlSlug?: string) => {
   try {
-    let data = JSON.parse(fs.readFileSync(path, "utf8"));
+    let data;
+    if (await fs.existsSync(path)) {
+      data = await JSON.parse(fs.readFileSync(path, "utf8"));
+    } else {
+      data = urlSlug ? { [urlSlug]: {} } : {};
+      await fs.writeFileSync(path, JSON.stringify(data, null, 2), "utf8");
+    }
     if (urlSlug) return data[urlSlug];
     return data;
   } catch (error) {
@@ -16,9 +22,9 @@ export const getActiveGames = (urlSlug?: string) => {
   }
 };
 
-export const updateActiveGame = (updatedData, urlSlug) => {
+export const updateActiveGame = async (updatedData, urlSlug) => {
   try {
-    let data = getActiveGames();
+    const data = await getActiveGames();
     data[urlSlug] = updatedData;
     fs.writeFileSync(path, JSON.stringify(data, null, 2), "utf8");
     return data;
