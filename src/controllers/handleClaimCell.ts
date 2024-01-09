@@ -2,14 +2,15 @@ import { Request, Response } from "express";
 import {
   createWebImageAsset,
   errorHandler,
-  getActiveGames,
+  getGameData,
   getCredentials,
   getFinishLineOptions,
   getWinningCombo,
-  updateActiveGame,
+  updateGameData,
   updateGameText,
 } from "../utils/index.js";
 import { DroppedAsset } from "../utils/topiaInit.js";
+import { GameDataType } from "../types/gameData";
 
 export const handleClaimCell = async (req: Request, res: Response) => {
   try {
@@ -22,23 +23,23 @@ export const handleClaimCell = async (req: Request, res: Response) => {
     const cell = parseInt(req.params.cell);
     if (isNaN(cell)) throw "Cell is missing.";
 
-    const activeGame = await getActiveGames(urlSlug);
-    if (!activeGame.status) activeGame.status = {};
+    const gameData: GameDataType = await getGameData(credentials);
+    if (!gameData.status) gameData.status = {};
 
-    if (!activeGame) {
+    if (!gameData) {
       text = "No active games found. Please select X or O to begin!";
-    } else if (!activeGame.playerO || !activeGame.playerX) {
+    } else if (!gameData.playerO || !gameData.playerX) {
       text = "Two players are needed to get started.";
-    } else if (activeGame.status[cell]) {
+    } else if (gameData.status[cell]) {
       text = "Cannot place your move here.";
-    } else if (activeGame.lastTurn === visitorId) {
+    } else if (gameData.lastTurn === visitorId) {
       text = "It's not your turn.";
     } else {
-      activeGame.lastTurn = visitorId;
+      gameData.lastTurn = visitorId;
       shouldUpdateGame = true;
     }
 
-    activeGame.status[cell] = visitorId;
+    gameData.status[cell] = visitorId;
 
     await updateGameText(credentials, text);
     if (!shouldUpdateGame) throw text;
@@ -49,36 +50,33 @@ export const handleClaimCell = async (req: Request, res: Response) => {
       isInteractive: true,
       interactivePublicKey,
       layer0: "",
-      layer1: `${process.env.BUCKET}${visitorId === activeGame.playerO?.visitorId ? "blue_o" : "pink_x"}.png`,
+      layer1: `${process.env.BUCKET}${visitorId === gameData.playerO?.visitorId ? "blue_o" : "pink_x"}.png`,
       // @ts-ignore
       position: cellAsset.position,
       uniqueName: `TicTacToe_move_${urlSlug}`,
       urlSlug,
     });
 
-    if (!activeGame.moves) activeGame.moves = {};
-    activeGame.moves[cell] = droppedAsset.id;
+    if (!gameData.moves) gameData.moves = {};
+    gameData.moves[cell] = droppedAsset.id;
 
-    await updateActiveGame(activeGame, urlSlug);
-
-    const winningCombo = await getWinningCombo(activeGame.status);
+    const winningCombo = await getWinningCombo(gameData.status);
     if (winningCombo) {
       // Dropping a finishing line
-      const finishLineOptions = await getFinishLineOptions(urlSlug, activeGame, winningCombo, req.credentials);
+      const finishLineOptions = await getFinishLineOptions(urlSlug, gameData, winningCombo, req.credentials);
       const finishLine = await DroppedAsset.drop(webImageAsset, {
         ...finishLineOptions,
         isInteractive: true,
         interactivePublicKey,
       });
-      activeGame.finishLineId = finishLine.id;
+      gameData.finishLineId = finishLine.id;
 
       // Dropping 👑 and player's name
       text = `👑 ${username} wins!`;
       const textAsset = await updateGameText(credentials, text);
-      activeGame.messageTextId = textAsset.id;
-
-      await updateActiveGame(activeGame, urlSlug);
+      gameData.messageTextId = textAsset.id;
     }
+    await updateGameData(credentials, gameData);
 
     return res.status(200).send({ message: "Move successfully made." });
   } catch (error) {

@@ -1,32 +1,33 @@
 import { Request, Response } from "express";
-import { errorHandler, getActiveGames, getCredentials, updateActiveGame } from "../utils/index.js";
-import { updateGameText } from "../utils/updateGameText.js";
+import { errorHandler, getGameData, getCredentials, updateGameData, updateGameText } from "../utils/index.js";
+import { GameDataType } from "../types/gameData.js";
 
 export const handlePlayerSelection = async (req: Request, res: Response) => {
   try {
     const symbol = req.params.symbol as "x" | "o";
     const isPlayerX = symbol === "o" ? 0 : 1;
     const credentials = getCredentials(req.body);
-    const { urlSlug, visitorId } = credentials;
+    const { visitorId } = credentials;
     const { username } = req.body;
     let text = "",
       shouldUpdateGame = true;
 
-    const activeGame = await getActiveGames(urlSlug);
+    const gameData: GameDataType = await getGameData(credentials);
+    if (!gameData) throw "There was an issue retrieving game data.";
 
-    if (activeGame.playerX?.visitorId === visitorId) {
+    if (gameData.playerX?.visitorId === visitorId) {
       text = `You are already player X`;
       shouldUpdateGame = false;
-    } else if (activeGame.playerO?.visitorId === visitorId) {
+    } else if (gameData.playerO?.visitorId === visitorId) {
       text = `You are already player O`;
       shouldUpdateGame = false;
-    } else if (isPlayerX && activeGame.playerX) {
+    } else if (isPlayerX && gameData.playerX) {
       text = "Player X already selected.";
       shouldUpdateGame = false;
-    } else if (!isPlayerX && activeGame.playerO) {
+    } else if (!isPlayerX && gameData.playerO) {
       text = "Player O already selected.";
       shouldUpdateGame = false;
-    } else if ((isPlayerX && activeGame.playerO) || (!isPlayerX && activeGame.playerX)) {
+    } else if ((isPlayerX && gameData.playerO) || (!isPlayerX && gameData.playerX)) {
       text = "Let the game begin!";
     } else {
       text = "Find a second player!";
@@ -35,9 +36,9 @@ export const handlePlayerSelection = async (req: Request, res: Response) => {
     const textAsset = await updateGameText(credentials, text);
     if (!shouldUpdateGame) throw text;
 
-    activeGame.messageTextId = textAsset.id;
-    activeGame[`player${symbol.toUpperCase()}`] = { visitorId, username };
-    updateActiveGame(activeGame, urlSlug);
+    gameData.messageTextId = textAsset.id;
+    gameData[`player${symbol.toUpperCase()}`] = { visitorId, username };
+    updateGameData(credentials, gameData);
 
     return res.json({ success: true });
   } catch (error) {
