@@ -10,7 +10,6 @@ router.get("/", (req, res) => {
 
 router.post("/select-player/:symbol", auth, handlePlayerSelection);
 router.post("/click/:cell", auth, handleClaimCell);
-// router.post("/align-board", auth, alignDroppedAssets);
 router.post("/reset", auth, handleResetBoard);
 
 // Error handling

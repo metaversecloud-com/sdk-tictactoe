@@ -24,11 +24,10 @@ export const handleClaimCell = async (req: Request, res: Response) => {
     if (isNaN(cell)) throw "Cell is missing.";
 
     const gameData: GameDataType = await getGameData(credentials);
-    if (!gameData.status) gameData.status = {};
 
     if (!gameData) {
       text = "No active games found. Please select X or O to begin!";
-    } else if (!gameData.playerO || !gameData.playerX) {
+    } else if (!gameData.playerO?.visitorId || !gameData.playerX?.visitorId) {
       text = "Two players are needed to get started.";
     } else if (gameData.status[cell]) {
       text = "Cannot place your move here.";

@@ -21,13 +21,13 @@ export const handlePlayerSelection = async (req: Request, res: Response) => {
     } else if (gameData.playerO?.visitorId === visitorId) {
       text = `You are already player O`;
       shouldUpdateGame = false;
-    } else if (isPlayerX && gameData.playerX) {
+    } else if (isPlayerX && gameData.playerX?.visitorId) {
       text = "Player X already selected.";
       shouldUpdateGame = false;
-    } else if (!isPlayerX && gameData.playerO) {
+    } else if (!isPlayerX && gameData.playerO?.visitorId) {
       text = "Player O already selected.";
       shouldUpdateGame = false;
-    } else if ((isPlayerX && gameData.playerO) || (!isPlayerX && gameData.playerX)) {
+    } else if ((isPlayerX && gameData.playerO?.visitorId) || (!isPlayerX && gameData.playerX?.visitorId)) {
       text = "Let the game begin!";
     } else {
       text = "Find a second player!";

@@ -10,6 +10,8 @@ export const getGameData = async (credentials: Credentials): Promise<GameDataTyp
       credentials.interactivePublicKey,
       process.env.INTERACTIVE_SECRET,
     );
+    droppedAsset.interactivePublicKey = credentials.interactivePublicKey;
+
     await initializeDroppedAssetDataObject(droppedAsset);
 
     return droppedAsset.dataObject;
