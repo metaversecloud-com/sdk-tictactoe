@@ -1,4 +1,4 @@
-import { Credentials } from "../types/credentials";
+import { Credentials } from "../types/credentialsInterface";
 import { errorHandler } from "./index.js";
 
 export const getCredentials = (params: any): Credentials => {
@@ -12,6 +12,7 @@ export const getCredentials = (params: any): Credentials => {
       assetId: params.assetId,
       interactiveNonce: params.interactiveNonce,
       interactivePublicKey: params.interactivePublicKey,
+      profileId: params.profileId,
       urlSlug: params.urlSlug,
       visitorId: Number(params.visitorId),
     };

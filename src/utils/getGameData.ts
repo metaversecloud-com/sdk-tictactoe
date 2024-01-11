@@ -1,20 +1,18 @@
-import { errorHandler, DroppedAsset, initializeDroppedAssetDataObject } from "./index.js";
-import { GameDataType } from "../types/gameData.js";
-import { Credentials } from "../types/credentials.js";
+import { errorHandler, DroppedAsset, getDroppedAsset, initializeDroppedAssetDataObject } from "./index.js";
+import { GameDataType } from "../types/gameDataType.js";
+import { Credentials } from "../types/credentialsInterface.js";
 
 export const getGameData = async (credentials: Credentials): Promise<GameDataType> => {
   try {
-    const droppedAsset = await DroppedAsset.getWithUniqueName(
-      "TicTacToeBoard",
-      credentials.urlSlug,
-      credentials.interactivePublicKey,
-      process.env.INTERACTIVE_SECRET,
-    );
-    droppedAsset.interactivePublicKey = credentials.interactivePublicKey;
+    const droppedAsset = await getDroppedAsset(credentials);
+    const uniqueName = droppedAsset.uniqueName.split("_");
+    const keyAssetId = !uniqueName[0] || uniqueName[0] === "Reset" ? credentials.assetId : uniqueName[0];
+    const keyAsset = await DroppedAsset.create(keyAssetId, credentials.urlSlug, {
+      credentials: { ...credentials, assetId: keyAssetId },
+    });
+    await initializeDroppedAssetDataObject(keyAsset);
 
-    await initializeDroppedAssetDataObject(droppedAsset);
-
-    return droppedAsset.dataObject;
+    return keyAsset.dataObject;
   } catch (error) {
     errorHandler({
       error,

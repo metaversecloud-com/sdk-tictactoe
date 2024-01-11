@@ -1,9 +1,8 @@
 export const cellWidth = 80;
 
 export const defaultGameData = {
-  finishLineId: null,
-  lastTurn: null,
-  messageTextId: null,
+  lastInteraction: null,
+  lastPlayerTurn: null,
   moves: {},
   playerO: {},
   playerX: {},

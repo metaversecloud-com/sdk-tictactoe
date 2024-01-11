@@ -1,13 +1,13 @@
 import { Request, Response } from "express";
 import { errorHandler, getGameData, getCredentials, updateGameData, updateGameText } from "../utils/index.js";
-import { GameDataType } from "../types/gameData.js";
+import { GameDataType } from "../types/gameDataType.js";
 
 export const handlePlayerSelection = async (req: Request, res: Response) => {
   try {
     const symbol = req.params.symbol as "x" | "o";
     const isPlayerX = symbol === "o" ? 0 : 1;
     const credentials = getCredentials(req.body);
-    const { visitorId } = credentials;
+    const { profileId, visitorId } = credentials;
     const { username } = req.body;
     let text = "",
       shouldUpdateGame = true;
@@ -33,12 +33,14 @@ export const handlePlayerSelection = async (req: Request, res: Response) => {
       text = "Find a second player!";
     }
 
-    const textAsset = await updateGameText(credentials, text);
+    await updateGameText(credentials, text, `${gameData.keyAssetId}_TicTacToe_gameText`);
     if (!shouldUpdateGame) throw text;
 
-    gameData.messageTextId = textAsset.id;
-    gameData[`player${symbol.toUpperCase()}`] = { visitorId, username };
-    updateGameData(credentials, gameData);
+    await updateGameText(credentials, username, `${gameData.keyAssetId}_TicTacToe_player${isPlayerX ? "X" : "O"}Text`);
+
+    gameData[`player${symbol.toUpperCase()}`] = { profileId, username, visitorId };
+    gameData.lastInteraction = new Date();
+    updateGameData(credentials, gameData.keyAssetId, gameData);
 
     return res.json({ success: true });
   } catch (error) {

@@ -1,21 +1,23 @@
 import { Request, Response } from "express";
 import {
-  createWebImageAsset,
+  DroppedAsset,
+  dropWebImageAsset,
   errorHandler,
-  getGameData,
   getCredentials,
+  getGameData,
+  getWorldDataObject,
   getFinishLineOptions,
   getWinningCombo,
   updateGameData,
   updateGameText,
 } from "../utils/index.js";
-import { DroppedAsset } from "../utils/topiaInit.js";
-import { GameDataType } from "../types/gameData";
+import { GameDataType } from "../types/gameDataType";
+import { DroppedAssetInterface } from "@rtsdk/topia";
 
 export const handleClaimCell = async (req: Request, res: Response) => {
   try {
     const credentials = getCredentials(req.body);
-    const { assetId, interactivePublicKey, urlSlug, visitorId } = credentials;
+    const { assetId, profileId, urlSlug, visitorId } = credentials;
     const { username } = req.body;
     let text = "",
       shouldUpdateGame = false;
@@ -29,53 +31,60 @@ export const handleClaimCell = async (req: Request, res: Response) => {
       text = "No active games found. Please select X or O to begin!";
     } else if (!gameData.playerO?.visitorId || !gameData.playerX?.visitorId) {
       text = "Two players are needed to get started.";
+    } else if (gameData.playerO?.visitorId !== visitorId && gameData.playerX?.visitorId !== visitorId) {
+      text = "Game in progress.";
     } else if (gameData.status[cell]) {
       text = "Cannot place your move here.";
-    } else if (gameData.lastTurn === visitorId) {
-      text = "It's not your turn.";
+    } else if (gameData.lastPlayerTurn === visitorId) {
+      const username =
+        gameData.playerX?.visitorId === visitorId ? gameData.playerO?.username : gameData.playerX?.username;
+      text = `It's ${username}'s turn.`;
     } else {
-      gameData.lastTurn = visitorId;
+      gameData.lastPlayerTurn = visitorId;
       shouldUpdateGame = true;
     }
 
     gameData.status[cell] = visitorId;
 
-    await updateGameText(credentials, text);
-    if (!shouldUpdateGame) throw text;
+    if (!shouldUpdateGame) {
+      await updateGameText(credentials, text, `${gameData.keyAssetId}_TicTacToe_gameText`);
+      throw text;
+    }
 
-    const cellAsset = await DroppedAsset.get(assetId, urlSlug, { credentials });
-    const webImageAsset = await createWebImageAsset(req.credentials);
-    const droppedAsset = await DroppedAsset.drop(webImageAsset, {
-      isInteractive: true,
-      interactivePublicKey,
-      layer0: "",
+    const cellAsset: DroppedAssetInterface = await DroppedAsset.get(assetId, urlSlug, { credentials });
+    await dropWebImageAsset({
+      credentials,
       layer1: `${process.env.BUCKET}${visitorId === gameData.playerO?.visitorId ? "blue_o" : "pink_x"}.png`,
-      // @ts-ignore
       position: cellAsset.position,
-      uniqueName: `TicTacToe_move_${urlSlug}`,
-      urlSlug,
+      uniqueName: `${gameData.keyAssetId}_TicTacToe_move`,
     });
-
-    if (!gameData.moves) gameData.moves = {};
-    gameData.moves[cell] = droppedAsset.id;
 
     const winningCombo = await getWinningCombo(gameData.status);
     if (winningCombo) {
       // Dropping a finishing line
-      const finishLineOptions = await getFinishLineOptions(urlSlug, gameData, winningCombo, req.credentials);
-      const finishLine = await DroppedAsset.drop(webImageAsset, {
+      const finishLineOptions = await getFinishLineOptions(gameData.keyAssetId, winningCombo, credentials, gameData);
+      await dropWebImageAsset({
+        credentials,
         ...finishLineOptions,
-        isInteractive: true,
-        interactivePublicKey,
       });
-      gameData.finishLineId = finishLine.id;
 
       // Dropping 👑 and player's name
       text = `👑 ${username} wins!`;
-      const textAsset = await updateGameText(credentials, text);
-      gameData.messageTextId = textAsset.id;
+
+      // update world data object
+      const world = await getWorldDataObject(credentials);
+      const promises = [];
+      promises.push(
+        world.incrementDataObjectValue(`keyAssets.${gameData.keyAssetId}.gamesWonByUser.${profileId}.count`, 1),
+      );
+      promises.push(world.incrementDataObjectValue(`keyAssets.${gameData.keyAssetId}.totalGamesWonCount`, 1));
+      Promise.all(promises);
     }
-    await updateGameData(credentials, gameData);
+
+    await updateGameText(credentials, text, `${gameData.keyAssetId}_TicTacToe_gameText`);
+
+    gameData.lastInteraction = new Date();
+    await updateGameData(credentials, gameData.keyAssetId, gameData);
 
     return res.status(200).send({ message: "Move successfully made." });
   } catch (error) {
