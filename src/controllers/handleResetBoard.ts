@@ -70,8 +70,6 @@ export const handleResetBoard = async (req: Request, res: Response) => {
       await World.deleteDroppedAssets(urlSlug, droppedAssetIds, interactivePublicKey, process.env.INTERACTIVE_SECRET);
     }
 
-    if (isAdmin) generateBoard(credentials);
-
     // update key asset data object
     const updatedData = {
       ...defaultGameData,
@@ -90,6 +88,8 @@ export const handleResetBoard = async (req: Request, res: Response) => {
     }
     promises.push(world.incrementDataObjectValue(`keyAssets.${assetId}.totalGamesResetCount`, 1));
     await Promise.all(promises);
+
+    if (isAdmin) await generateBoard(credentials);
 
     return res.status(200).send({ message: "Game reset successfully" });
   } catch (error) {

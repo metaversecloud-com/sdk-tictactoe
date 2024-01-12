@@ -5,7 +5,7 @@ import cors from "cors";
 import "dotenv/config";
 
 function checkEnvVariables() {
-  const requiredEnvVariables = ["INTERACTIVE_KEY", "INTERACTIVE_SECRET"];
+  const requiredEnvVariables = ["APP_URL", "BUCKET", "INTERACTIVE_KEY", "INTERACTIVE_SECRET"];
   const missingVariables = requiredEnvVariables.filter((variable) => !process.env[variable]);
 
   if (missingVariables.length > 0) {

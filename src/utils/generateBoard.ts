@@ -20,23 +20,7 @@ export const generateBoard = async (credentials: Credentials) => {
 
     initializeDroppedAssetDataObject(keyAsset);
 
-    const [
-      board,
-      gameText,
-      playerXText,
-      playerOText,
-      x,
-      o,
-      cell0,
-      cell1,
-      cell2,
-      cell3,
-      cell4,
-      cell5,
-      cell6,
-      cell7,
-      cell8,
-    ] = await Promise.all([
+    await Promise.all([
       dropWebImageAsset({
         credentials,
         layer0: `${process.env.BUCKET}Board.png`,
@@ -70,6 +54,9 @@ export const generateBoard = async (credentials: Credentials) => {
         text: "",
         uniqueName: `${assetId}_TicTacToe_playerOText`,
       }),
+    ]);
+
+    const [x, o, cell0, cell1, cell2, cell3, cell4, cell5, cell6, cell7, cell8] = await Promise.all([
       dropWebImageAsset({
         credentials,
         layer0: `${process.env.BUCKET}pink_x.png`,
