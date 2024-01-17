@@ -29,11 +29,13 @@ export const handleClaimCell = async (req: Request, res: Response) => {
 
     if (!gameData) {
       text = "No active games found. Please select X or O to begin!";
+    } else if (gameData.isGameOver) {
+      text = "Game over! Press Reset to start another.";
     } else if (!gameData.playerO?.visitorId || !gameData.playerX?.visitorId) {
       text = "Two players are needed to get started.";
     } else if (gameData.playerO?.visitorId !== visitorId && gameData.playerX?.visitorId !== visitorId) {
       text = "Game in progress.";
-    } else if (gameData.status[cell]) {
+    } else if (gameData.claimedCells[cell]) {
       text = "Cannot place your move here.";
     } else if (gameData.lastPlayerTurn === visitorId) {
       const username =
@@ -43,8 +45,6 @@ export const handleClaimCell = async (req: Request, res: Response) => {
       gameData.lastPlayerTurn = visitorId;
       shouldUpdateGame = true;
     }
-
-    gameData.status[cell] = visitorId;
 
     if (!shouldUpdateGame) {
       await updateGameText(credentials, text, `${gameData.keyAssetId}_TicTacToe_gameText`);
@@ -59,7 +59,8 @@ export const handleClaimCell = async (req: Request, res: Response) => {
       uniqueName: `${gameData.keyAssetId}_TicTacToe_move`,
     });
 
-    const winningCombo = await getWinningCombo(gameData.status);
+    gameData.claimedCells[cell] = visitorId;
+    const winningCombo = await getWinningCombo(gameData.claimedCells);
     if (winningCombo) {
       // Dropping a finishing line
       const finishLineOptions = await getFinishLineOptions(gameData.keyAssetId, winningCombo, credentials, gameData);
@@ -70,6 +71,7 @@ export const handleClaimCell = async (req: Request, res: Response) => {
 
       // Dropping 👑 and player's name
       text = `👑 ${username} wins!`;
+      gameData.isGameOver = true;
 
       // update world data object
       const world = await getWorldDataObject(credentials);

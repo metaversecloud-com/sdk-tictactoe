@@ -1,4 +1,6 @@
 export type GameDataType = {
+  claimedCells?: object;
+  isGameOver?: boolean;
   keyAssetId?: string;
   lastInteraction?: Date;
   lastPlayerTurn?: number;
@@ -13,5 +15,4 @@ export type GameDataType = {
     visitorId?: number;
   };
   resetCount?: number;
-  status?: object;
 };

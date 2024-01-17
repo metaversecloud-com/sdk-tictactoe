@@ -30,6 +30,7 @@ export const handleResetBoard = async (req: Request, res: Response) => {
       throw "Nothing to reset!";
     } else if (
       !isAdmin &&
+      !gameData.isGameOver &&
       gameData.playerO?.visitorId !== visitorId &&
       gameData.playerX?.visitorId !== visitorId &&
       new Date(gameData.lastInteraction).getTime() > resetAllowedDate.getTime()
