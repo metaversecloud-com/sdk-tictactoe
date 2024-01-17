@@ -21,13 +21,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use("/api", router);
 
-app.get("/healthcheck", (req, res) => {
-  return res.json({
-    appVersion: process.env.APP_VERSION || 1,
-    status: "OK",
-  });
-});
-
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server listening on ${PORT}`);
