@@ -1,5 +1,11 @@
 import { Request, Response } from "express";
-import { errorHandler, getGameData, getCredentials, updateGameData, updateGameText } from "../utils/index.js";
+import {
+  errorHandler,
+  getDroppedAssetDataObject,
+  getCredentials,
+  updateGameData,
+  updateGameText,
+} from "../utils/index.js";
 import { GameDataType } from "../types/gameDataType.js";
 
 export const handlePlayerSelection = async (req: Request, res: Response) => {
@@ -12,35 +18,41 @@ export const handlePlayerSelection = async (req: Request, res: Response) => {
     let text = "",
       shouldUpdateGame = true;
 
-    const gameData: GameDataType = await getGameData(credentials);
-    if (!gameData) throw "There was an issue retrieving game data.";
+    const keyAsset = await getDroppedAssetDataObject(credentials);
+    const updatedData: GameDataType = keyAsset.dataObject;
+    const { keyAssetId, playerO, playerX } = updatedData;
 
-    if (gameData.playerX?.visitorId === visitorId) {
+    if (playerX.visitorId === visitorId) {
       text = `You are already player X`;
       shouldUpdateGame = false;
-    } else if (gameData.playerO?.visitorId === visitorId) {
+    } else if (playerO.visitorId === visitorId) {
       text = `You are already player O`;
       shouldUpdateGame = false;
-    } else if (isPlayerX && gameData.playerX?.visitorId) {
+    } else if (isPlayerX && playerX.visitorId) {
       text = "Player X already selected.";
       shouldUpdateGame = false;
-    } else if (!isPlayerX && gameData.playerO?.visitorId) {
+    } else if (!isPlayerX && playerO.visitorId) {
       text = "Player O already selected.";
       shouldUpdateGame = false;
-    } else if ((isPlayerX && gameData.playerO?.visitorId) || (!isPlayerX && gameData.playerX?.visitorId)) {
+    } else if ((isPlayerX && playerO.visitorId) || (!isPlayerX && playerX.visitorId)) {
       text = "Let the game begin!";
     } else {
       text = "Find a second player!";
     }
 
-    await updateGameText(credentials, text, `${gameData.keyAssetId}_TicTacToe_gameText`);
+    await updateGameText(credentials, text, `${keyAssetId}_TicTacToe_gameText`);
     if (!shouldUpdateGame) throw text;
 
-    await updateGameText(credentials, username, `${gameData.keyAssetId}_TicTacToe_player${isPlayerX ? "X" : "O"}Text`);
+    await updateGameText(credentials, username, `${keyAssetId}_TicTacToe_player${isPlayerX ? "X" : "O"}Text`);
 
-    gameData[`player${symbol.toUpperCase()}`] = { profileId, username, visitorId };
-    gameData.lastInteraction = new Date();
-    updateGameData(credentials, gameData.keyAssetId, gameData);
+    updatedData[`player${symbol.toUpperCase()}`] = { profileId, username, visitorId };
+    updatedData.lastInteraction = new Date();
+
+    await updateGameData({
+      credentials,
+      droppedAssetId: keyAssetId,
+      updatedData,
+    });
 
     return res.json({ success: true });
   } catch (error) {

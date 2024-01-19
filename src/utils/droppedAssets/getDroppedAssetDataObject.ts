@@ -1,8 +1,7 @@
-import { errorHandler, DroppedAsset, getDroppedAsset, initializeDroppedAssetDataObject } from "./index.js";
-import { GameDataType } from "../types/gameDataType.js";
-import { Credentials } from "../types/credentialsInterface.js";
+import { errorHandler, DroppedAsset, getDroppedAsset, initializeDroppedAssetDataObject } from "../index.js";
+import { Credentials } from "../../types/credentialsInterface.js";
 
-export const getGameData = async (credentials: Credentials): Promise<GameDataType> => {
+export const getDroppedAssetDataObject = async (credentials: Credentials) => {
   try {
     const droppedAsset = await getDroppedAsset(credentials);
     const uniqueName = droppedAsset.uniqueName.split("_TicTacToe_");
@@ -13,7 +12,7 @@ export const getGameData = async (credentials: Credentials): Promise<GameDataTyp
     });
     await initializeDroppedAssetDataObject(keyAsset);
 
-    return keyAsset.dataObject;
+    return keyAsset;
   } catch (error) {
     errorHandler({
       error,

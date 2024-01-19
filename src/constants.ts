@@ -8,4 +8,5 @@ export const defaultGameData = {
   playerO: {},
   playerX: {},
   resetCount: 0,
+  turnCount: 0,
 };

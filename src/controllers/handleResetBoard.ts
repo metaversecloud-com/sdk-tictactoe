@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
 import {
-  getGameData,
-  getWorldDataObject,
   errorHandler,
+  getDroppedAssetDataObject,
+  getWorldDataObject,
   generateBoard,
+  lockDataObject,
   updateGameData,
   updateGameText,
   Visitor,
@@ -21,78 +22,101 @@ export const handleResetBoard = async (req: Request, res: Response) => {
     const visitor: VisitorInterface = await Visitor.get(visitorId, urlSlug, { credentials });
     const isAdmin = visitor.isAdmin;
 
-    const gameData: GameDataType = await getGameData(credentials);
+    const keyAsset = await getDroppedAssetDataObject(credentials);
+    const { isGameOver, lastInteraction, playerO, playerX, resetCount } = keyAsset.dataObject as GameDataType;
 
-    const resetAllowedDate = new Date();
-    resetAllowedDate.setMinutes(resetAllowedDate.getMinutes() - 5);
+    try {
+      try {
+        await lockDataObject(
+          `${assetId}-${resetCount}-${new Date(Math.round(new Date().getTime() / 10000) * 10000)}`,
+          keyAsset,
+        );
+      } catch (error) {
+        return res.status(409).json({ message: "Reset already in progress." });
+      }
 
-    if (!isAdmin && !gameData.lastInteraction) {
-      throw "Nothing to reset!";
-    } else if (
-      !isAdmin &&
-      !gameData.isGameOver &&
-      gameData.playerO?.visitorId !== visitorId &&
-      gameData.playerX?.visitorId !== visitorId &&
-      new Date(gameData.lastInteraction).getTime() > resetAllowedDate.getTime()
-    ) {
-      throw "You must be either a player or admin to reset the board";
-    }
+      const resetAllowedDate = new Date();
+      resetAllowedDate.setMinutes(resetAllowedDate.getMinutes() - 5);
 
-    let droppedAssetIds = [],
-      droppedAssets;
-    const world = await getWorldDataObject(credentials);
+      if (!isAdmin && !lastInteraction) {
+        throw "Nothing to reset!";
+      } else if (
+        !isAdmin &&
+        !isGameOver &&
+        playerO.visitorId !== visitorId &&
+        playerX.visitorId !== visitorId &&
+        new Date(lastInteraction).getTime() > resetAllowedDate.getTime()
+      ) {
+        throw "You must be either a player or admin to reset the board";
+      }
 
-    if (isAdmin) {
-      droppedAssets = await world.fetchDroppedAssetsWithUniqueName({
-        isPartial: true,
-        uniqueName: assetId,
+      let droppedAssetIds = [],
+        droppedAssets;
+      const world = await getWorldDataObject(credentials);
+
+      if (isAdmin) {
+        droppedAssets = await world.fetchDroppedAssetsWithUniqueName({
+          isPartial: true,
+          uniqueName: assetId,
+        });
+      } else {
+        droppedAssets = await world.fetchDroppedAssetsWithUniqueName({
+          isPartial: false,
+          uniqueName: `${assetId}_TicTacToe_move`,
+        });
+
+        const finishLine = await world.fetchDroppedAssetsWithUniqueName({
+          isPartial: false,
+          uniqueName: `${assetId}_TicTacToe_finishLine`,
+        });
+        if (finishLine.length > 0) droppedAssetIds.push(finishLine[0].id);
+
+        updateGameText(credentials, "", `${assetId}_TicTacToe_gameText`);
+        updateGameText(credentials, "", `${assetId}_TicTacToe_playerXText`);
+        updateGameText(credentials, "", `${assetId}_TicTacToe_playerOText`);
+      }
+
+      for (const droppedAsset in droppedAssets) {
+        droppedAssetIds.push(droppedAssets[droppedAsset].id);
+      }
+      if (droppedAssetIds.length > 0) {
+        await World.deleteDroppedAssets(urlSlug, droppedAssetIds, interactivePublicKey, process.env.INTERACTIVE_SECRET);
+      }
+
+      // update world data object
+      const promises = [];
+      const xProfileId = playerX.profileId;
+      const oProfileId = playerO.profileId;
+      if (xProfileId && oProfileId) {
+        promises.push(world.incrementDataObjectValue(`keyAssets.${assetId}.gamesPlayedByUser.${xProfileId}.count`, 1));
+        promises.push(world.incrementDataObjectValue(`keyAssets.${assetId}.gamesPlayedByUser.${oProfileId}.count`, 1));
+      }
+      promises.push(world.incrementDataObjectValue(`keyAssets.${assetId}.totalGamesResetCount`, 1));
+      await Promise.all(promises);
+
+      if (isAdmin) await generateBoard(credentials);
+
+      // update key asset data object
+      const updatedData = {
+        ...defaultGameData,
+        keyAssetId: assetId,
+        resetCount: resetCount + 1,
+      };
+      await updateGameData({
+        credentials,
+        droppedAssetId: assetId,
+        updatedData,
       });
-    } else {
-      droppedAssets = await world.fetchDroppedAssetsWithUniqueName({
-        isPartial: false,
-        uniqueName: `${assetId}_TicTacToe_move`,
+
+      return res.status(200).send({ message: "Game reset successfully" });
+    } catch (error) {
+      await updateGameData({
+        credentials,
+        droppedAssetId: assetId,
+        updatedData: { resetCount: resetCount + 1 },
       });
-
-      const finishLine = await world.fetchDroppedAssetsWithUniqueName({
-        isPartial: false,
-        uniqueName: `${assetId}_TicTacToe_finishLine`,
-      });
-      if (finishLine.length > 0) droppedAssetIds.push(finishLine[0].id);
-
-      updateGameText(credentials, "", `${assetId}_TicTacToe_gameText`);
-      updateGameText(credentials, "", `${assetId}_TicTacToe_playerXText`);
-      updateGameText(credentials, "", `${assetId}_TicTacToe_playerOText`);
+      throw error;
     }
-
-    for (const droppedAsset in droppedAssets) {
-      droppedAssetIds.push(droppedAssets[droppedAsset].id);
-    }
-    if (droppedAssetIds.length > 0) {
-      await World.deleteDroppedAssets(urlSlug, droppedAssetIds, interactivePublicKey, process.env.INTERACTIVE_SECRET);
-    }
-
-    // update key asset data object
-    const updatedData = {
-      ...defaultGameData,
-      keyAssetId: assetId,
-      resetCount: gameData.resetCount + 1,
-    };
-    await updateGameData(credentials, assetId, updatedData);
-
-    // update world data object
-    const promises = [];
-    const xProfileId = gameData.playerX?.profileId;
-    const oProfileId = gameData.playerO?.profileId;
-    if (xProfileId && oProfileId) {
-      promises.push(world.incrementDataObjectValue(`keyAssets.${assetId}.gamesPlayedByUser.${xProfileId}.count`, 1));
-      promises.push(world.incrementDataObjectValue(`keyAssets.${assetId}.gamesPlayedByUser.${oProfileId}.count`, 1));
-    }
-    promises.push(world.incrementDataObjectValue(`keyAssets.${assetId}.totalGamesResetCount`, 1));
-    await Promise.all(promises);
-
-    if (isAdmin) await generateBoard(credentials);
-
-    return res.status(200).send({ message: "Game reset successfully" });
   } catch (error) {
     errorHandler({
       error,

@@ -15,4 +15,5 @@ export type GameDataType = {
     visitorId?: number;
   };
   resetCount?: number;
+  turnCount?: number;
 };

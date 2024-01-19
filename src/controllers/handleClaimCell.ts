@@ -4,10 +4,11 @@ import {
   dropWebImageAsset,
   errorHandler,
   getCredentials,
-  getGameData,
+  getDroppedAssetDataObject,
   getWorldDataObject,
   getFinishLineOptions,
   getWinningCombo,
+  lockDataObject,
   updateGameData,
   updateGameText,
 } from "../utils/index.js";
@@ -25,69 +26,89 @@ export const handleClaimCell = async (req: Request, res: Response) => {
     const cell = parseInt(req.params.cell);
     if (isNaN(cell)) throw "Cell is missing.";
 
-    const gameData: GameDataType = await getGameData(credentials);
+    const keyAsset = await getDroppedAssetDataObject(credentials);
+    const updatedData: GameDataType = keyAsset.dataObject;
+    const { claimedCells, isGameOver, keyAssetId, lastPlayerTurn, playerO, playerX, resetCount, turnCount } =
+      updatedData;
 
-    if (!gameData) {
-      text = "No active games found. Please select X or O to begin!";
-    } else if (gameData.isGameOver) {
-      text = "Game over! Press Reset to start another.";
-    } else if (!gameData.playerO?.visitorId || !gameData.playerX?.visitorId) {
-      text = "Two players are needed to get started.";
-    } else if (gameData.playerO?.visitorId !== visitorId && gameData.playerX?.visitorId !== visitorId) {
-      text = "Game in progress.";
-    } else if (gameData.claimedCells[cell]) {
-      text = "Cannot place your move here.";
-    } else if (gameData.lastPlayerTurn === visitorId) {
-      const username =
-        gameData.playerX?.visitorId === visitorId ? gameData.playerO?.username : gameData.playerX?.username;
-      text = `It's ${username}'s turn.`;
-    } else {
-      gameData.lastPlayerTurn = visitorId;
-      shouldUpdateGame = true;
-    }
+    try {
+      try {
+        await lockDataObject(
+          `${keyAssetId}-${resetCount}-${turnCount}-${new Date(Math.round(new Date().getTime() / 10000) * 10000)}`,
+          keyAsset,
+        );
+      } catch (error) {
+        return res.status(409).json({ message: "Move already in progress." });
+      }
 
-    if (!shouldUpdateGame) {
-      await updateGameText(credentials, text, `${gameData.keyAssetId}_TicTacToe_gameText`);
-      throw text;
-    }
+      if (isGameOver) {
+        text = "Game over! Press Reset to start another.";
+      } else if (!playerO.visitorId || !playerX.visitorId) {
+        text = "Two players are needed to get started.";
+      } else if (playerO.visitorId !== visitorId && playerX.visitorId !== visitorId) {
+        text = "Game in progress.";
+      } else if (claimedCells[cell]) {
+        text = "Cannot place your move here.";
+      } else if (lastPlayerTurn === visitorId) {
+        const username = playerX.visitorId === visitorId ? playerO.username : playerX.username;
+        text = `It's ${username}'s turn.`;
+      } else {
+        updatedData.lastPlayerTurn = visitorId;
+        shouldUpdateGame = true;
+      }
 
-    const cellAsset: DroppedAssetInterface = await DroppedAsset.get(assetId, urlSlug, { credentials });
-    await dropWebImageAsset({
-      credentials,
-      layer1: `${process.env.BUCKET}${visitorId === gameData.playerO?.visitorId ? "blue_o" : "pink_x"}.png`,
-      position: cellAsset.position,
-      uniqueName: `${gameData.keyAssetId}_TicTacToe_move`,
-    });
+      if (!shouldUpdateGame) {
+        await updateGameText(credentials, text, `${keyAssetId}_TicTacToe_gameText`);
+        throw text;
+      }
 
-    gameData.claimedCells[cell] = visitorId;
-    const winningCombo = await getWinningCombo(gameData.claimedCells);
-    if (winningCombo) {
-      // Dropping a finishing line
-      const finishLineOptions = await getFinishLineOptions(gameData.keyAssetId, winningCombo, credentials, gameData);
+      const cellAsset: DroppedAssetInterface = await DroppedAsset.get(assetId, urlSlug, { credentials });
       await dropWebImageAsset({
         credentials,
-        ...finishLineOptions,
+        layer1: `${process.env.BUCKET}${visitorId === playerO.visitorId ? "blue_o" : "pink_x"}.png`,
+        position: cellAsset.position,
+        uniqueName: `${keyAssetId}_TicTacToe_move`,
       });
 
-      // Dropping 👑 and player's name
-      text = `👑 ${username} wins!`;
-      gameData.isGameOver = true;
+      updatedData.claimedCells[cell] = visitorId;
+      const winningCombo = await getWinningCombo(updatedData.claimedCells);
+      if (winningCombo) {
+        // Dropping a finishing line
+        const finishLineOptions = await getFinishLineOptions(keyAssetId, winningCombo, credentials, updatedData);
+        await dropWebImageAsset({
+          credentials,
+          ...finishLineOptions,
+        });
 
-      // update world data object
-      const world = await getWorldDataObject(credentials);
-      const promises = [];
-      promises.push(
-        world.incrementDataObjectValue(`keyAssets.${gameData.keyAssetId}.gamesWonByUser.${profileId}.count`, 1),
-      );
-      promises.push(world.incrementDataObjectValue(`keyAssets.${gameData.keyAssetId}.totalGamesWonCount`, 1));
-      Promise.all(promises);
+        // Dropping 👑 and player's name
+        text = `👑 ${username} wins!`;
+        updatedData.isGameOver = true;
+
+        // update world data object
+        const world = await getWorldDataObject(credentials);
+        const promises = [];
+        promises.push(world.incrementDataObjectValue(`keyAssets.${keyAssetId}.gamesWonByUser.${profileId}.count`, 1));
+        promises.push(world.incrementDataObjectValue(`keyAssets.${keyAssetId}.totalGamesWonCount`, 1));
+        Promise.all(promises);
+      }
+
+      await updateGameText(credentials, text, `${keyAssetId}_TicTacToe_gameText`);
+
+      updatedData.lastInteraction = new Date();
+      updatedData.turnCount = turnCount + 1;
+      await updateGameData({
+        credentials,
+        droppedAssetId: keyAssetId,
+        updatedData,
+      });
+    } catch (error) {
+      await updateGameData({
+        credentials,
+        droppedAssetId: keyAssetId,
+        updatedData: { turnCount: turnCount + 1 },
+      });
+      throw error;
     }
-
-    await updateGameText(credentials, text, `${gameData.keyAssetId}_TicTacToe_gameText`);
-
-    gameData.lastInteraction = new Date();
-    await updateGameData(credentials, gameData.keyAssetId, gameData);
-
     return res.status(200).send({ message: "Move successfully made." });
   } catch (error) {
     errorHandler({
