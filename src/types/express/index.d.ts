@@ -1,4 +1,4 @@
-import { Credentials } from "../credentials.ts";
+import { Credentials } from "../credentialsInterface.ts";
 
 declare global {
   namespace Express {

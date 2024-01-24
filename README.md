@@ -3,7 +3,3 @@
 # TicTacToe
 
 TicTacToe is configured with the [Topia SDK](https://metaversecloud-com.github.io/mc-sdk-js).
-
-### How To Play
-
--

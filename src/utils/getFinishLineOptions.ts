@@ -1,25 +1,26 @@
-import { combos, DroppedAsset, errorHandler } from "./index.js";
-import { Credentials } from "../types/credentials";
+import { combos, errorHandler, getDroppedAsset } from "./index.js";
+import { Credentials } from "../types/credentialsInterface";
 
 const cellWidth = 80;
 
-export const getFinishLineOptions = async (urlSlug: string, game: any, combo, credentials: Credentials) => {
+export const getFinishLineOptions = async (assetId: string, combo, credentials: Credentials, game: any) => {
   try {
-    const boardAsset = await DroppedAsset.getWithUniqueName(
-      "TicTacToeBoard",
-      urlSlug,
-      credentials.interactivePublicKey,
-      process.env.INTERACTIVE_SECRET,
-    );
-    if (!boardAsset) throw "TicTacToe board not found";
+    const { urlSlug, visitorId } = credentials;
+    credentials.assetId = assetId;
 
-    // @ts-ignore
-    const position = boardAsset.position;
-    const color = game.playerO.visitorId === credentials.visitorId ? "blue" : "pink";
+    const keyAsset = await getDroppedAsset(credentials);
+    if (!keyAsset) throw "TicTacToe board not found";
+
+    const position = {
+      x: keyAsset.position.x,
+      y: keyAsset.position.y - 200,
+    };
+
+    const color = game.playerO.visitorId === visitorId ? "blue" : "pink";
     const options = {
       layer1: `${process.env.BUCKET}${color}_horizontal.png`,
       position,
-      uniqueName: `TicTacToe_finishLine_${urlSlug}`,
+      uniqueName: `${assetId}_TicTacToe_finishLine`,
       urlSlug,
     };
 
@@ -55,7 +56,7 @@ export const getFinishLineOptions = async (urlSlug: string, game: any, combo, cr
         break;
     }
     return options;
-  } catch (error: any) {
+  } catch (error) {
     errorHandler({
       error,
       functionName: "getFinishLineOptions",

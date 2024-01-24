@@ -9,14 +9,70 @@ export const combos = {
   R_CROSS: [0, 4, 8],
 };
 
-export const getWinningCombo = (status) => {
-  if (status[0] && status[1] && status[2] && status[0] === status[1] && status[1] === status[2]) return combos.H_TOP;
-  if (status[3] && status[4] && status[5] && status[3] === status[4] && status[4] === status[5]) return combos.H_MID;
-  if (status[6] && status[7] && status[8] && status[6] === status[7] && status[7] === status[8]) return combos.H_BOT;
-  if (status[0] && status[3] && status[6] && status[0] === status[3] && status[3] === status[6]) return combos.V_LEFT;
-  if (status[1] && status[4] && status[7] && status[1] === status[4] && status[4] === status[7]) return combos.V_MID;
-  if (status[2] && status[5] && status[8] && status[2] === status[5] && status[5] === status[8]) return combos.V_RIGHT;
-  if (status[0] && status[4] && status[8] && status[0] === status[4] && status[4] === status[8]) return combos.R_CROSS;
-  if (status[2] && status[4] && status[6] && status[2] === status[4] && status[4] === status[6]) return combos.L_CROSS;
+export const getWinningCombo = (claimedCells) => {
+  if (
+    claimedCells[0] &&
+    claimedCells[1] &&
+    claimedCells[2] &&
+    claimedCells[0] === claimedCells[1] &&
+    claimedCells[1] === claimedCells[2]
+  )
+    return combos.H_TOP;
+  if (
+    claimedCells[3] &&
+    claimedCells[4] &&
+    claimedCells[5] &&
+    claimedCells[3] === claimedCells[4] &&
+    claimedCells[4] === claimedCells[5]
+  )
+    return combos.H_MID;
+  if (
+    claimedCells[6] &&
+    claimedCells[7] &&
+    claimedCells[8] &&
+    claimedCells[6] === claimedCells[7] &&
+    claimedCells[7] === claimedCells[8]
+  )
+    return combos.H_BOT;
+  if (
+    claimedCells[0] &&
+    claimedCells[3] &&
+    claimedCells[6] &&
+    claimedCells[0] === claimedCells[3] &&
+    claimedCells[3] === claimedCells[6]
+  )
+    return combos.V_LEFT;
+  if (
+    claimedCells[1] &&
+    claimedCells[4] &&
+    claimedCells[7] &&
+    claimedCells[1] === claimedCells[4] &&
+    claimedCells[4] === claimedCells[7]
+  )
+    return combos.V_MID;
+  if (
+    claimedCells[2] &&
+    claimedCells[5] &&
+    claimedCells[8] &&
+    claimedCells[2] === claimedCells[5] &&
+    claimedCells[5] === claimedCells[8]
+  )
+    return combos.V_RIGHT;
+  if (
+    claimedCells[0] &&
+    claimedCells[4] &&
+    claimedCells[8] &&
+    claimedCells[0] === claimedCells[4] &&
+    claimedCells[4] === claimedCells[8]
+  )
+    return combos.R_CROSS;
+  if (
+    claimedCells[2] &&
+    claimedCells[4] &&
+    claimedCells[6] &&
+    claimedCells[2] === claimedCells[4] &&
+    claimedCells[4] === claimedCells[6]
+  )
+    return combos.L_CROSS;
   return null;
 };

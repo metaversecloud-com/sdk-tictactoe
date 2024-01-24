@@ -26,7 +26,7 @@ export const errorHandler = ({
           reqQueryParams,
           reqBody: req?.body,
         },
-        error: JSON.stringify(error),
+        error: `❌ ${JSON.stringify(error)}`,
       }),
     );
 
