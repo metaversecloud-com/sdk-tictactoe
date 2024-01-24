@@ -35,12 +35,9 @@
     "typescript": "^5.3.3"
   },
   "scripts": {
-    "serve": "npx tsc -w & npx nodemon -q build/src/index.js",
-    "start-dev": "npm run build & node build/src/index.js",
-    "build": "tsc -p tsconfig.json",
-    "start": "node build/src/index.js",
-    "link-sdk": "yalc link @rtsdk/topia",
-    "unlink-sdk": "yalc remove @rtsdk/topia"
+    "start": "concurrently \"npm run serve --workspace=server\" \"npm start --workspace=client\"",
+    "start:dev": "concurrently \"npm run serve --workspace=server\" \"npm run dev --workspace=client\"",
+    "build:prod": "npm run build -w server && npm run build -w client"
   },
   "repository": {
     "type": "git",
