@@ -4,6 +4,7 @@ import {
   dropWebImageAsset,
   errorHandler,
   getCredentials,
+  getDroppedAsset,
   getDroppedAssetDataObject,
   getWorldDataObject,
   getFinishLineOptions,
@@ -14,6 +15,7 @@ import {
 } from "../utils/index.js";
 import { GameDataType } from "../types/gameDataType";
 import { DroppedAssetInterface } from "@rtsdk/topia";
+import { cellWidth } from "../constants.js";
 
 export const handleClaimCell = async (req: Request, res: Response) => {
   try {
@@ -26,7 +28,7 @@ export const handleClaimCell = async (req: Request, res: Response) => {
     const cell = parseInt(req.params.cell);
     if (isNaN(cell)) throw "Cell is missing.";
 
-    const keyAsset = await getDroppedAssetDataObject(credentials);
+    const keyAsset: DroppedAssetInterface = await getDroppedAssetDataObject(credentials);
     const updatedData: GameDataType = keyAsset.dataObject;
     const { claimedCells, isGameOver, keyAssetId, lastPlayerTurn, playerO, playerX, resetCount, turnCount } =
       updatedData;
@@ -73,20 +75,36 @@ export const handleClaimCell = async (req: Request, res: Response) => {
       updatedData.claimedCells[cell] = visitorId;
       const winningCombo = await getWinningCombo(updatedData.claimedCells);
       if (winningCombo) {
+        // Dropping 👑 and player's name
+        text = `${username} wins!`;
+        updatedData.isGameOver = true;
+
         // Dropping a finishing line
         const finishLineOptions = await getFinishLineOptions(keyAssetId, winningCombo, credentials, updatedData);
-        await dropWebImageAsset({
-          credentials,
-          ...finishLineOptions,
-        });
 
-        // Dropping 👑 and player's name
-        text = `👑 ${username} wins!`;
-        updatedData.isGameOver = true;
+        const droppedAsset = await getDroppedAsset(credentials);
+        const position = {
+          x: playerO.visitorId === visitorId ? droppedAsset.position.x + 200 : droppedAsset.position.x - 200,
+          y: droppedAsset.position.y - 180 - cellWidth * 2,
+        };
 
         // update world data object
         const world = await getWorldDataObject(credentials);
         const promises = [];
+        promises.push(
+          dropWebImageAsset({
+            credentials,
+            ...finishLineOptions,
+          }),
+        );
+        promises.push(
+          dropWebImageAsset({
+            credentials,
+            layer0: `${process.env.BUCKET}crown.png`,
+            position,
+            uniqueName: `${keyAssetId}_TicTacToe_crown`,
+          }),
+        );
         promises.push(world.incrementDataObjectValue(`keyAssets.${keyAssetId}.gamesWonByUser.${profileId}.count`, 1));
         promises.push(world.incrementDataObjectValue(`keyAssets.${keyAssetId}.totalGamesWonCount`, 1));
         Promise.all(promises);

@@ -22,6 +22,8 @@ export const handleResetBoard = async (req: Request, res: Response) => {
     const visitor: VisitorInterface = await Visitor.get(visitorId, urlSlug, { credentials });
     const isAdmin = visitor.isAdmin;
 
+    updateGameText(credentials, "Reset in progress...", `${assetId}_TicTacToe_gameText`);
+
     const keyAsset = await getDroppedAssetDataObject(credentials);
     const { isGameOver, lastInteraction, playerO, playerX, resetCount } = keyAsset.dataObject as GameDataType;
 
@@ -71,6 +73,12 @@ export const handleResetBoard = async (req: Request, res: Response) => {
         });
         if (finishLine.length > 0) droppedAssetIds.push(finishLine[0].id);
 
+        const crown = await world.fetchDroppedAssetsWithUniqueName({
+          isPartial: false,
+          uniqueName: `${assetId}_TicTacToe_crown`,
+        });
+        if (crown.length > 0) droppedAssetIds.push(crown[0].id);
+
         updateGameText(credentials, "", `${assetId}_TicTacToe_gameText`);
         updateGameText(credentials, "", `${assetId}_TicTacToe_playerXText`);
         updateGameText(credentials, "", `${assetId}_TicTacToe_playerOText`);
@@ -110,6 +118,7 @@ export const handleResetBoard = async (req: Request, res: Response) => {
 
       return res.status(200).send({ message: "Game reset successfully" });
     } catch (error) {
+      updateGameText(credentials, "", `${assetId}_TicTacToe_gameText`);
       await updateGameData({
         credentials,
         droppedAssetId: assetId,
