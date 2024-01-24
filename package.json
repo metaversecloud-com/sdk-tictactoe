@@ -2,7 +2,7 @@
   "name": "TicTacToe",
   "private": true,
   "author": "Topia",
-  "version": "2.1.0",
+  "version": "1.0.0",
   "description": "An in-world TicTacToe game for Topia.",
   "main": "src/index.ts",
   "dependencies": {
@@ -35,9 +35,12 @@
     "typescript": "^5.3.3"
   },
   "scripts": {
-    "start": "concurrently \"npm run serve --workspace=server\" \"npm start --workspace=client\"",
-    "start:dev": "concurrently \"npm run serve --workspace=server\" \"npm run dev --workspace=client\"",
-    "build:prod": "npm run build -w server && npm run build -w client"
+    "serve": "npx tsc -w & npx nodemon -q build/src/index.js",
+    "start-dev": "npm run build & node build/src/index.js",
+    "build": "tsc -p tsconfig.json",
+    "start": "node build/src/index.js",
+    "link-sdk": "yalc link @rtsdk/topia",
+    "unlink-sdk": "yalc remove @rtsdk/topia"
   },
   "repository": {
     "type": "git",
