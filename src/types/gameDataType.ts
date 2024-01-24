@@ -4,6 +4,7 @@ export type GameDataType = {
   keyAssetId?: string;
   lastInteraction?: Date;
   lastPlayerTurn?: number;
+  playerCount?: number;
   playerO?: {
     profileId?: string;
     username?: string;
