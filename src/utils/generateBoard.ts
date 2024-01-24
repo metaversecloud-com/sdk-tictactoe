@@ -6,7 +6,7 @@ import {
   initializeDroppedAssetDataObject,
 } from "./index.js";
 import { Credentials } from "../types/credentialsInterface.js";
-import { cellWidth } from "../constants.js";
+import { cellWidth, defaultGameText } from "../constants.js";
 
 export const generateBoard = async (credentials: Credentials) => {
   try {
@@ -33,8 +33,8 @@ export const generateBoard = async (credentials: Credentials) => {
           x: boardCenter.x,
           y: resetBtnCenter.y - 375,
         },
-        style: { textColor: "#ece4c3", textSize: 24, textWidth: 300 },
-        text: "Click X or O to begin!",
+        style: { textColor: "#ece4c3", textSize: 22, textWidth: 300 },
+        text: defaultGameText,
         uniqueName: `${assetId}_TicTacToe_gameText`,
       }),
       dropTextAsset({
@@ -43,7 +43,7 @@ export const generateBoard = async (credentials: Credentials) => {
           x: resetBtnCenter.x - 200,
           y: boardCenter.y,
         },
-        style: { textColor: "#ff61ff", textSize: 24, textWidth: 170 },
+        style: { textColor: "#ff61ff", textSize: 20, textWidth: 150 },
         text: "",
         uniqueName: `${assetId}_TicTacToe_playerXText`,
       }),
@@ -53,7 +53,7 @@ export const generateBoard = async (credentials: Credentials) => {
           x: resetBtnCenter.x + 200,
           y: boardCenter.y,
         },
-        style: { textColor: "#22ffff", textSize: 24, textWidth: 170 },
+        style: { textColor: "#22ffff", textSize: 20, textWidth: 150 },
         text: "",
         uniqueName: `${assetId}_TicTacToe_playerOText`,
       }),

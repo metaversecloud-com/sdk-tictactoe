@@ -9,7 +9,7 @@ export const combos = {
   R_CROSS: [0, 4, 8],
 };
 
-export const getWinningCombo = (claimedCells) => {
+export const getGameStatus = (claimedCells) => {
   if (
     claimedCells[0] &&
     claimedCells[1] &&
@@ -17,7 +17,7 @@ export const getWinningCombo = (claimedCells) => {
     claimedCells[0] === claimedCells[1] &&
     claimedCells[1] === claimedCells[2]
   )
-    return combos.H_TOP;
+    return { hasWinningCombo: true, winningCombo: combos.H_TOP };
   if (
     claimedCells[3] &&
     claimedCells[4] &&
@@ -25,7 +25,7 @@ export const getWinningCombo = (claimedCells) => {
     claimedCells[3] === claimedCells[4] &&
     claimedCells[4] === claimedCells[5]
   )
-    return combos.H_MID;
+    return { hasWinningCombo: true, winningCombo: combos.H_MID };
   if (
     claimedCells[6] &&
     claimedCells[7] &&
@@ -33,7 +33,7 @@ export const getWinningCombo = (claimedCells) => {
     claimedCells[6] === claimedCells[7] &&
     claimedCells[7] === claimedCells[8]
   )
-    return combos.H_BOT;
+    return { hasWinningCombo: true, winningCombo: combos.H_BOT };
   if (
     claimedCells[0] &&
     claimedCells[3] &&
@@ -41,7 +41,7 @@ export const getWinningCombo = (claimedCells) => {
     claimedCells[0] === claimedCells[3] &&
     claimedCells[3] === claimedCells[6]
   )
-    return combos.V_LEFT;
+    return { hasWinningCombo: true, winningCombo: combos.V_LEFT };
   if (
     claimedCells[1] &&
     claimedCells[4] &&
@@ -49,7 +49,7 @@ export const getWinningCombo = (claimedCells) => {
     claimedCells[1] === claimedCells[4] &&
     claimedCells[4] === claimedCells[7]
   )
-    return combos.V_MID;
+    return { hasWinningCombo: true, winningCombo: combos.V_MID };
   if (
     claimedCells[2] &&
     claimedCells[5] &&
@@ -57,7 +57,7 @@ export const getWinningCombo = (claimedCells) => {
     claimedCells[2] === claimedCells[5] &&
     claimedCells[5] === claimedCells[8]
   )
-    return combos.V_RIGHT;
+    return { hasWinningCombo: true, winningCombo: combos.V_RIGHT };
   if (
     claimedCells[0] &&
     claimedCells[4] &&
@@ -65,7 +65,7 @@ export const getWinningCombo = (claimedCells) => {
     claimedCells[0] === claimedCells[4] &&
     claimedCells[4] === claimedCells[8]
   )
-    return combos.R_CROSS;
+    return { hasWinningCombo: true, winningCombo: combos.R_CROSS };
   if (
     claimedCells[2] &&
     claimedCells[4] &&
@@ -73,6 +73,18 @@ export const getWinningCombo = (claimedCells) => {
     claimedCells[2] === claimedCells[4] &&
     claimedCells[4] === claimedCells[6]
   )
-    return combos.L_CROSS;
-  return null;
+    return { hasWinningCombo: true, winningCombo: combos.L_CROSS };
+  if (
+    claimedCells[0] &&
+    claimedCells[1] &&
+    claimedCells[2] &&
+    claimedCells[3] &&
+    claimedCells[4] &&
+    claimedCells[5] &&
+    claimedCells[6] &&
+    claimedCells[7] &&
+    claimedCells[8]
+  )
+    return { hasWinningCombo: false, isDraw: true };
+  return { hasWinningCombo: false, isDraw: false };
 };
