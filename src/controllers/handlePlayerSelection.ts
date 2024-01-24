@@ -3,6 +3,7 @@ import {
   errorHandler,
   getDroppedAssetDataObject,
   getCredentials,
+  lockDataObject,
   updateGameData,
   updateGameText,
 } from "../utils/index.js";
@@ -20,40 +21,57 @@ export const handlePlayerSelection = async (req: Request, res: Response) => {
 
     const keyAsset = await getDroppedAssetDataObject(credentials);
     const updatedData: GameDataType = keyAsset.dataObject;
-    const { keyAssetId, playerO, playerX } = updatedData;
+    const { keyAssetId, playerCount, playerO, playerX } = updatedData;
 
-    if (playerX.visitorId === visitorId) {
-      text = `You are already player X`;
-      shouldUpdateGame = false;
-    } else if (playerO.visitorId === visitorId) {
-      text = `You are already player O`;
-      shouldUpdateGame = false;
-    } else if (isPlayerX && playerX.visitorId) {
-      text = "Player X already selected.";
-      shouldUpdateGame = false;
-    } else if (!isPlayerX && playerO.visitorId) {
-      text = "Player O already selected.";
-      shouldUpdateGame = false;
-    } else if ((isPlayerX && playerO.visitorId) || (!isPlayerX && playerX.visitorId)) {
-      text = "Let the game begin!";
-    } else {
-      text = "Find a second player!";
+    try {
+      try {
+        await lockDataObject(
+          `${keyAssetId}-${visitorId}-${playerCount}-${new Date(Math.round(new Date().getTime() / 10000) * 10000)}`,
+          keyAsset,
+        );
+      } catch (error) {
+        return res.status(409).json({ message: "Player selection already in progress." });
+      }
+
+      if (playerX.visitorId === visitorId) {
+        text = `You are already player X`;
+        shouldUpdateGame = false;
+      } else if (playerO.visitorId === visitorId) {
+        text = `You are already player O`;
+        shouldUpdateGame = false;
+      } else if (isPlayerX && playerX.visitorId) {
+        text = "Player X already selected.";
+        shouldUpdateGame = false;
+      } else if (!isPlayerX && playerO.visitorId) {
+        text = "Player O already selected.";
+        shouldUpdateGame = false;
+      } else if ((isPlayerX && playerO.visitorId) || (!isPlayerX && playerX.visitorId)) {
+        text = "Let the game begin!";
+      } else {
+        text = "Find a second player!";
+      }
+
+      await updateGameText(credentials, text, `${keyAssetId}_TicTacToe_gameText`);
+      if (!shouldUpdateGame) throw text;
+
+      await updateGameText(credentials, username, `${keyAssetId}_TicTacToe_player${isPlayerX ? "X" : "O"}Text`);
+
+      updatedData[`player${symbol.toUpperCase()}`] = { profileId, username, visitorId };
+      updatedData.lastInteraction = new Date();
+
+      await updateGameData({
+        credentials,
+        droppedAssetId: keyAssetId,
+        updatedData,
+      });
+    } catch (error) {
+      await updateGameData({
+        credentials,
+        droppedAssetId: keyAssetId,
+        updatedData: { playerCount: playerCount + 1 },
+      });
+      throw error;
     }
-
-    await updateGameText(credentials, text, `${keyAssetId}_TicTacToe_gameText`);
-    if (!shouldUpdateGame) throw text;
-
-    await updateGameText(credentials, username, `${keyAssetId}_TicTacToe_player${isPlayerX ? "X" : "O"}Text`);
-
-    updatedData[`player${symbol.toUpperCase()}`] = { profileId, username, visitorId };
-    updatedData.lastInteraction = new Date();
-
-    await updateGameData({
-      credentials,
-      droppedAssetId: keyAssetId,
-      updatedData,
-    });
-
     return res.json({ success: true });
   } catch (error) {
     errorHandler({

@@ -5,6 +5,7 @@ export const defaultGameData = {
   isGameOver: false,
   lastInteraction: null,
   lastPlayerTurn: null,
+  playerCount: 0,
   playerO: {},
   playerX: {},
   resetCount: 0,
