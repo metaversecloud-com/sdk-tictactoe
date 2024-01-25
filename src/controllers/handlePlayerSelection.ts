@@ -23,10 +23,8 @@ export const handlePlayerSelection = async (req: Request, res: Response) => {
 
     try {
       try {
-        await lockDataObject(
-          `${keyAssetId}-${visitorId}-${playerCount}-${new Date(Math.round(new Date().getTime() / 5000) * 5000)}`,
-          keyAsset,
-        );
+        const timestamp = new Date(Math.round(new Date().getTime() / 5000) * 5000);
+        await lockDataObject(`${keyAssetId}-${visitorId}-${playerCount}-${timestamp}`, keyAsset);
       } catch (error) {
         return res.status(409).json({ message: "Player selection already in progress." });
       }

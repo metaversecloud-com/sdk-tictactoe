@@ -1,30 +1,26 @@
-import { combos, errorHandler, getDroppedAsset } from "./index.js";
-import { Credentials } from "../types/credentialsInterface";
+import { combos, errorHandler } from "./index.js";
+import { cellWidth } from "../constants.js";
 
-const cellWidth = 80;
-
-export const getFinishLineOptions = async (assetId: string, combo, credentials: Credentials, game: any) => {
+export const getFinishLineOptions = async (
+  isPlayerO: boolean,
+  keyAssetId: string,
+  keyAssetPosition: { x?: number; y?: number },
+  winningCombo: number[],
+) => {
   try {
-    const { urlSlug, visitorId } = credentials;
-    credentials.assetId = assetId;
-
-    const keyAsset = await getDroppedAsset(credentials);
-    if (!keyAsset) throw "TicTacToe board not found";
-
     const position = {
-      x: keyAsset.position.x,
-      y: keyAsset.position.y - 200,
+      x: keyAssetPosition.x,
+      y: keyAssetPosition.y - 200,
     };
 
-    const color = game.playerO.visitorId === visitorId ? "blue" : "pink";
+    const color = isPlayerO ? "blue" : "pink";
     const options = {
       layer1: `${process.env.BUCKET}${color}_horizontal.png`,
       position,
-      uniqueName: `${assetId}_TicTacToe_finishLine`,
-      urlSlug,
+      uniqueName: `${keyAssetId}_TicTacToe_finishLine`,
     };
 
-    switch (combo) {
+    switch (winningCombo) {
       case combos.H_TOP:
         options.position = { x: position.x, y: position.y - cellWidth };
         break;

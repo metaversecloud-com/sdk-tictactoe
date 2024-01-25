@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import {
-  DroppedAsset,
   dropWebImageAsset,
   errorHandler,
   getCredentials,
@@ -13,13 +12,12 @@ import {
   updateGameText,
 } from "../utils/index.js";
 import { GameDataType } from "../types/gameDataType";
-import { DroppedAssetInterface } from "@rtsdk/topia";
 import { cellWidth } from "../constants.js";
 
 export const handleClaimCell = async (req: Request, res: Response) => {
   try {
     const credentials = getCredentials(req.body);
-    const { assetId, profileId, urlSlug, visitorId } = credentials;
+    const { profileId, visitorId } = credentials;
     const { username } = req.body;
     let text = "",
       shouldUpdateGame = false;
@@ -52,10 +50,8 @@ export const handleClaimCell = async (req: Request, res: Response) => {
 
     try {
       try {
-        await lockDataObject(
-          `${keyAssetId}-${resetCount}-${turnCount}-${new Date(Math.round(new Date().getTime() / 5000) * 5000)}`,
-          keyAsset,
-        );
+        const timestamp = new Date(Math.round(new Date().getTime() / 5000) * 5000);
+        await lockDataObject(`${keyAssetId}-${resetCount}-${turnCount}-${timestamp}`, keyAsset);
       } catch (error) {
         return res.status(409).json({ message: "Move already in progress." });
       }
@@ -84,7 +80,7 @@ export const handleClaimCell = async (req: Request, res: Response) => {
 
       const promises = [];
 
-      const cellAsset: DroppedAssetInterface = await DroppedAsset.get(assetId, urlSlug, { credentials });
+      const cellAsset = await getDroppedAsset(credentials);
       promises.push(
         dropWebImageAsset({
           credentials,
@@ -99,32 +95,32 @@ export const handleClaimCell = async (req: Request, res: Response) => {
         text = "It's a draw! Press Reset to play again.";
         updatedData.isGameOver = true;
       } else if (gameStatus.hasWinningCombo) {
-        // Dropping 👑 and player's name
+        await keyAsset.fetchDroppedAssetById();
+        // @ts-ignore
+        const keyAssetPosition = keyAsset.position;
+
         text = `${username} wins!`;
         updatedData.isGameOver = true;
 
-        // Dropping a finishing line
+        // drop a finishing line
         const finishLineOptions = await getFinishLineOptions(
+          playerO.visitorId === visitorId,
           keyAssetId,
+          keyAssetPosition,
           gameStatus.winningCombo,
-          credentials,
-          updatedData,
         );
-
-        const droppedAsset = await getDroppedAsset(credentials);
-        const position = {
-          x: playerO.visitorId === visitorId ? droppedAsset.position.x + 200 : droppedAsset.position.x - 200,
-          y: droppedAsset.position.y - 180 - cellWidth * 2,
-        };
-
-        // update world data object
-        const world = await getWorldDataObject(credentials);
         promises.push(
           dropWebImageAsset({
             credentials,
             ...finishLineOptions,
           }),
         );
+
+        // drop crown
+        const position = {
+          x: playerO.visitorId === visitorId ? keyAssetPosition.x + 200 : keyAssetPosition.x - 200,
+          y: keyAssetPosition.y - 180 - cellWidth * 2,
+        };
         promises.push(
           dropWebImageAsset({
             credentials,
@@ -133,6 +129,9 @@ export const handleClaimCell = async (req: Request, res: Response) => {
             uniqueName: `${keyAssetId}_TicTacToe_crown`,
           }),
         );
+
+        // update world data object
+        const world = await getWorldDataObject(credentials);
         promises.push(world.incrementDataObjectValue(`keyAssets.${keyAssetId}.gamesWonByUser.${profileId}.count`, 1));
         promises.push(world.incrementDataObjectValue(`keyAssets.${keyAssetId}.totalGamesWonCount`, 1));
       }
@@ -140,7 +139,7 @@ export const handleClaimCell = async (req: Request, res: Response) => {
       promises.push(
         keyAsset.updateDataObject({
           ...updatedData,
-          [`claimedCells.${cell}`]: credentials.visitorId,
+          [`claimedCells.${cell}`]: visitorId,
         }),
       );
 
