@@ -23,6 +23,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4.1.1
+        with:
+          ref: ${{ github.event.inputs.version_number }}
         
       - uses: actions/setup-node@v4.0.1
         with:
