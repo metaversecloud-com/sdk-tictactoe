@@ -60,6 +60,7 @@ export const handlePlayerSelection = async (req: Request, res: Response) => {
           playerCount: playerCount + 1,
           [`player${symbol.toUpperCase()}`]: { profileId, username, visitorId },
         }),
+        updateGameText(credentials, text, `${keyAssetId}_TicTacToe_gameText`),
         updateGameText(credentials, username, `${keyAssetId}_TicTacToe_player${isPlayerX ? "X" : "O"}Text`),
       ]);
     } catch (error) {
