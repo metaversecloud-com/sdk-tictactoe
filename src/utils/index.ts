@@ -4,7 +4,7 @@ export * from "./errorHandler.js";
 export * from "./generateBoard.js";
 export * from "./getCredentials.js";
 export * from "./getFinishLineOptions.js";
-export * from "./getWinningCombo.js";
+export * from "./getGameStatus.js";
 export * from "./lockDataObject.js";
 export * from "./topiaInit.js";
 export * from "./updateGameData.js";

@@ -20,9 +20,8 @@ export const updateGameData = async ({
       credentials: { ...credentials, assetId: droppedAssetId },
     });
 
-    const lockTimestamp = new Date(Math.round(new Date().getTime() / 10000) * 10000);
-    if (!lockId) lockId = `${droppedAsset.id}-gameUpdates-${lockTimestamp}`;
-    await droppedAsset.updateDataObject({ ...updatedData }, { lock: { lockId, releaseLock } });
+    const options = lockId ? { lock: { lockId, releaseLock } } : {};
+    await droppedAsset.updateDataObject({ ...updatedData }, options);
 
     return droppedAsset.dataObject;
   } catch (error) {

@@ -4,7 +4,6 @@ import {
   getDroppedAssetDataObject,
   getCredentials,
   lockDataObject,
-  updateGameData,
   updateGameText,
 } from "../utils/index.js";
 import { GameDataType } from "../types/gameDataType.js";
@@ -20,15 +19,12 @@ export const handlePlayerSelection = async (req: Request, res: Response) => {
       shouldUpdateGame = true;
 
     const keyAsset = await getDroppedAssetDataObject(credentials);
-    const updatedData: GameDataType = keyAsset.dataObject;
-    const { keyAssetId, playerCount, playerO, playerX } = updatedData;
+    const { keyAssetId, playerCount, playerO, playerX } = keyAsset.dataObject as GameDataType;
 
     try {
       try {
-        await lockDataObject(
-          `${keyAssetId}-${visitorId}-${playerCount}-${new Date(Math.round(new Date().getTime() / 10000) * 10000)}`,
-          keyAsset,
-        );
+        const timestamp = new Date(Math.round(new Date().getTime() / 5000) * 5000);
+        await lockDataObject(`${keyAssetId}-${visitorId}-${playerCount}-${timestamp}`, keyAsset);
       } catch (error) {
         return res.status(409).json({ message: "Player selection already in progress." });
       }
@@ -51,25 +47,22 @@ export const handlePlayerSelection = async (req: Request, res: Response) => {
         text = "Find a second player!";
       }
 
-      await updateGameText(credentials, text, `${keyAssetId}_TicTacToe_gameText`);
-      if (!shouldUpdateGame) throw text;
+      if (!shouldUpdateGame) {
+        await updateGameText(credentials, text, `${keyAssetId}_TicTacToe_gameText`);
+        throw text;
+      }
 
-      await updateGameText(credentials, username, `${keyAssetId}_TicTacToe_player${isPlayerX ? "X" : "O"}Text`);
-
-      updatedData[`player${symbol.toUpperCase()}`] = { profileId, username, visitorId };
-      updatedData.lastInteraction = new Date();
-
-      await updateGameData({
-        credentials,
-        droppedAssetId: keyAssetId,
-        updatedData,
-      });
+      await Promise.all([
+        keyAsset.updateDataObject({
+          lastInteraction: new Date(),
+          playerCount: playerCount + 1,
+          [`player${symbol.toUpperCase()}`]: { profileId, username, visitorId },
+        }),
+        updateGameText(credentials, text, `${keyAssetId}_TicTacToe_gameText`),
+        updateGameText(credentials, username, `${keyAssetId}_TicTacToe_player${isPlayerX ? "X" : "O"}Text`),
+      ]);
     } catch (error) {
-      await updateGameData({
-        credentials,
-        droppedAssetId: keyAssetId,
-        updatedData: { playerCount: playerCount + 1 },
-      });
+      await keyAsset.updateDataObject({ playerCount: playerCount + 1 });
       throw error;
     }
     return res.json({ success: true });
