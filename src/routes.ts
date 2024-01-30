@@ -10,7 +10,7 @@ router.post("/reset", auth, handleResetBoard);
 
 router.get("/system/health", (req, res) => {
   return res.json({
-    appVersion: process.env.APP_VERSION || 1,
+    appVersion: process.env.npm_package_version,
     status: "OK",
   });
 });
