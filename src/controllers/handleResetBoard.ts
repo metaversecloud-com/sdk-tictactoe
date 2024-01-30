@@ -59,11 +59,13 @@ export const handleResetBoard = async (req: Request, res: Response) => {
       const world = await getWorldDataObject(credentials);
 
       if (isAdmin) {
+        // get all assets with assetId in unique name for full board rebuild
         droppedAssets = await world.fetchDroppedAssetsWithUniqueName({
           isPartial: true,
           uniqueName: assetId,
         });
       } else {
+        // get only game move assets with assetId in unique name
         droppedAssets = await world.fetchDroppedAssetsWithUniqueName({
           isPartial: false,
           uniqueName: `${assetId}_TicTacToe_move`,
