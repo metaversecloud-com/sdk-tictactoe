@@ -21,10 +21,15 @@ export const handleResetBoard = async (req: Request, res: Response) => {
     const visitor: VisitorInterface = await Visitor.get(visitorId, urlSlug, { credentials });
     const isAdmin = visitor.isAdmin;
 
-    await updateGameText(credentials, "Reset in progress...", `${assetId}_TicTacToe_gameText`);
-
-    const keyAsset = await getDroppedAssetDataObject(credentials);
+    const { keyAsset, wasDataObjectInitialized } = await getDroppedAssetDataObject(credentials);
     const { isGameOver, lastInteraction, playerO, playerX, resetCount } = keyAsset.dataObject as GameDataType;
+
+    if (wasDataObjectInitialized) {
+      await generateBoard(credentials);
+      return res.status(200).send({ message: "Game created successfully" });
+    }
+
+    await updateGameText(credentials, "Reset in progress...", `${assetId}_TicTacToe_gameText`);
 
     try {
       try {
@@ -134,7 +139,7 @@ export const handleResetBoard = async (req: Request, res: Response) => {
       throw error;
     }
   } catch (error) {
-    errorHandler({
+    return errorHandler({
       error,
       functionName: "handleResetBoard",
       message: "Error resetting the board.",

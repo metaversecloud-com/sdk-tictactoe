@@ -53,7 +53,7 @@ export const getFinishLineOptions = async (
     }
     return options;
   } catch (error) {
-    errorHandler({
+    return errorHandler({
       error,
       functionName: "getFinishLineOptions",
       message: "Error getting finish line options.",

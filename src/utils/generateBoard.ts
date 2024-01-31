@@ -235,7 +235,7 @@ export const generateBoard = async (credentials: Credentials) => {
 
     return { success: true };
   } catch (error) {
-    errorHandler({
+    return errorHandler({
       error,
       functionName: "generateBoard",
       message: "Error generating game board.",

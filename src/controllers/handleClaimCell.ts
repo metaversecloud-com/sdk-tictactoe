@@ -25,7 +25,7 @@ export const handleClaimCell = async (req: Request, res: Response) => {
     const cell = parseInt(req.params.cell);
     if (isNaN(cell)) throw "Cell is missing.";
 
-    const keyAsset = await getDroppedAssetDataObject(credentials);
+    const { keyAsset } = await getDroppedAssetDataObject(credentials);
 
     let {
       claimedCells,
@@ -152,7 +152,7 @@ export const handleClaimCell = async (req: Request, res: Response) => {
     }
     return res.status(200).send({ message: "Move successfully made." });
   } catch (error) {
-    errorHandler({
+    return errorHandler({
       error,
       functionName: "handleClaimCell",
       message: "Error making a move.",

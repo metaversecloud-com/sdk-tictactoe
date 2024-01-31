@@ -25,7 +25,7 @@ export const updateGameData = async ({
 
     return droppedAsset.dataObject;
   } catch (error) {
-    errorHandler({
+    return errorHandler({
       error,
       functionName: "updateGameData",
       message: "Error updating active game.",

@@ -12,7 +12,7 @@ export default async (req: Request, res: Response, next: NextFunction) => {
 
     return next();
   } catch (error: any) {
-    errorHandler({
+    return errorHandler({
       error,
       functionName: "auth",
       message: "Error validating visitor in world",
