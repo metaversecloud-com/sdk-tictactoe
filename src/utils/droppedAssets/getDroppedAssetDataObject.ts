@@ -10,11 +10,11 @@ export const getDroppedAssetDataObject = async (credentials: Credentials) => {
     const keyAsset = await DroppedAsset.create(keyAssetId, credentials.urlSlug, {
       credentials: { ...credentials, assetId: keyAssetId },
     });
-    await initializeDroppedAssetDataObject(keyAsset);
+    const wasDataObjectInitialized = await initializeDroppedAssetDataObject(keyAsset);
 
-    return keyAsset;
+    return { keyAsset, wasDataObjectInitialized };
   } catch (error) {
-    errorHandler({
+    return errorHandler({
       error,
       functionName: "getGameData",
       message: "Error getting game data.",

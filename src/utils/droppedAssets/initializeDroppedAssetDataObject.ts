@@ -3,9 +3,11 @@ import { errorHandler } from "../index.js";
 
 export const initializeDroppedAssetDataObject = async (droppedAsset) => {
   try {
+    let wasDataObjectInitialized = false;
     await droppedAsset.fetchDataObject();
 
     if (!droppedAsset.dataObject?.keyAssetId) {
+      wasDataObjectInitialized = true;
       const lockId = `${droppedAsset.id}-${new Date(Math.round(new Date().getTime() / 60000) * 60000)}`;
       await droppedAsset.setDataObject(
         {
@@ -16,9 +18,9 @@ export const initializeDroppedAssetDataObject = async (droppedAsset) => {
       );
     }
 
-    return;
+    return wasDataObjectInitialized;
   } catch (error) {
-    errorHandler({
+    return errorHandler({
       error,
       functionName: "initializeDroppedAssetDataObject",
       message: "Error initializing dropped asset data object",

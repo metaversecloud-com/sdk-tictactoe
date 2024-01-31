@@ -13,7 +13,7 @@ export const updateGameText = async (credentials: Credentials, text: string, uni
     await droppedAsset.updateCustomTextAsset({}, text);
     return droppedAsset;
   } catch (error) {
-    errorHandler({
+    return errorHandler({
       error,
       functionName: "updateGameText",
       message: "Error updating game text.",
