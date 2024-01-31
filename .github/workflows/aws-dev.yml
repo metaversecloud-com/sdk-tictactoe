@@ -27,11 +27,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4.1.1
         
-      - name: listFiles
-        run: |
-          pwd
-          ls -la
-        
       - uses: actions/setup-node@v4.0.1
         with:
           node-version: 20.10
