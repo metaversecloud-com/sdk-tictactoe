@@ -25,7 +25,7 @@ jobs:
     environment: ${{ inputs.env || 'dev' }}
     steps:
       - name: listFiles
-        run: 
+        run: |
           pwd
           ls -la
           
