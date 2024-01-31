@@ -24,13 +24,13 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ inputs.env || 'dev' }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4.1.1
+        
       - name: listFiles
         run: |
           pwd
           ls -la
-          
-      - name: Checkout
-        uses: actions/checkout@v4.1.1
         
       - uses: actions/setup-node@v4.0.1
         with:
