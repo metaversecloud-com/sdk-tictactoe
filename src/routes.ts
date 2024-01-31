@@ -1,6 +1,7 @@
 import express, { NextFunction, Request, Response } from "express";
 import auth from "./middleware/auth.js";
 import { handleClaimCell, handlePlayerSelection, handleResetBoard } from "./controllers/index.js";
+import { getVersion } from "./utils/getVersion.js";
 
 const router = express.Router();
 
@@ -10,7 +11,7 @@ router.post("/reset", auth, handleResetBoard);
 
 router.get("/system/health", (req, res) => {
   return res.json({
-    appVersion: process.env.npm_package_version,
+    appVersion: getVersion(),
     status: "OK",
   });
 });
