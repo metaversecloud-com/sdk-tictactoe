@@ -25,12 +25,12 @@ jobs:
         uses: actions/checkout@v4.1.1
         with:
           ref: ${{ github.event.inputs.version_number }}
-          
+
       - name: 'change version'
         uses: reedyuk/npm-version@1.1.1
         with:
           version: ${{ github.event.inputs.version_number }}
-          git-tag-version: 'true'
+          git-tag-version: 'false'
 
       - name: 'change version'
         uses: reedyuk/npm-version@1.1.1
