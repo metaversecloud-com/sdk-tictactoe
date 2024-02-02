@@ -20,7 +20,7 @@ export const dropTextAsset = async ({
 }) => {
   const { interactivePublicKey, urlSlug } = credentials;
 
-  const asset = Asset.create(process.env.TEXT_ASSET_ID, {
+  const asset = Asset.create(process.env.TEXT_ASSET_ID || "textAsset", {
     credentials,
   });
 
