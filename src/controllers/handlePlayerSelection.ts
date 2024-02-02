@@ -18,7 +18,7 @@ export const handlePlayerSelection = async (req: Request, res: Response) => {
     let text = "",
       shouldUpdateGame = true;
 
-    const keyAsset = await getDroppedAssetDataObject(credentials);
+    const { keyAsset } = await getDroppedAssetDataObject(credentials);
     const { keyAssetId, playerCount, playerO, playerX } = keyAsset.dataObject as GameDataType;
 
     try {
@@ -67,7 +67,7 @@ export const handlePlayerSelection = async (req: Request, res: Response) => {
     }
     return res.json({ success: true });
   } catch (error) {
-    errorHandler({
+    return errorHandler({
       error,
       functionName: "handlePlayerSelection",
       message: "Error handling player selection",

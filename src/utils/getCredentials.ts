@@ -17,7 +17,7 @@ export const getCredentials = (params: any): Credentials => {
       visitorId: Number(params.visitorId),
     };
   } catch (error: any) {
-    errorHandler({
+    return errorHandler({
       error,
       functionName: "getCredentials",
       message: "Error getting credentials from req.",
