@@ -16,7 +16,7 @@ export const dropWebImageAsset = async ({
 }) => {
   const { interactivePublicKey, urlSlug } = credentials;
 
-  const asset = Asset.create(process.env.WEB_IMAGE || "webImageAsset", {
+  const asset = Asset.create(process.env.WEB_IMAGE_ASSET_ID || "webImageAsset", {
     credentials,
   });
 
