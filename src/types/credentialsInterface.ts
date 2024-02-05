@@ -3,6 +3,7 @@ export interface Credentials {
   interactiveNonce: string;
   interactivePublicKey: string;
   profileId: string;
+  sceneDropId: string;
   urlSlug: string;
   visitorId: number;
 }

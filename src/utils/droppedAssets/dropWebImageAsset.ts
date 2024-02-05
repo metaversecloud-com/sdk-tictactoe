@@ -14,7 +14,7 @@ export const dropWebImageAsset = async ({
   position?: { x?: number; y?: number };
   uniqueName: string;
 }) => {
-  const { interactivePublicKey, urlSlug } = credentials;
+  const { interactivePublicKey, sceneDropId, urlSlug } = credentials;
 
   const asset = Asset.create(process.env.WEB_IMAGE_ASSET_ID || "webImageAsset", {
     credentials,
@@ -27,6 +27,7 @@ export const dropWebImageAsset = async ({
     layer1,
     // @ts-ignore
     position,
+    sceneDropId,
     uniqueName,
     urlSlug,
   });

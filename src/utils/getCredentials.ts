@@ -13,6 +13,7 @@ export const getCredentials = (params: any): Credentials => {
       interactiveNonce: params.interactiveNonce,
       interactivePublicKey: params.interactivePublicKey,
       profileId: params.profileId,
+      sceneDropId: params.sceneDropId,
       urlSlug: params.urlSlug,
       visitorId: Number(params.visitorId),
     };
