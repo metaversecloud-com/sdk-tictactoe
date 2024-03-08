@@ -20,7 +20,7 @@ export const initializeDroppedAssetDataObject = async (droppedAsset) => {
 
     return wasDataObjectInitialized;
   } catch (error) {
-    return errorHandler({
+    errorHandler({
       error,
       functionName: "initializeDroppedAssetDataObject",
       message: "Error initializing dropped asset data object",

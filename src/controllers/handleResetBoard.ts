@@ -98,7 +98,10 @@ export const handleResetBoard = async (req: Request, res: Response) => {
       }
       if (droppedAssetIds.length > 0) {
         promises.push(
-          World.deleteDroppedAssets(urlSlug, droppedAssetIds, interactivePublicKey, process.env.INTERACTIVE_SECRET),
+          World.deleteDroppedAssets(urlSlug, droppedAssetIds, {
+            interactivePublicKey,
+            interactiveSecret: process.env.INTERACTIVE_SECRET,
+          }),
         );
       }
 
@@ -126,7 +129,9 @@ export const handleResetBoard = async (req: Request, res: Response) => {
         promises.push(world.incrementDataObjectValue(`keyAssets.${assetId}.gamesPlayedByUser.${xProfileId}.count`, 1));
         promises.push(world.incrementDataObjectValue(`keyAssets.${assetId}.gamesPlayedByUser.${oProfileId}.count`, 1));
       }
-      promises.push(world.incrementDataObjectValue(`keyAssets.${assetId}.totalGamesResetCount`, 1));
+      promises.push(
+        world.incrementDataObjectValue(`keyAssets.${assetId}.totalGamesResetCount`, 1, { analytics: ["resetCount"] }),
+      );
 
       await Promise.all(promises);
 

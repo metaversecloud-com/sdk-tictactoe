@@ -133,7 +133,11 @@ export const handleClaimCell = async (req: Request, res: Response) => {
         // update world data object
         const world = await getWorldDataObject(credentials);
         promises.push(world.incrementDataObjectValue(`keyAssets.${keyAssetId}.gamesWonByUser.${profileId}.count`, 1));
-        promises.push(world.incrementDataObjectValue(`keyAssets.${keyAssetId}.totalGamesWonCount`, 1));
+        promises.push(
+          world.incrementDataObjectValue(`keyAssets.${keyAssetId}.totalGamesWonCount`, 1, {
+            analytics: ["gamesWonCount"],
+          }),
+        );
       }
 
       promises.push(
