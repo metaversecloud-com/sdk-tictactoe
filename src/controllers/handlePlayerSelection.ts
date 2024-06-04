@@ -13,7 +13,7 @@ export const handlePlayerSelection = async (req: Request, res: Response) => {
     const symbol = req.params.symbol as "x" | "o";
     const isPlayerX = symbol === "o" ? 0 : 1;
     const credentials = getCredentials(req.body);
-    const { profileId, visitorId } = credentials;
+    const { profileId, urlSlug, visitorId } = credentials;
     const { username } = req.body;
     let text = "",
       shouldUpdateGame = true;
@@ -53,11 +53,16 @@ export const handlePlayerSelection = async (req: Request, res: Response) => {
       }
 
       await Promise.all([
-        keyAsset.updateDataObject({
-          lastInteraction: new Date(),
-          playerCount: playerCount + 1,
-          [`player${symbol.toUpperCase()}`]: { profileId, username, visitorId },
-        }),
+        keyAsset.updateDataObject(
+          {
+            lastInteraction: new Date(),
+            playerCount: playerCount + 1,
+            [`player${symbol.toUpperCase()}`]: { profileId, username, visitorId },
+          },
+          {
+            analytics: [{ analyticName: "joins", profileId, urlSlug, uniqueKey: profileId }],
+          },
+        ),
         updateGameText(credentials, text, `${keyAssetId}_TicTacToe_gameText`),
         updateGameText(credentials, username, `${keyAssetId}_TicTacToe_player${isPlayerX ? "X" : "O"}Text`),
       ]);
