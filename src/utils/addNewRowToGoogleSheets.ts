@@ -31,7 +31,14 @@ export const addNewRowToGoogleSheets = async (SSAEvents: SSAEvent[]) => {
       const formattedDate = now.toISOString().split("T")[0];
       const formattedTime = now.toISOString().split("T")[1].split(".")[0];
 
-      const dataRowToBeInsertedInGoogleSheets = [formattedDate, formattedTime, identityId, displayName, "Quest", event];
+      const dataRowToBeInsertedInGoogleSheets = [
+        formattedDate,
+        formattedTime,
+        identityId,
+        displayName,
+        "TicTacToe",
+        event,
+      ];
 
       // @ts-ignore
       await sheetsClient.spreadsheets.values.append({
