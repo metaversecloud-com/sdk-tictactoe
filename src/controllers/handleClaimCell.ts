@@ -10,6 +10,9 @@ import {
   getWorldDataObject,
   lockDataObject,
   updateGameText,
+  addNewRowToGoogleSheets,
+  Visitor,
+  World,
 } from "../utils/index.js";
 import { GameDataType } from "../types/gameDataType";
 import { cellWidth } from "../constants.js";
@@ -17,10 +20,11 @@ import { cellWidth } from "../constants.js";
 export const handleClaimCell = async (req: Request, res: Response) => {
   try {
     const credentials = getCredentials(req.body);
-    const { profileId, visitorId } = credentials;
+    const { displayName, identityId, profileId, urlSlug, visitorId } = credentials;
     const { username } = req.body;
     let text = "",
-      shouldUpdateGame = false;
+      shouldUpdateGame = false,
+      analytics = [];
 
     const cell = parseInt(req.params.cell);
     if (isNaN(cell)) throw "Cell is missing.";
@@ -90,13 +94,47 @@ export const handleClaimCell = async (req: Request, res: Response) => {
         }),
       );
 
+      // TODO: figure out isFirstMove by looping through claimedCells and returning true if only one is not null
+      // if (isFirstMove) {
+      //   promises.push(
+      //     world.triggerParticle({
+      //       position: { x: keyAsset.position.x, y: keyAsset.position.y - 100 },
+      //       name: "firework3_blue",
+      //     }),
+      //   );
+
+      //   analytics.push({ analyticName: "starts", profileId: playerO.profileId, urlSlug, uniqueKey: playerO.profileId });
+      //   analytics.push({ analyticName: "starts", profileId: playerX.profileId, urlSlug, uniqueKey: playerX.profileId });
+
+      //   addNewRowToGoogleSheets([
+      //     {
+      //       displayName,
+      //       identityId,
+      //       event: "starts",
+      //     },
+      //   ]);
+      // }
+
       const gameStatus = await getGameStatus(claimedCells);
       if (gameStatus.isDraw) {
         text = "It's a draw! Press Reset to play again.";
         updatedData.isGameOver = true;
+
+        const world = World.create(urlSlug, { credentials });
+        promises.push(
+          world.triggerParticle({
+            position: keyAsset.position,
+            name: "Rain",
+          }),
+        );
+
+        const uniqueKey =
+          playerO.profileId > playerX.profileId
+            ? `${playerO.profileId}-${playerX.profileId}`
+            : `${playerX.profileId}-${playerO.profileId}`;
+        analytics.push({ analyticName: "ties", profileId: playerO.profileId, urlSlug, uniqueKey });
+        analytics.push({ analyticName: "ties", profileId: playerX.profileId, urlSlug, uniqueKey });
       } else if (gameStatus.hasWinningCombo) {
-        await keyAsset.fetchDroppedAssetById();
-        // @ts-ignore
         const keyAssetPosition = keyAsset.position;
 
         text = `${username} wins!`;
@@ -133,14 +171,32 @@ export const handleClaimCell = async (req: Request, res: Response) => {
         // update world data object
         const world = await getWorldDataObject(credentials);
         promises.push(world.incrementDataObjectValue(`keyAssets.${keyAssetId}.gamesWonByUser.${profileId}.count`, 1));
-        promises.push(world.incrementDataObjectValue(`keyAssets.${keyAssetId}.totalGamesWonCount`, 1));
+        promises.push(
+          world.incrementDataObjectValue(`keyAssets.${keyAssetId}.totalGamesWonCount`, 1, {
+            analytics: [{ analyticName: "completions", profileId, urlSlug, uniqueKey: profileId }],
+          }),
+        );
+
+        const visitor = await Visitor.create(visitorId, urlSlug, { credentials });
+        promises.push(visitor.triggerParticle({ name: "firework2_gold" }));
+
+        addNewRowToGoogleSheets([
+          {
+            displayName,
+            identityId,
+            event: "completions",
+          },
+        ]);
       }
 
       promises.push(
-        keyAsset.updateDataObject({
-          ...updatedData,
-          [`claimedCells.${cell}`]: visitorId,
-        }),
+        keyAsset.updateDataObject(
+          {
+            ...updatedData,
+            [`claimedCells.${cell}`]: visitorId,
+          },
+          { analytics },
+        ),
       );
 
       promises.push(updateGameText(credentials, text, `${keyAssetId}_TicTacToe_gameText`));

@@ -13,6 +13,15 @@ router.get("/system/health", (req, res) => {
   return res.json({
     appVersion: getVersion(),
     status: "OK",
+    envs: {
+      NODE_ENV: process.env.NODE_ENV,
+      INSTANCE_DOMAIN: process.env.INSTANCE_DOMAIN,
+      INTERACTIVE_KEY: process.env.INTERACTIVE_KEY,
+      S3_BUCKET: process.env.S3_BUCKET,
+      GOOGLESHEETS_CLIENT_EMAIL: process.env.CLIENT_EMAIL ? "SET" : "UNSET",
+      GOOGLESHEETS_SHEET_ID: process.env.SHEET_ID ? "SET" : "UNSET",
+      GOOGLESHEETS_PRIVATE_KEY: process.env.PRIVATE_KEY ? "SET" : "UNSET",
+    },
   });
 });
 

@@ -3,12 +3,11 @@ import { errorHandler, DroppedAsset } from "./index.js";
 
 export const updateGameText = async (credentials: Credentials, text: string, uniqueName: string) => {
   try {
-    const { interactivePublicKey, urlSlug } = credentials;
     const droppedAsset = await DroppedAsset.getWithUniqueName(
       uniqueName,
-      urlSlug,
-      interactivePublicKey,
+      credentials.urlSlug,
       process.env.INTERACTIVE_SECRET,
+      credentials,
     );
     await droppedAsset.updateCustomTextAsset({}, text);
     return droppedAsset;

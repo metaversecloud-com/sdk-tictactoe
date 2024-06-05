@@ -16,7 +16,7 @@ import { VisitorInterface } from "@rtsdk/topia";
 export const handleResetBoard = async (req: Request, res: Response) => {
   try {
     const credentials = req.credentials;
-    const { assetId, interactivePublicKey, urlSlug, visitorId } = credentials;
+    const { assetId, urlSlug, visitorId } = credentials;
 
     const visitor: VisitorInterface = await Visitor.get(visitorId, urlSlug, { credentials });
     const isAdmin = visitor.isAdmin;
@@ -97,9 +97,7 @@ export const handleResetBoard = async (req: Request, res: Response) => {
         droppedAssetIds.push(droppedAssets[droppedAsset].id);
       }
       if (droppedAssetIds.length > 0) {
-        promises.push(
-          World.deleteDroppedAssets(urlSlug, droppedAssetIds, interactivePublicKey, process.env.INTERACTIVE_SECRET),
-        );
+        promises.push(World.deleteDroppedAssets(urlSlug, droppedAssetIds, process.env.INTERACTIVE_SECRET, credentials));
       }
 
       // update key asset data object
@@ -126,7 +124,17 @@ export const handleResetBoard = async (req: Request, res: Response) => {
         promises.push(world.incrementDataObjectValue(`keyAssets.${assetId}.gamesPlayedByUser.${xProfileId}.count`, 1));
         promises.push(world.incrementDataObjectValue(`keyAssets.${assetId}.gamesPlayedByUser.${oProfileId}.count`, 1));
       }
-      promises.push(world.incrementDataObjectValue(`keyAssets.${assetId}.totalGamesResetCount`, 1));
+      promises.push(
+        world.incrementDataObjectValue(`keyAssets.${assetId}.totalGamesResetCount`, 1, {
+          analytics: [{ analyticName: "resets", urlSlug }],
+        }),
+      );
+
+      const position = {
+        x: keyAsset.position.x,
+        y: keyAsset.position.y - 200,
+      };
+      promises.push(world.triggerParticle({ position, name: "Green Smoke" }));
 
       await Promise.all(promises);
 

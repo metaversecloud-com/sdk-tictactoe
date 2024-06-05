@@ -1,5 +1,6 @@
 export * from "./droppedAssets/index.js";
 export * from "./world/index.js";
+export * from "./addNewRowToGoogleSheets.js";
 export * from "./errorHandler.js";
 export * from "./generateBoard.js";
 export * from "./getCredentials.js";

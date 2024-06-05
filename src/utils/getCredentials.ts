@@ -10,6 +10,8 @@ export const getCredentials = (params: any): Credentials => {
     }
     return {
       assetId: params.assetId,
+      displayName: params.displayName,
+      identityId: params.identityId,
       interactiveNonce: params.interactiveNonce,
       interactivePublicKey: params.interactivePublicKey,
       profileId: params.profileId,
