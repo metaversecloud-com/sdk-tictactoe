@@ -130,7 +130,11 @@ export const handleResetBoard = async (req: Request, res: Response) => {
         }),
       );
 
-      promises.push(world.triggerParticle({ position: keyAsset.position, name: "Green Smoke" }));
+      const position = {
+        x: keyAsset.position.x,
+        y: keyAsset.position.y - 200,
+      };
+      promises.push(world.triggerParticle({ position, name: "Green Smoke" }));
 
       await Promise.all(promises);
 

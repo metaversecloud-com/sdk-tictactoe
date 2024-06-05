@@ -131,7 +131,6 @@ export const handleClaimCell = async (req: Request, res: Response) => {
         analytics.push({ analyticName: "ties", profileId: playerO.profileId, urlSlug, uniqueKey: playerO.profileId });
         analytics.push({ analyticName: "ties", profileId: playerX.profileId, urlSlug, uniqueKey: playerX.profileId });
       } else if (gameStatus.hasWinningCombo) {
-        await keyAsset.fetchDroppedAssetById();
         const keyAssetPosition = keyAsset.position;
 
         text = `${username} wins!`;

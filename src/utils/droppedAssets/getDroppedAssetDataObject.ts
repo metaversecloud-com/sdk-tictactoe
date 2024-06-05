@@ -7,7 +7,7 @@ export const getDroppedAssetDataObject = async (credentials: Credentials) => {
     const uniqueName = droppedAsset.uniqueName.split("_TicTacToe_");
     const keyAssetId = !uniqueName[0] || uniqueName[0].toLowerCase() === "reset" ? credentials.assetId : uniqueName[0];
 
-    const keyAsset = await DroppedAsset.create(keyAssetId, credentials.urlSlug, {
+    const keyAsset = await DroppedAsset.get(keyAssetId, credentials.urlSlug, {
       credentials: { ...credentials, assetId: keyAssetId },
     });
     const wasDataObjectInitialized = await initializeDroppedAssetDataObject(keyAsset);
