@@ -128,8 +128,12 @@ export const handleClaimCell = async (req: Request, res: Response) => {
           }),
         );
 
-        analytics.push({ analyticName: "ties", profileId: playerO.profileId, urlSlug, uniqueKey: playerO.profileId });
-        analytics.push({ analyticName: "ties", profileId: playerX.profileId, urlSlug, uniqueKey: playerX.profileId });
+        const uniqueKey =
+          playerO.profileId > playerX.profileId
+            ? `${playerO.profileId}-${playerX.profileId}`
+            : `${playerX.profileId}-${playerO.profileId}`;
+        analytics.push({ analyticName: "ties", profileId: playerO.profileId, urlSlug, uniqueKey });
+        analytics.push({ analyticName: "ties", profileId: playerX.profileId, urlSlug, uniqueKey });
       } else if (gameStatus.hasWinningCombo) {
         const keyAssetPosition = keyAsset.position;
 
