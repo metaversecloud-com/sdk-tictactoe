@@ -132,8 +132,12 @@ export const handleClaimCell = async (req: Request, res: Response) => {
           playerO.profileId > playerX.profileId
             ? `${playerO.profileId}-${playerX.profileId}`
             : `${playerX.profileId}-${playerO.profileId}`;
-        analytics.push({ analyticName: "ties", profileId: playerO.profileId, urlSlug, uniqueKey });
-        analytics.push({ analyticName: "ties", profileId: playerX.profileId, urlSlug, uniqueKey });
+        analytics.push(
+          { analyticName: "ties", profileId: playerO.profileId, urlSlug, uniqueKey },
+          { analyticName: "ties", profileId: playerX.profileId, urlSlug, uniqueKey },
+          { analyticName: "completions", profileId: playerO.profileId, urlSlug, uniqueKey: playerO.profileId },
+          { analyticName: "completions", profileId: playerX.profileId, urlSlug, uniqueKey: playerX.profileId },
+        );
       } else if (gameStatus.hasWinningCombo) {
         const keyAssetPosition = keyAsset.position;
 
@@ -173,7 +177,11 @@ export const handleClaimCell = async (req: Request, res: Response) => {
         promises.push(world.incrementDataObjectValue(`keyAssets.${keyAssetId}.gamesWonByUser.${profileId}.count`, 1));
         promises.push(
           world.incrementDataObjectValue(`keyAssets.${keyAssetId}.totalGamesWonCount`, 1, {
-            analytics: [{ analyticName: "completions", profileId, urlSlug, uniqueKey: profileId }],
+            analytics: [
+              { analyticName: "wins", profileId, urlSlug, uniqueKey: profileId },
+              { analyticName: "completions", profileId: playerO.profileId, urlSlug, uniqueKey: playerO.profileId },
+              { analyticName: "completions", profileId: playerX.profileId, urlSlug, uniqueKey: playerX.profileId },
+            ],
           }),
         );
 
