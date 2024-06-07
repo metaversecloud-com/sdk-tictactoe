@@ -173,7 +173,11 @@ export const handleClaimCell = async (req: Request, res: Response) => {
         promises.push(world.incrementDataObjectValue(`keyAssets.${keyAssetId}.gamesWonByUser.${profileId}.count`, 1));
         promises.push(
           world.incrementDataObjectValue(`keyAssets.${keyAssetId}.totalGamesWonCount`, 1, {
-            analytics: [{ analyticName: "completions", profileId, urlSlug, uniqueKey: profileId }],
+            analytics: [
+              { analyticName: "wins", profileId, urlSlug, uniqueKey: profileId },
+              { analyticName: "completions", profileId: playerO.profileId, urlSlug, uniqueKey: playerO.profileId },
+              { analyticName: "completions", profileId: playerX.profileId, urlSlug, uniqueKey: playerX.profileId },
+            ],
           }),
         );
 
