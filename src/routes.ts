@@ -24,6 +24,7 @@ router.get("/system/health", (req, res) => {
       GOOGLESHEETS_CLIENT_EMAIL: process.env.CLIENT_EMAIL ? "SET" : "UNSET",
       GOOGLESHEETS_SHEET_ID: process.env.SHEET_ID ? "SET" : "UNSET",
       GOOGLESHEETS_PRIVATE_KEY: process.env.PRIVATE_KEY ? "SET" : "UNSET",
+      GOOGLESHEETS_SHEET_RANGE: process.env.GOOGLESHEETS_SHEET_RANGE ? "SET" : "UNSET",
     },
   });
 });

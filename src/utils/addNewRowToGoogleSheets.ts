@@ -48,7 +48,7 @@ export const addNewRowToGoogleSheets = async (SSAEvents: SSAEvent[]) => {
         range: process.env.GOOGLESHEETS_SHEET_RANGE || "Sheet1",
         valueInputOption: "RAW",
         insertDataOption: "INSERT_ROWS",
-        resource: {
+        requestBody: {
           values: [dataRowToBeInsertedInGoogleSheets],
         },
       });
