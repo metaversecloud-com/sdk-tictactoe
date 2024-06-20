@@ -193,6 +193,7 @@ export const handleClaimCell = async (req: Request, res: Response) => {
             displayName,
             identityId,
             event: "completions",
+            urlSlug,
           },
         ]);
       }
