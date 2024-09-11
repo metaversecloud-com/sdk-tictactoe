@@ -99,7 +99,7 @@ export const handleClaimCell = async (req: Request, res: Response) => {
       //   promises.push(
       //     world.triggerParticle({
       //       position: { x: keyAsset.position.x, y: keyAsset.position.y - 100 },
-      //       name: "firework3_blue",
+      //       name: "balloonDisco_breeze",
       //     }),
       //   );
 
@@ -124,7 +124,7 @@ export const handleClaimCell = async (req: Request, res: Response) => {
         promises.push(
           world.triggerParticle({
             position: keyAsset.position,
-            name: "Rain",
+            name: "pastelConfetti_explosion",
           }),
         );
 
@@ -186,7 +186,7 @@ export const handleClaimCell = async (req: Request, res: Response) => {
         );
 
         const visitor = await Visitor.create(visitorId, urlSlug, { credentials });
-        promises.push(visitor.triggerParticle({ name: "firework2_gold" }));
+        promises.push(visitor.triggerParticle({ name: "crown_float" }));
 
         addNewRowToGoogleSheets([
           {
