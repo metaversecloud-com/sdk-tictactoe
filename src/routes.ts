@@ -14,7 +14,7 @@ router.get("/system/health", (req, res) => {
   return res.json({
     appVersion: getVersion(),
     status: "OK",
-    deploymentDate: SERVER_START_DATE,
+    serverStartDate: SERVER_START_DATE,
     envs: {
       COMMIT_HASH: process.env.COMMIT_HASH,
       NODE_ENV: process.env.NODE_ENV,
