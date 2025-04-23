@@ -16,9 +16,7 @@ export const dropWebImageAsset = async ({
 }) => {
   const { interactivePublicKey, sceneDropId, urlSlug } = credentials;
 
-  const asset = Asset.create(process.env.WEB_IMAGE_ASSET_ID || "webImageAsset", {
-    credentials,
-  });
+  const asset = Asset.create(process.env.WEB_IMAGE_ASSET_ID || "webImageAsset", { credentials });
 
   const droppedAsset = await DroppedAsset.drop(asset, {
     isInteractive: true,

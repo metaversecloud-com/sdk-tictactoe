@@ -20,9 +20,7 @@ export const dropTextAsset = async ({
 }) => {
   const { interactivePublicKey, sceneDropId, urlSlug } = credentials;
 
-  const asset = Asset.create(process.env.TEXT_ASSET_ID || "textAsset", {
-    credentials,
-  });
+  const asset = Asset.create(process.env.TEXT_ASSET_ID || "textAsset", { credentials });
 
   const droppedAsset = await DroppedAsset.drop(asset, {
     isInteractive: true,
