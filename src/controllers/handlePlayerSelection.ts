@@ -5,8 +5,10 @@ import {
   getCredentials,
   lockDataObject,
   updateGameText,
+  World,
 } from "../utils/index.js";
 import { GameDataType } from "../types/gameDataType.js";
+import { WorldActivityType } from "@rtsdk/topia";
 
 export const handlePlayerSelection = async (req: Request, res: Response) => {
   try {
@@ -29,6 +31,8 @@ export const handlePlayerSelection = async (req: Request, res: Response) => {
         return res.status(409).json({ message: "Player selection already in progress." });
       }
 
+      const world = World.create(urlSlug, { credentials });
+
       if (playerX.visitorId === visitorId) {
         text = `You are already player X`;
         shouldUpdateGame = false;
@@ -43,8 +47,10 @@ export const handlePlayerSelection = async (req: Request, res: Response) => {
         shouldUpdateGame = false;
       } else if ((isPlayerX && playerO.visitorId) || (!isPlayerX && playerX.visitorId)) {
         text = "Let the game begin!";
+        world.triggerActivity({ type: WorldActivityType.GAME_ON, assetId: keyAssetId });
       } else {
         text = "Find a second player!";
+        world.triggerActivity({ type: WorldActivityType.GAME_WAITING, assetId: keyAssetId });
       }
 
       if (!shouldUpdateGame) {
