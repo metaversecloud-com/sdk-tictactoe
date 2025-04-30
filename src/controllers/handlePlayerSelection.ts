@@ -47,10 +47,14 @@ export const handlePlayerSelection = async (req: Request, res: Response) => {
         shouldUpdateGame = false;
       } else if ((isPlayerX && playerO.visitorId) || (!isPlayerX && playerX.visitorId)) {
         text = "Let the game begin!";
-        world.triggerActivity({ type: WorldActivityType.GAME_ON, assetId: keyAssetId });
+        world.triggerActivity({ type: WorldActivityType.GAME_ON, assetId: keyAssetId }).catch((error) => {
+          console.error("Error triggering activity:", error);
+        });
       } else {
         text = "Find a second player!";
-        world.triggerActivity({ type: WorldActivityType.GAME_WAITING, assetId: keyAssetId });
+        world.triggerActivity({ type: WorldActivityType.GAME_WAITING, assetId: keyAssetId }).catch((error) => {
+          console.error("Error triggering activity:", error);
+        });
       }
 
       if (!shouldUpdateGame) {
