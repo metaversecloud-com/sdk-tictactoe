@@ -52,9 +52,16 @@ export const handlePlayerSelection = async (req: Request, res: Response) => {
         });
       } else {
         text = "Find a second player!";
-        world.triggerActivity({ type: WorldActivityType.GAME_WAITING, assetId: keyAssetId }).catch((error) => {
-          console.error("Error triggering activity:", error);
-        });
+        world
+          .triggerActivity({ type: WorldActivityType.GAME_WAITING, assetId: keyAssetId })
+
+          .catch((error) =>
+            errorHandler({
+              error,
+              functionName: "handlePlayerSelection",
+              message: "Error triggering world activity",
+            }),
+          );
       }
 
       if (!shouldUpdateGame) {
