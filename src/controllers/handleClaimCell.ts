@@ -121,12 +121,19 @@ export const handleClaimCell = async (req: Request, res: Response) => {
         updatedData.isGameOver = true;
 
         const world = World.create(urlSlug, { credentials });
-        promises.push(
-          world.triggerParticle({
+
+        world
+          .triggerParticle({
             position: keyAsset.position,
             name: "pastelConfetti_explosion",
-          }),
-        );
+          })
+          .catch((error) =>
+            errorHandler({
+              error,
+              functionName: "handleClaimCell",
+              message: "Error triggering particle effects",
+            }),
+          );
 
         const uniqueKey =
           playerO.profileId > playerX.profileId
@@ -186,7 +193,14 @@ export const handleClaimCell = async (req: Request, res: Response) => {
         );
 
         const visitor = await Visitor.create(visitorId, urlSlug, { credentials });
-        promises.push(visitor.triggerParticle({ name: "crown_float" }));
+
+        visitor.triggerParticle({ name: "crown_float" }).catch((error) =>
+          errorHandler({
+            error,
+            functionName: "handleClaimCell",
+            message: "Error triggering particle effects",
+          }),
+        );
 
         addNewRowToGoogleSheets([
           {
