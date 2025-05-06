@@ -135,7 +135,7 @@ export const handleResetBoard = async (req: Request, res: Response) => {
         y: keyAsset.position.y - 200,
       };
 
-      world.triggerParticle({ position, name: "blueSmoke_fog" }).catch((error) =>
+      world.triggerParticle({ position, name: "blueSmoke_fog", duration: 2 }).catch((error) =>
         errorHandler({
           error,
           functionName: "handleResetBoard",

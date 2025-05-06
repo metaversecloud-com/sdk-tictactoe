@@ -7,7 +7,7 @@
   "main": "src/index.ts",
   "dependencies": {
     "@googleapis/sheets": "^7.0.0",
-    "@rtsdk/topia": "^0.15.7",
+    "@rtsdk/topia": "^0.15.8",
     "@types/cors": "^2.8.13",
     "axios": "^1.5.0",
     "body-parser": "^1.20.2",
