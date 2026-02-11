@@ -53,26 +53,6 @@ The app dynamically generates assets using the following unique name pattern:
 | `{assetId}_TicTacToe_finishLine`  | Win line visualization       |
 | `{assetId}_TicTacToe_crown`       | Victory crown for winner     |
 
-### Environment Variables
-
-```
-APP_URL=http://localhost:3001          # Webhook URL for game events
-NODE_ENV=development
-PORT=3001
-INTERACTIVE_KEY=xxxxxxxxxxxxx
-INTERACTIVE_SECRET=xxxxxxxxxxxxxx
-API_KEY=xxxxxxxxxxxxx
-BUCKET=https://sdk-tictactoe.s3.amazonaws.com/
-```
-
-### Optional: Google Sheets Integration
-
-```
-GOOGLESHEETS_CLIENT_EMAIL=xxxxxxxxxxxxx
-GOOGLESHEETS_SHEET_ID=xxxxxxxxxxxxx
-GOOGLESHEETS_PRIVATE_KEY=xxxxxxxxxxxxx
-```
-
 ### Data Objects
 
 **Key Asset (Reset Button)**:
@@ -107,6 +87,26 @@ GOOGLESHEETS_PRIVATE_KEY=xxxxxxxxxxxxx
   }
 }
 ```
+
+## Environment Variables
+
+Create a `.env` file in the root directory. See `.env-example` for a template.
+
+| Variable                    | Description                                                                        | Required |
+| --------------------------- | ---------------------------------------------------------------------------------- | -------- |
+| `NODE_ENV`                  | Node environment (`development` or `production`)                                   | Yes      |
+| `PORT`                      | Server port (default: `3001`)                                                      | No       |
+| `INSTANCE_DOMAIN`           | Topia API domain (`api.topia.io` for production, `api-stage.topia.io` for staging) | Yes      |
+| `INTERACTIVE_KEY`           | Topia interactive app key                                                          | Yes      |
+| `INTERACTIVE_SECRET`        | Topia interactive app secret                                                       | Yes      |
+| `APP_URL`                   | Webhook URL for game events (e.g., ngrok URL in development)                       | Yes      |
+| `APP_VERSION`               | Application version string                                                         | Yes      |
+| `BUCKET`                    | S3 bucket URL for game assets (e.g., `https://sdk-tictactoe.s3.amazonaws.com/`)    | Yes      |
+| `TEXT_ASSET_ID`             | Asset ID for creating text assets (default: `textAsset`)                           | No       |
+| `WEB_IMAGE_ASSET_ID`        | Asset ID for creating web image assets (default: `webImageAsset`)                  | No       |
+| `GOOGLESHEETS_CLIENT_EMAIL` | Google service account email for analytics                                         | No       |
+| `GOOGLESHEETS_SHEET_ID`     | Google Sheet ID for analytics                                                      | No       |
+| `GOOGLESHEETS_PRIVATE_KEY`  | Google service account private key                                                 | No       |
 
 ## Developers
 
