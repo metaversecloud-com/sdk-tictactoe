@@ -42,6 +42,7 @@ The app dynamically generates assets using the following unique name pattern:
 
 | Unique Name Pattern               | Description                  |
 | --------------------------------- | ---------------------------- |
+| `Reset`                           | Key asset - required         |
 | `{assetId}_TicTacToe_board`       | The board background image   |
 | `{assetId}_TicTacToe_gameText`    | Main game status message     |
 | `{assetId}_TicTacToe_playerXText` | Player X name display        |
