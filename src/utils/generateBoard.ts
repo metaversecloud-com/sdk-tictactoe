@@ -44,7 +44,7 @@ export const generateBoard = async (credentials: Credentials) => {
           y: boardCenter.y,
         },
         style: { textColor: "#ff61ff", textSize: 20, textWidth: 150 },
-        text: "",
+        text: "Player X",
         uniqueName: `${assetId}_TicTacToe_playerXText`,
       }),
       dropTextAsset({
@@ -54,7 +54,7 @@ export const generateBoard = async (credentials: Credentials) => {
           y: boardCenter.y,
         },
         style: { textColor: "#22ffff", textSize: 20, textWidth: 150 },
-        text: "",
+        text: "Player O",
         uniqueName: `${assetId}_TicTacToe_playerOText`,
       }),
     ]);

@@ -75,6 +75,8 @@ export const handleClaimCell = async (req: Request, res: Response) => {
         updatedData.lastPlayerTurn = visitorId;
         claimedCells[cell] = visitorId;
         shouldUpdateGame = true;
+        const username = lastPlayerTurn === playerO.visitorId ? playerO.username : playerX.username;
+        text = `It's ${username}'s turn.`;
       }
 
       if (!shouldUpdateGame) {
