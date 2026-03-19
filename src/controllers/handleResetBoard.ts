@@ -88,8 +88,8 @@ export const handleResetBoard = async (req: Request, res: Response) => {
         });
         if (crown.length > 0) droppedAssetIds.push(crown[0].id);
 
-        updateGameText(credentials, "", `${assetId}_TicTacToe_playerXText`);
-        updateGameText(credentials, "", `${assetId}_TicTacToe_playerOText`);
+        updateGameText(credentials, "Player X", `${assetId}_TicTacToe_playerXText`);
+        updateGameText(credentials, "Player O", `${assetId}_TicTacToe_playerOText`);
         updateGameText(credentials, defaultGameText, `${assetId}_TicTacToe_gameText`);
       }
 
@@ -148,7 +148,9 @@ export const handleResetBoard = async (req: Request, res: Response) => {
       return res.status(200).send({ message: "Game reset successfully" });
     } catch (error) {
       await Promise.all([
-        updateGameText(credentials, "", `${assetId}_TicTacToe_gameText`),
+        updateGameText(credentials, defaultGameText, `${assetId}_TicTacToe_gameText`),
+        updateGameText(credentials, "Player X", `${assetId}_TicTacToe_playerXText`),
+        updateGameText(credentials, "Player O", `${assetId}_TicTacToe_playerOText`),
         keyAsset.updateDataObject({ isResetInProgress: false, resetCount: resetCount + 1 }),
       ]);
       throw error;
