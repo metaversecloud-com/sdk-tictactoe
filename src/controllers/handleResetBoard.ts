@@ -42,7 +42,6 @@ export const handleResetBoard = async (req: Request, res: Response) => {
     ) {
       throw "You must be either a player or admin to reset the board";
     } else {
-      console.log("test");
       await updateGameText(credentials, "Reset in progress...", `${assetId}_TicTacToe_gameText`);
     }
 
