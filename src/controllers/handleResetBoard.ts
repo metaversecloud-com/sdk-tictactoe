@@ -29,7 +29,21 @@ export const handleResetBoard = async (req: Request, res: Response) => {
       return res.status(200).send({ message: "Game created successfully" });
     }
 
-    await updateGameText(credentials, "Reset in progress...", `${assetId}_TicTacToe_gameText`);
+    const resetAllowedDate = new Date();
+    resetAllowedDate.setMinutes(resetAllowedDate.getMinutes() - 5);
+    if (!isAdmin && !lastInteraction) {
+      throw "Nothing to reset!";
+    } else if (
+      !isAdmin &&
+      !isGameOver &&
+      playerO.visitorId !== visitorId &&
+      playerX.visitorId !== visitorId &&
+      new Date(lastInteraction).getTime() > resetAllowedDate.getTime()
+    ) {
+      throw "You must be either a player or admin to reset the board";
+    } else {
+      await updateGameText(credentials, "Reset in progress...", `${assetId}_TicTacToe_gameText`);
+    }
 
     try {
       try {
@@ -44,20 +58,6 @@ export const handleResetBoard = async (req: Request, res: Response) => {
       }
 
       const promises = [];
-      const resetAllowedDate = new Date();
-      resetAllowedDate.setMinutes(resetAllowedDate.getMinutes() - 5);
-
-      if (!isAdmin && !lastInteraction) {
-        throw "Nothing to reset!";
-      } else if (
-        !isAdmin &&
-        !isGameOver &&
-        playerO.visitorId !== visitorId &&
-        playerX.visitorId !== visitorId &&
-        new Date(lastInteraction).getTime() > resetAllowedDate.getTime()
-      ) {
-        throw "You must be either a player or admin to reset the board";
-      }
 
       let droppedAssetIds = [],
         droppedAssets;
@@ -147,12 +147,7 @@ export const handleResetBoard = async (req: Request, res: Response) => {
 
       return res.status(200).send({ message: "Game reset successfully" });
     } catch (error) {
-      await Promise.all([
-        updateGameText(credentials, defaultGameText, `${assetId}_TicTacToe_gameText`),
-        updateGameText(credentials, "Player X", `${assetId}_TicTacToe_playerXText`),
-        updateGameText(credentials, "Player O", `${assetId}_TicTacToe_playerOText`),
-        keyAsset.updateDataObject({ isResetInProgress: false, resetCount: resetCount + 1 }),
-      ]);
+      await keyAsset.updateDataObject({ isResetInProgress: false, resetCount: resetCount + 1 });
       throw error;
     }
   } catch (error) {
