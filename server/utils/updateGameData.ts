@@ -12,12 +12,14 @@ import { Credentials } from "../types/credentialsInterface.js";
  * merge semantics don't reliably overwrite nested children with null.
  */
 export const updateGameData = async ({
+  analytics,
   credentials,
   droppedAssetId,
   lockId,
   releaseLock = true,
   updatedData,
 }: {
+  analytics?: Array<Record<string, any>>;
   credentials: Credentials;
   droppedAssetId: string;
   lockId?: string;
@@ -29,7 +31,9 @@ export const updateGameData = async ({
       credentials: { ...credentials, assetId: droppedAssetId },
     });
 
-    const options = lockId ? { lock: { lockId, releaseLock } } : {};
+    const options: Record<string, any> = {};
+    if (lockId) options.lock = { lockId, releaseLock };
+    if (analytics && analytics.length) options.analytics = analytics;
     await droppedAsset.setDataObject({ ...updatedData }, options);
 
     return droppedAsset.dataObject;

@@ -91,28 +91,12 @@ describe("routes", () => {
     expect(res.body.envs).toHaveProperty("NODE_ENV");
   });
 
-  test("GET /game-state returns gameData / leaderboard / badges / visitorStats", async () => {
-    const mockKeyAsset = {
-      id: "asset-123",
-      uniqueName: "reset",
-      position: { x: 100, y: 200 },
-      dataObject: {
-        claimedCells: {},
-        isGameOver: false,
-        isResetInProgress: false,
-        lastPlayerTurn: null,
-        playerO: { visitorId: null, username: null, profileId: null },
-        playerX: { visitorId: null, username: null, profileId: null },
-        resetCount: 0,
-        turnCount: 0,
-      },
-    };
+  test("GET /leaderboard-state returns visitor / leaderboard / badges / inventory (no gameData, no verifyBoard)", async () => {
+    const mockKeyAsset = { id: "asset-123", uniqueName: "reset", position: { x: 100, y: 200 }, dataObject: {} };
     const mockVisitor = {
       isAdmin: true,
       fetchInventoryItems: jest.fn().mockResolvedValue([]),
-      fetchDataObject: jest.fn().mockResolvedValue({ totalWins: 3, totalGamesPlayed: 5 }),
       inventoryItems: [],
-      dataObject: { totalWins: 3, totalGamesPlayed: 5 },
       updateDataObject: jest.fn().mockResolvedValue({}),
     };
 
@@ -127,38 +111,67 @@ describe("routes", () => {
 
     const app = makeApp();
     const res = await request(app)
-      .get("/api/game-state")
+      .get("/api/leaderboard-state")
       .query(baseCreds as any);
 
     expect(res.status).toBe(200);
-    expect(res.body).toHaveProperty("success", true);
-    expect(res.body).toHaveProperty("isAdmin", true);
-    expect(res.body).toHaveProperty("gameData");
-    expect(res.body).toHaveProperty("leaderboard");
+    expect(res.body).toMatchObject({
+      success: true,
+      visitor: { isAdmin: true, profileId: baseCreds.profileId, visitorId: baseCreds.visitorId },
+    });
     expect(res.body.leaderboard[0]).toMatchObject({ profileId: "profile-1", wins: 3 });
     expect(res.body).toHaveProperty("badges");
     expect(res.body).toHaveProperty("visitorInventory");
-    expect(res.body).toHaveProperty("visitorStats");
-    expect(res.body.visitorStats).toMatchObject({ totalWins: 3, totalGamesPlayed: 5 });
-
-    expect(mockUtils.verifyBoard).toHaveBeenCalled();
+    expect(res.body).not.toHaveProperty("gameData");
+    expect(res.body).not.toHaveProperty("visitorStats");
+    expect(mockUtils.verifyBoard).not.toHaveBeenCalled();
   });
 
-  test("GET /leaderboard returns the parsed leaderboard", async () => {
+  test("GET /reset-state returns visitor + minimal gameData for canReset (runs verifyBoard)", async () => {
+    const mockKeyAsset = {
+      id: "asset-123",
+      position: { x: 0, y: 0 },
+      dataObject: {
+        isGameOver: false,
+        isResetInProgress: false,
+        lastInteraction: null,
+        playerX: { visitorId: 42, username: "Alice", profileId: "alice" },
+        playerO: { visitorId: null, username: null, profileId: null },
+        // Include extra fields that should NOT appear in the response.
+        claimedCells: { 0: 42 },
+        turnCount: 1,
+      },
+    };
+    const mockVisitor = { isAdmin: false, updateDataObject: jest.fn().mockResolvedValue({}) };
+
     mockUtils.getCredentials.mockReturnValue(baseCreds);
-    mockUtils.getDroppedAssetDataObject.mockResolvedValue({ keyAsset: { dataObject: {} } });
-    mockUtils.parseLeaderboard.mockReturnValue([{ profileId: "p1", displayName: "Bob", wins: 5 }]);
+    mockUtils.getDroppedAssetDataObject.mockResolvedValue({ keyAsset: mockKeyAsset, wasDataObjectInitialized: false });
+    (mockUtils.Visitor.get as jest.Mock).mockResolvedValue(mockVisitor);
 
     const app = makeApp();
     const res = await request(app)
-      .get("/api/leaderboard")
+      .get("/api/reset-state")
       .query(baseCreds as any);
+
     expect(res.status).toBe(200);
-    expect(res.body.success).toBe(true);
-    expect(res.body.leaderboard).toEqual([{ profileId: "p1", displayName: "Bob", wins: 5 }]);
+    expect(res.body).toMatchObject({
+      success: true,
+      visitor: { isAdmin: false, visitorId: baseCreds.visitorId },
+      gameData: {
+        isGameOver: false,
+        isResetInProgress: false,
+        lastInteraction: null,
+        playerX: { visitorId: 42 },
+        playerO: { visitorId: null },
+      },
+    });
+    // Only the fields useCanReset reads should be present.
+    expect(res.body.gameData).not.toHaveProperty("claimedCells");
+    expect(res.body.gameData).not.toHaveProperty("turnCount");
+    expect(mockUtils.verifyBoard).toHaveBeenCalled();
   });
 
-  test("POST /leaderboard/reset admin-gated", async () => {
+  test("POST /leaderboard/reset admin-gated + returns empty leaderboard", async () => {
     mockUtils.getCredentials.mockReturnValue(baseCreds);
     // Non-admin — should get 403
     (mockUtils.Visitor.get as jest.Mock).mockResolvedValue({ isAdmin: false });
@@ -172,6 +185,8 @@ describe("routes", () => {
     res = await request(app).post("/api/leaderboard/reset").send(baseCreds);
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
+    // Reset returns the new (empty) leaderboard directly so callers skip a follow-up GET.
+    expect(res.body.leaderboard).toEqual([]);
     expect(mockUtils.resetLeaderboard).toHaveBeenCalled();
   });
 });

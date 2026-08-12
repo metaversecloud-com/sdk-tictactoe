@@ -1,2 +1,4 @@
 export * from "./Error";
-export * from "./Home";
+export * from "./InfoPage";
+export * from "./LeaderboardHome";
+export * from "./ResetPage";

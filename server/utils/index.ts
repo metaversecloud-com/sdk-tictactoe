@@ -1,5 +1,4 @@
 export * from "./droppedAssets/index.js";
-export * from "./world/index.js";
 export * from "./addNewRowToGoogleSheets.js";
 export * from "./awardBadge.js";
 export * from "./errorHandler.js";

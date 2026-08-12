@@ -12,9 +12,8 @@ export const LeaderboardTab = () => {
     if (!confirm("Reset this leaderboard? This cannot be undone.")) return;
     setIsBusy(true);
     try {
-      await backendAPI.post("/leaderboard/reset");
-      const refreshed = await backendAPI.get("/leaderboard");
-      setGameState(dispatch, { leaderboard: refreshed.data?.leaderboard || [] });
+      const res = await backendAPI.post("/leaderboard/reset");
+      setGameState(dispatch, { leaderboard: res.data?.leaderboard || [] });
     } catch (error) {
       setErrorMessage(dispatch, error as ErrorType);
     } finally {

@@ -3,8 +3,8 @@ import auth from "./middleware/auth.js";
 import {
   handleClaimCell,
   handleCloseIframe,
-  handleGetGameState,
-  handleGetLeaderboard,
+  handleGetLeaderboardState,
+  handleGetResetState,
   handlePlayerSelection,
   handleResetBoard,
   handleResetLeaderboard,
@@ -13,9 +13,9 @@ import { getVersion } from "./utils/getVersion.js";
 
 const router = express.Router();
 
-// Client-facing (drawer) routes
-router.get("/game-state", handleGetGameState);
-router.get("/leaderboard", handleGetLeaderboard);
+// Client-facing (drawer) routes — one focused endpoint per page
+router.get("/leaderboard-state", handleGetLeaderboardState); // LeaderboardHome (/, /leaderboard)
+router.get("/reset-state", handleGetResetState); // ResetPage (/reset)
 router.post("/leaderboard/reset", auth, handleResetLeaderboard);
 router.post("/close-iframe", auth, handleCloseIframe);
 

@@ -28,7 +28,9 @@ export const handleResetLeaderboard = async (req: Request, res: Response) => {
     const { keyAsset } = dataObjResult;
 
     await resetLeaderboard(keyAsset);
-    return res.json({ success: true, message: "Leaderboard reset." });
+    // Return the new (empty) leaderboard so callers can update state without
+    // a follow-up GET — reset always produces `[]` by definition.
+    return res.json({ success: true, message: "Leaderboard reset.", leaderboard: [] });
   } catch (error) {
     return errorHandler({
       error,

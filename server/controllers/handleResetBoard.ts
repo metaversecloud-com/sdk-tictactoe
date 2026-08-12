@@ -4,7 +4,6 @@ import {
   errorHandler,
   getCredentials,
   getDroppedAssetDataObject,
-  getWorldDataObject,
   updateGameData,
   updateGameText,
   Visitor,
@@ -62,7 +61,7 @@ export const handleResetBoard = async (req: Request, res: Response) => {
       }
 
       const promises: Promise<any>[] = [];
-      const world = await getWorldDataObject(credentials);
+      const world = World.create(urlSlug, { credentials });
 
       // Delete the transient move / finish-line / crown assets in this scene.
       if (sceneDropId) {
@@ -103,14 +102,8 @@ export const handleResetBoard = async (req: Request, res: Response) => {
           credentials,
           droppedAssetId: assetId || "",
           updatedData,
-        }),
-      );
-
-      // World-scoped counters
-      const xProfileId = playerX?.profileId;
-      const oProfileId = playerO?.profileId;
-      promises.push(
-        world.incrementDataObjectValue(`keyAssets.${assetId}.totalGamesResetCount`, 1, {
+          // Piggy-back the `resets` analytic on the reset write itself — no
+          // separate world counter needed; nothing reads it.
           analytics: [{ analyticName: "resets", urlSlug }],
         }),
       );

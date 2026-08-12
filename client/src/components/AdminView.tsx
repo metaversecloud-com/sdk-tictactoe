@@ -3,13 +3,6 @@ import { GlobalDispatchContext, GlobalStateContext } from "@/context/GlobalConte
 import { backendAPI, setErrorMessage, setGameState } from "@/utils";
 import { ErrorType } from "@/context/types";
 
-/**
- * Full-screen admin panel with a back arrow. This is where any TTT-specific
- * admin controls live. Right now the only real control is a nuclear-option
- * reset (same as the Reset button on the game tab), plus a shortcut to the
- * leaderboard reset. Placeholders + a note in the README describe how to
- * extend this.
- */
 export const AdminView = ({ onBack }: { onBack: () => void }) => {
   const dispatch = useContext(GlobalDispatchContext);
   const { visitor } = useContext(GlobalStateContext);
@@ -19,9 +12,8 @@ export const AdminView = ({ onBack }: { onBack: () => void }) => {
     if (!confirm("Reset the leaderboard? This cannot be undone.")) return;
     setBusy(true);
     try {
-      await backendAPI.post("/leaderboard/reset");
-      const refreshed = await backendAPI.get("/leaderboard");
-      setGameState(dispatch, { leaderboard: refreshed.data?.leaderboard || [] });
+      const res = await backendAPI.post("/leaderboard/reset");
+      setGameState(dispatch, { leaderboard: res.data?.leaderboard || [] });
       alert("Leaderboard reset.");
     } catch (error) {
       setErrorMessage(dispatch, error as ErrorType);
