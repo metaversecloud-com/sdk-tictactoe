@@ -1,18 +1,17 @@
 {
   "app": "sdk-tictactoe",
   "env": "dev",
-  "targetRevision": "dev",
   "clusterName": "Topia-dev-SDK-Apps",
   "clusterType": "eks",
   "namespace": "sdk-apps-dev",
   "services": [
     {
-      "name": "tictactoe0 tictactoe0-dev-topia.topia-rtsdk.com /api/system/health sdk-tictactoe",
-      "image": "368076259134.dkr.ecr.us-east-1.amazonaws.com/sdk-example:",
+      "name": "tictactoe0",
+      "image": "368076259134.dkr.ecr.us-east-1.amazonaws.com/sdk-example:sdk-tictactoe",
       "hosts": [
-        ""
+        "tictactoe0-dev-topia.topia-rtsdk.com"
       ],
-      "health": ""
+      "health": "/api/system/health"
     }
   ]
 }

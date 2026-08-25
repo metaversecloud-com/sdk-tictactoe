@@ -1,50 +1,31 @@
 {
-  "name": "TicTacToe",
-  "private": true,
-  "author": "Topia",
-  "version": "1.0.1",
-  "description": "An in-world TicTacToe game for Topia.",
-  "main": "src/index.ts",
-  "dependencies": {
-    "@googleapis/sheets": "^7.0.0",
-    "@rtsdk/topia": "^0.20.1",
-    "@types/cors": "^2.8.13",
-    "axios": "^1.5.0",
-    "body-parser": "^1.20.2",
-    "cors": "^2.8.5",
-    "dotenv": "^16.3.1",
-    "express": "^4.18.2",
-    "express-queue": "^0.0.13",
-    "express-timeout-handler": "^2.2.2",
-    "google-auth-library": "^9.10.0",
-    "jsonwebtoken": "^9.0.1",
-    "node": "^20.5.1",
-    "node-cron": "^3.0.2",
-    "nodemon": "^3.0.1",
-    "yalc": "^1.0.0-pre.53"
-  },
-  "devDependencies": {
-    "@tsconfig/node-lts": "^20.1.0",
-    "@types/cors": "^2.8.13",
-    "@types/express": "^4.17.17",
-    "@types/jsonwebtoken": "^9.0.2",
-    "@types/node": "^20.10.6",
-    "@types/node-cron": "^3.0.8",
-    "eslint-config-next": "13.4.19",
-    "nodemon": "^3.0.1",
-    "sequelize-typescript": "^2.1.5",
-    "ts-node": "^10.9.1",
-    "typescript": "^5.3.3"
-  },
+  "name": "sdk-tictactoe",
+  "author": "metaversecloud.com | topia.io",
+  "version": "2.0.0",
+  "description": "An in-world Tic-Tac-Toe game with a React drawer UI, leaderboards, and ecosystem badges.",
+  "type": "module",
   "scripts": {
-    "serve": "npx tsc -w & npx nodemon -q build/src/index.js",
-    "start-dev": "npm run build & node build/src/index.js",
-    "build": "tsc -p tsconfig.json",
-    "start": "node build/src/index.js",
-    "link-sdk": "yalc link @rtsdk/topia",
-    "unlink-sdk": "yalc remove @rtsdk/topia"
+    "build": "npm run build -ws",
+    "start": "npm run start -w server",
+    "dev": "concurrently \"npm run dev-server\" \"npm run dev-client\"",
+    "dev-server": "npm run dev --prefix server",
+    "dev-client": "npm run dev --prefix client"
   },
-  "keywords": [],
-  "license": "ISC",
-  "type": "module"
+  "dependencies": {
+    "@rtsdk/topia": "^0.20.1",
+    "axios": "^1.6.8",
+    "concurrently": "^8.2.2"
+  },
+  "license": "BSD-3-Clause",
+  "devDependencies": {
+    "@types/axios": "^0.14.0",
+    "@types/node": "^20.12.4",
+    "nodemon": "^3.1.0",
+    "prettier": "3.2.5",
+    "typescript": "^5.4.3"
+  },
+  "workspaces": [
+    "client",
+    "server"
+  ]
 }

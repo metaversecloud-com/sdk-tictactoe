@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    /* Language and Environment */
+    "target": "ESNext",
+
+    /* Modules */
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "paths": {
+      "@utils/*": ["./utils/*"]
+    },
+    "types": ["node", "jest"],
+
+    /* Emit */
+    "outDir": "./dist",
+    "rootDir": ".",
+
+    /* Interop Constraints */
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+
+    /* Type Checking (lenient — matches legacy behavior) */
+    "strict": false,
+
+    /* Completeness */
+    "skipLibCheck": true
+  },
+  "include": ["**/*.ts"]
+}

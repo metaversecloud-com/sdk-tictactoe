@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tictactoe0-config
+  labels:
+    app.kubernetes.io/name: tictactoe0
+data:
+  APP_URL: "https://tictactoe0-dev-topia.topia-rtsdk.com/api/"
+  BUCKET: "https://sdk-tictactoe.s3.amazonaws.com/"
+  INSTANCE_DOMAIN: "api.topia.io"
+  INSTANCE_PROTOCOL: "https"
+  INTERACTIVE_KEY: "CHp3TwoDoeMiBZ7xmP8C"
+  NODE_ENV: "production"
+  PORT: "3000"
+  TEXT_ASSET_ID: "textAsset"
+  WEB_IMAGE_ASSET_ID: "webImageAsset"
