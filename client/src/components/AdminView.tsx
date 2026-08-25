@@ -14,7 +14,6 @@ export const AdminView = ({ onBack }: { onBack: () => void }) => {
     try {
       const res = await backendAPI.post("/leaderboard/reset");
       setGameState(dispatch, { leaderboard: res.data?.leaderboard || [] });
-      alert("Leaderboard reset.");
     } catch (error) {
       setErrorMessage(dispatch, error as ErrorType);
     } finally {
