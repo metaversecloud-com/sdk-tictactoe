@@ -26,5 +26,5 @@ patches:
 images:
   - name: tictactoe0
     newName: 368076259134.dkr.ecr.us-east-1.amazonaws.com/sdk-example
-    digest: sha256:dc2f85f0e8aa33436468c7fc10e2fddb02fe4b794f697b0a149e3dc3570bc2bf
+    digest: sha256:a4c5420e0f28885dce6adeba8b2fadcf63f3dfb91e0eac59ab77b021cc90818d
     newTag: sdk-tictactoe
