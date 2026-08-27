@@ -1,6 +1,7 @@
 import { DroppedAssetInterface } from "@rtsdk/topia";
 import { DroppedAsset, World } from "../topiaInit.js";
 import { errorHandler } from "../errorHandler.js";
+import { verifyBoard } from "../verifyBoard.js";
 import { Credentials } from "../../types/credentialsInterface.js";
 import { KEY_ASSET_UNIQUE_NAME } from "../../constants.js";
 
@@ -43,12 +44,35 @@ export const getKeyAsset = async (credentials: Credentials): Promise<DroppedAsse
         uniqueName: KEY_ASSET_UNIQUE_NAME,
       });
       const first = Array.isArray(found) ? found[0] : Array.isArray((found as any)?.assets) ? (found as any).assets[0] : null;
-      if (!first?.id) {
-        throw new Error(
-          `Key asset (uniqueName="${KEY_ASSET_UNIQUE_NAME}") not found in scene drop ${sceneDropId}. Author the scene with the reset-button asset.`,
-        );
+      let recoveredId: string | undefined = first?.id;
+
+      if (!recoveredId) {
+        // Author-error or corrupted scene — delegate to verifyBoard, which
+        // wipes the scene (except the click origin), rebuilds a fresh board
+        // with a new key asset, then removes the click origin last. Then
+        // scan again to pick up the new key asset's id.
+        const rebuildResult = await verifyBoard(credentials);
+        if (!rebuildResult.fullRebuild) {
+          throw new Error(
+            `Key asset (uniqueName="${KEY_ASSET_UNIQUE_NAME}") missing from scene drop ${sceneDropId} and rebuild did not run.`,
+          );
+        }
+        const foundAfter: any = await world.fetchDroppedAssetsBySceneDropId({
+          sceneDropId,
+          uniqueName: KEY_ASSET_UNIQUE_NAME,
+        });
+        const rebuiltFirst = Array.isArray(foundAfter)
+          ? foundAfter[0]
+          : Array.isArray((foundAfter as any)?.assets)
+            ? (foundAfter as any).assets[0]
+            : null;
+        recoveredId = rebuiltFirst?.id as string | undefined;
+        if (!recoveredId) {
+          throw new Error(`Key asset still missing after rebuild for scene drop ${sceneDropId}`);
+        }
       }
-      keyAssetId = first.id as string;
+
+      keyAssetId = recoveredId;
     }
 
     // Cache the mapping so future clicks skip the scan.

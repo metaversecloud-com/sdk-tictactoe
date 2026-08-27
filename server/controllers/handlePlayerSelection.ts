@@ -6,6 +6,7 @@ import {
   getCredentials,
   lockDataObject,
   updateGameText,
+  verifyBoard,
   Visitor,
   World,
 } from "../utils/index.js";
@@ -33,6 +34,15 @@ export const handlePlayerSelection = async (req: Request, res: Response) => {
       req.body && req.body.interactiveNonce ? req.body : req.query && req.query.interactiveNonce ? req.query : req.body;
     const credentials = getCredentials(source);
     const { displayName, profileId, urlSlug, visitorId } = credentials;
+
+    // Verify the scene has all required pieces (including the key asset).
+    // If it doesn't, verifyBoard may fully rebuild — in which case the world
+    // beneath us has been replaced and the player-selection webhook target
+    // no longer exists.
+    const verification = await verifyBoard(credentials);
+    if (verification.fullRebuild) {
+      return res.json({ success: true, boardRebuilt: true });
+    }
 
     let text = "";
     let shouldUpdateGame = true;
