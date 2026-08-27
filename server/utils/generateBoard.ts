@@ -1,6 +1,7 @@
 import { dropTextAsset, dropWebImageAsset, errorHandler, getDroppedAsset } from "./index.js";
 import { Credentials } from "../types/credentialsInterface.js";
 import { cellWidth, defaultGameText } from "../constants.js";
+import { DroppedAssetClickType } from "@rtsdk/topia";
 
 type GenerateOptions = {
   // If provided, only regenerate these uniqueNames from the label set
@@ -29,11 +30,60 @@ export const generateBoard = async (credentials: Credentials, opts: GenerateOpti
       y: resetBtnCenter.y - 200,
     };
 
+    // APP_URL is the backend base (ends in `/api/`) — right for webhooks that
+    // hit our routes, wrong for LINK-type assets that need to open a client
+    // page in the drawer. Strip the trailing `/api` (with or without slash)
+    // to get the app root; e.g. `https://foo.com/api/` → `https://foo.com/`.
+    const appUrl = process.env.APP_URL || "";
+    const appRootUrl = appUrl.replace(/\/api\/?$/, "/");
+
     const regenerateAll = !opts.missingUniqueNames && opts.cellsShort === undefined;
     const missingSet = new Set(opts.missingUniqueNames || []);
     const needs = (uniqueName: string) => regenerateAll || missingSet.has(uniqueName);
 
     const promises: Promise<any>[] = [];
+
+    if (needs("TicTacToe_reset")) {
+      promises.push(
+        dropWebImageAsset({
+          credentials,
+          layer0: `${process.env.BUCKET}reset.png`,
+          position: resetBtnCenter,
+          uniqueName: `TicTacToe_reset`,
+          clickType: DroppedAssetClickType.LINK,
+          clickableLink: `${appRootUrl}reset`,
+          clickableLinkTitle: "Reset Tic Tac Toe",
+        }),
+      );
+    }
+
+    if (needs("TicTacToe_info")) {
+      promises.push(
+        dropWebImageAsset({
+          credentials,
+          layer0: `${process.env.BUCKET}info.png`,
+          position: { x: resetBtnCenter.x, y: resetBtnCenter.y + 100 },
+          uniqueName: `TicTacToe_info`,
+          clickType: DroppedAssetClickType.LINK,
+          clickableLink: `${appRootUrl}info`,
+          clickableLinkTitle: "How to Play Tic Tac Toe",
+        }),
+      );
+    }
+
+    if (needs("TicTacToe_leaderboard")) {
+      promises.push(
+        dropWebImageAsset({
+          credentials,
+          layer0: `${process.env.BUCKET}leaderboard.png`,
+          position: { x: boardCenter.x, y: resetBtnCenter.y - 475 },
+          uniqueName: `TicTacToe_leaderboard`,
+          clickType: DroppedAssetClickType.LINK,
+          clickableLink: `${appRootUrl}leaderboard`,
+          clickableLinkTitle: "Leaderboard",
+        }),
+      );
+    }
 
     if (needs("TicTacToe_board")) {
       promises.push(
@@ -110,8 +160,9 @@ export const generateBoard = async (credentials: Credentials, opts: GenerateOpti
           layer0: `${process.env.BUCKET}blue_o.png`,
           position: { x: resetBtnCenter.x + 200, y: boardCenter.y - cellWidth },
           uniqueName: `TicTacToe_o`,
-        }).then((asset: any) =>
-          asset?.addWebhook({
+        }).then(async (asset: any) => {
+          console.log("🚀 ~ generateBoard.ts:164 ~ asset:", asset.uniqueName);
+          await asset?.addWebhook({
             dataObject: {},
             description: "",
             isUniqueOnly: false,
@@ -119,8 +170,8 @@ export const generateBoard = async (credentials: Credentials, opts: GenerateOpti
             shouldSetClickType: true,
             title: "Blue O Selected",
             url: `${process.env.APP_URL}select-player/o`,
-          }),
-        ),
+          });
+        }),
       );
     }
 

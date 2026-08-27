@@ -36,7 +36,7 @@ jest.mock("@utils/index.js", () => {
     getBadges: jest.fn().mockResolvedValue({}),
     getVisitorBadges: jest.fn().mockReturnValue({}),
     parseLeaderboard: jest.fn().mockReturnValue([]),
-    verifyBoard: jest.fn().mockResolvedValue({ ok: true, regenerated: false }),
+    verifyBoard: jest.fn().mockResolvedValue({ ok: true, regenerated: false, fullRebuild: false }),
     resetLeaderboard: jest.fn().mockResolvedValue(undefined),
     Visitor: {
       get: jest.fn(),
@@ -188,5 +188,32 @@ describe("routes", () => {
     // Reset returns the new (empty) leaderboard directly so callers skip a follow-up GET.
     expect(res.body.leaderboard).toEqual([]);
     expect(mockUtils.resetLeaderboard).toHaveBeenCalled();
+  });
+
+  test("POST /click/:cell bails out early when verifyBoard fully rebuilds the scene", async () => {
+    mockUtils.getCredentials.mockReturnValue(baseCreds);
+    mockUtils.verifyBoard.mockResolvedValueOnce({ ok: true, regenerated: true, fullRebuild: true });
+
+    const app = makeApp();
+    const res = await request(app).post("/api/click/4").send(baseCreds);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({ boardRebuilt: true });
+    expect(mockUtils.verifyBoard).toHaveBeenCalled();
+    // Downstream game-state work must NOT run — the world under us was replaced.
+    expect(mockUtils.getDroppedAssetDataObject).not.toHaveBeenCalled();
+  });
+
+  test("POST /select-player/:symbol bails out early when verifyBoard fully rebuilds the scene", async () => {
+    mockUtils.getCredentials.mockReturnValue(baseCreds);
+    mockUtils.verifyBoard.mockResolvedValueOnce({ ok: true, regenerated: true, fullRebuild: true });
+
+    const app = makeApp();
+    const res = await request(app).post("/api/select-player/x").send(baseCreds);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({ success: true, boardRebuilt: true });
+    expect(mockUtils.verifyBoard).toHaveBeenCalled();
+    expect(mockUtils.getDroppedAssetDataObject).not.toHaveBeenCalled();
   });
 });
