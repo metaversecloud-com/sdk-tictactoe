@@ -25,8 +25,8 @@ export const ResetPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [disabled, setDisabled] = useState(false);
 
-  const fetchGameState = useMemo(
-    () => async () => {
+  const fetchGameState = useMemo(() => {
+    return async () => {
       try {
         const res = await backendAPI.get("/reset-state");
         setGameState(dispatch, res.data);
@@ -35,9 +35,8 @@ export const ResetPage = () => {
       } finally {
         setIsLoading(false);
       }
-    },
-    [dispatch],
-  );
+    };
+  }, [dispatch]);
 
   useEffect(() => {
     if (hasSetupBackend) fetchGameState();

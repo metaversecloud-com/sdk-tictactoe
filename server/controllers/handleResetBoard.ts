@@ -6,6 +6,7 @@ import {
   getDroppedAssetDataObject,
   updateGameData,
   updateGameText,
+  verifyBoard,
   Visitor,
   World,
 } from "../utils/index.js";
@@ -24,7 +25,19 @@ export const handleResetBoard = async (req: Request, res: Response) => {
     const source =
       req.body && req.body.interactiveNonce ? req.body : req.query && req.query.interactiveNonce ? req.query : req.body;
     const credentials = getCredentials(source);
-    const { assetId, sceneDropId, urlSlug, visitorId } = credentials;
+    const { sceneDropId, urlSlug, visitorId } = credentials;
+
+    // First: verify the scene has all required pieces. If the key asset is
+    // missing (old-webhook reset button predates the current uniqueName
+    // convention, or an admin deleted it), verifyBoard wipes the scene
+    // except the click origin, drops a fresh board, and removes the click
+    // origin last. In that case the current request is done — the rebuild
+    // itself IS the reset, and further writes in this same request would
+    // race against Topia's eventual consistency on the just-created assets.
+    const verification = await verifyBoard(credentials);
+    if (verification.fullRebuild) {
+      return res.status(200).send({ message: "Board rebuilt.", success: true, boardRebuilt: true });
+    }
 
     const visitor: VisitorInterface = await Visitor.get(visitorId, urlSlug, { credentials });
     const isAdmin = (visitor as any).isAdmin;
@@ -32,6 +45,13 @@ export const handleResetBoard = async (req: Request, res: Response) => {
     const dataObjResult = await getDroppedAssetDataObject(credentials);
     if (!dataObjResult || !("keyAsset" in dataObjResult)) throw new Error("Unable to load game key asset");
     const { keyAsset } = dataObjResult;
+    // Use the key asset's OWN id, not credentials.assetId. `getKeyAsset` may
+    // have triggered a full-scene rebuild during this request (old webhook
+    // reset button clicked → rebuild wipes the click origin), in which case
+    // credentials.assetId points at a deleted ghost. All writes below must
+    // target the fresh key asset — otherwise isResetInProgress:false lands
+    // on nothing and the new key asset stays locked.
+    const keyAssetId = (keyAsset as any).id as string;
     const { isGameOver, lastInteraction, playerO, playerX, resetCount } = (keyAsset.dataObject || {}) as GameDataType;
 
     const resetAllowedDate = new Date();
@@ -53,7 +73,9 @@ export const handleResetBoard = async (req: Request, res: Response) => {
         await keyAsset.updateDataObject(
           { isResetInProgress: true },
           {
-            lock: { lockId: `${assetId}-${resetCount}-${new Date(Math.round(new Date().getTime() / 10000) * 10000)}` },
+            lock: {
+              lockId: `${keyAssetId}-${resetCount}-${new Date(Math.round(new Date().getTime() / 10000) * 10000)}`,
+            },
           },
         );
       } catch (error) {
@@ -92,7 +114,7 @@ export const handleResetBoard = async (req: Request, res: Response) => {
       // Reset game state on the key asset — keep leaderboard intact.
       const updatedData = {
         ...defaultGameData,
-        keyAssetId: assetId,
+        keyAssetId,
         leaderboard: (keyAsset.dataObject as any)?.leaderboard || {},
         isResetInProgress: false,
         resetCount: (resetCount || 0) + 1,
@@ -100,7 +122,7 @@ export const handleResetBoard = async (req: Request, res: Response) => {
       promises.push(
         updateGameData({
           credentials,
-          droppedAssetId: assetId || "",
+          droppedAssetId: keyAssetId,
           updatedData,
           // Piggy-back the `resets` analytic on the reset write itself — no
           // separate world counter needed; nothing reads it.
