@@ -43,6 +43,15 @@ export const generateBoard = async (credentials: Credentials, opts: GenerateOpti
 
     const promises: Promise<any>[] = [];
 
+    if (needs("TicTacToe_blacktop")) {
+      await dropWebImageAsset({
+        credentials,
+        layer0: `${process.env.BUCKET}blacktop.png`,
+        position: boardCenter,
+        uniqueName: `TicTacToe_blacktop`,
+      });
+    }
+
     if (needs("TicTacToe_reset")) {
       promises.push(
         dropWebImageAsset({

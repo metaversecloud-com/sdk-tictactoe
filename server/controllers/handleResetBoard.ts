@@ -86,18 +86,22 @@ export const handleResetBoard = async (req: Request, res: Response) => {
       const world = World.create(urlSlug, { credentials });
 
       // Delete the transient move / finish-line / crown assets in this scene.
+      // One scene-wide fetch, then filter locally — no per-uniqueName round trips.
       if (sceneDropId) {
-        const toDeleteUniqueNames = ["TicTacToe_move", "TicTacToe_finishLine", "TicTacToe_crown"];
-        const droppedAssetIds: string[] = [];
-        for (const uniqueName of toDeleteUniqueNames) {
-          try {
-            const assets = await world.fetchDroppedAssetsBySceneDropId({ sceneDropId, uniqueName });
-            if (Array.isArray(assets)) {
-              for (const a of assets) if (a?.id) droppedAssetIds.push(a.id);
-            }
-          } catch (error) {
-            // Non-fatal
-          }
+        const toDeleteUniqueNames = new Set(["TicTacToe_move", "TicTacToe_finishLine", "TicTacToe_crown"]);
+        let droppedAssetIds: string[] = [];
+        try {
+          const fetched: any = await world.fetchDroppedAssetsBySceneDropId({ sceneDropId });
+          const allSceneAssets = Array.isArray(fetched)
+            ? fetched
+            : Array.isArray(fetched?.assets)
+              ? fetched.assets
+              : [];
+          droppedAssetIds = allSceneAssets
+            .filter((a: any) => a?.id && typeof a?.uniqueName === "string" && toDeleteUniqueNames.has(a.uniqueName))
+            .map((a: any) => a.id as string);
+        } catch (error) {
+          // Non-fatal — proceed with the rest of the reset even if enumeration fails.
         }
         if (droppedAssetIds.length > 0) {
           promises.push(
