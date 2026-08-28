@@ -16,8 +16,8 @@ export const useCanReset = (): boolean => {
 
   return useMemo(() => {
     if (!gameData) return true;
-    if (gameData.isResetInProgress) return false;
     if (visitor?.isAdmin) return true;
+    if (gameData.isResetInProgress) return false;
     const myVisitorId = visitor?.visitorId;
     const isPlayer =
       typeof myVisitorId === "number" &&
