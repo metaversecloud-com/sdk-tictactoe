@@ -57,7 +57,7 @@ export const handleGetResetState = async (req: Request, res: Response) => {
     return res.json({
       success: true,
       visitor: {
-        isAdmin: (visitor as any).isAdmin || false,
+        isAdmin: visitor.isAdmin || false,
         displayName: credentials.displayName || "",
         profileId,
         visitorId,

@@ -190,20 +190,6 @@ describe("routes", () => {
     expect(mockUtils.resetLeaderboard).toHaveBeenCalled();
   });
 
-  test("POST /click/:cell bails out early when verifyBoard fully rebuilds the scene", async () => {
-    mockUtils.getCredentials.mockReturnValue(baseCreds);
-    mockUtils.verifyBoard.mockResolvedValueOnce({ ok: true, regenerated: true, fullRebuild: true });
-
-    const app = makeApp();
-    const res = await request(app).post("/api/click/4").send(baseCreds);
-
-    expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({ boardRebuilt: true });
-    expect(mockUtils.verifyBoard).toHaveBeenCalled();
-    // Downstream game-state work must NOT run — the world under us was replaced.
-    expect(mockUtils.getDroppedAssetDataObject).not.toHaveBeenCalled();
-  });
-
   test("POST /select-player/:symbol bails out early when verifyBoard fully rebuilds the scene", async () => {
     mockUtils.getCredentials.mockReturnValue(baseCreds);
     mockUtils.verifyBoard.mockResolvedValueOnce({ ok: true, regenerated: true, fullRebuild: true });

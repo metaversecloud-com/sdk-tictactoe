@@ -161,7 +161,6 @@ export const generateBoard = async (credentials: Credentials, opts: GenerateOpti
           position: { x: resetBtnCenter.x + 200, y: boardCenter.y - cellWidth },
           uniqueName: `TicTacToe_o`,
         }).then(async (asset: any) => {
-          console.log("🚀 ~ generateBoard.ts:164 ~ asset:", asset.uniqueName);
           await asset?.addWebhook({
             dataObject: {},
             description: "",
