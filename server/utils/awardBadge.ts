@@ -23,8 +23,9 @@ export const grantBadgeIfNew = async ({
     if (ownedBadgeNames.has(badgeName)) return { granted: false };
 
     const inventoryItems = await getCachedInventoryItems({ credentials });
+    // INACTIVE filter is applied at the cache layer.
     const inventoryItem = inventoryItems.find(
-      (item: any) => item.name === badgeName && item.type === "BADGE" && item.status === "ACTIVE",
+      (item: any) => item.name === badgeName && item.type === "BADGE",
     );
     if (!inventoryItem) {
       console.warn(`Badge "${badgeName}" not found in ecosystem inventory`);
