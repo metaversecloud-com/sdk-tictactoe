@@ -1,0 +1,26 @@
+[
+  {
+    "id": "badge-1",
+    "name": "Victory",
+    "type": "BADGE",
+    "status": "ACTIVE",
+    "description": "Victory badge",
+    "image_path": "https://example.invalid/badges/1.png"
+  },
+  {
+    "id": "badge-2",
+    "name": "Champion",
+    "type": "BADGE",
+    "status": "ACTIVE",
+    "description": "Champion badge",
+    "image_path": "https://example.invalid/badges/2.png"
+  },
+  {
+    "id": "badge-3",
+    "name": "Hobbyist",
+    "type": "BADGE",
+    "status": "ACTIVE",
+    "description": "Hobbyist badge",
+    "image_path": "https://example.invalid/badges/3.png"
+  }
+]
