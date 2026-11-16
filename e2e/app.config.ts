@@ -65,29 +65,19 @@ export type RouteSpec = {
   knownBugs?: KnownBugs;
 };
 
-// getCredentials (protected file) returns { error } instead of throwing, so every route that
-// uses it has this bug until it's fixed there.
-const GET_CREDENTIALS_DOESNT_THROW = "EXP-428 #6: getCredentials doesn't throw";
-// It also never compares interactivePublicKey with INTERACTIVE_KEY, so credentials signed for another
-// app go straight through wherever nothing else happens to fail (same fix as EXP-428 #6).
-const NO_PUBLIC_KEY_CHECK = "EXP-428 #6: getCredentials never checks the public key";
-const CREDENTIAL_BUGS = { acceptsForeignCredentials: NO_PUBLIC_KEY_CHECK, unnamedCredentialError: GET_CREDENTIALS_DOESNT_THROW };
-
 /**
  * API routes that read the session credentials (getCredentials). Each one must reject missing or
  * foreign credentials and must never send the interactive secret to the browser. List them all.
  * The select-player, click and reset routes are also the webhooks of the board's X/O sprites and cells.
  */
 export const CREDENTIALED_ROUTES: RouteSpec[] = [
-  { method: "get", path: "/leaderboard-state", knownBugs: CREDENTIAL_BUGS },
-  { method: "get", path: "/reset-state", knownBugs: CREDENTIAL_BUGS },
-  // Foreign credentials fail here only because the platform visitor isn't an admin (403).
-  { method: "post", path: "/leaderboard/reset", knownBugs: { unnamedCredentialError: GET_CREDENTIALS_DOESNT_THROW } },
-  { method: "post", path: "/close-iframe", knownBugs: CREDENTIAL_BUGS },
-  { method: "post", path: "/select-player/x", knownBugs: CREDENTIAL_BUGS },
-  // Foreign credentials fail here only because no game is running ("Two players are needed").
-  { method: "post", path: "/click/4", knownBugs: { unnamedCredentialError: GET_CREDENTIALS_DOESNT_THROW } },
-  { method: "post", path: "/reset", knownBugs: CREDENTIAL_BUGS },
+  { method: "get", path: "/leaderboard-state" },
+  { method: "get", path: "/reset-state" },
+  { method: "post", path: "/leaderboard/reset" },
+  { method: "post", path: "/close-iframe" },
+  { method: "post", path: "/select-player/x" },
+  { method: "post", path: "/click/4" },
+  { method: "post", path: "/reset" },
 ];
 
 /**
@@ -144,10 +134,7 @@ export const HEALTH_KNOWN_BUGS: { incompleteContract?: string } = {};
  * registers its own logging handler. Fix: process.removeAllListeners("unhandledRejection") before
  * registering the app's handler.
  */
-export const PROCESS_KNOWN_BUGS: { exitsOnUnhandledRejection?: string } = {
-  exitsOnUnhandledRejection:
-    "EXP-472: @rtsdk/topia's unhandledRejection hook calls process.exit(1); server/index.ts's handler doesn't stop it",
-};
+export const PROCESS_KNOWN_BUGS: { exitsOnUnhandledRejection?: string } = {};
 
 /**
  * The request system.spec sends a malformed JSON body to. Default: the first POST/PUT route in
@@ -163,9 +150,7 @@ export const MALFORMED_JSON_REQUEST: { method: "post" | "put"; path: string } | 
  * middleware after express.json()). Fix: an error middleware that answers body-parser errors
  * (err.type === "entity.parse.failed") with res.status(400).json({ success: false, error: "Invalid JSON" }).
  */
-export const ERROR_KNOWN_BUGS: { malformedJson?: string } = {
-  malformedJson: "EXP-473: no error middleware: Express' default error page shows the stack trace (NODE_ENV isn't production)",
-};
+export const ERROR_KNOWN_BUGS: { malformedJson?: string } = {};
 
 /**
  * true starts mock-redis/server.mjs (an in-memory Redis) next to mock-topia and points REDIS_URL at it
